@@ -31,7 +31,6 @@ body{
 .hero .sub{margin-top:4px;font-size:.78rem;color:#3c4a48;letter-spacing:2px;text-transform:uppercase;opacity:.9;text-shadow:0 1px 2px rgba(255,255,255,.6)}
 .wrap{max-width:760px;margin:0 auto;padding:0 14px 60px}
 
-/* language bar */
 .langbar{position:sticky;top:0;z-index:30;background:rgba(233,222,198,.92);backdrop-filter:blur(8px);
   border-bottom:1px solid var(--line);padding:8px 6px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
 .langbar button{
@@ -40,7 +39,6 @@ body{
 .langbar button.active{background:var(--accent2);color:#fff;border-color:var(--accent2)}
 .langbar button .flag{font-size:1rem;line-height:1}
 
-/* category chips */
 .chips{position:sticky;top:47px;z-index:20;display:flex;gap:7px;overflow-x:auto;padding:9px 4px;
   background:linear-gradient(180deg,rgba(233,222,198,.96),rgba(233,222,198,.75));backdrop-filter:blur(6px);
   border-bottom:1px solid var(--line);scrollbar-width:none}
@@ -94,15 +92,15 @@ h2.cat-title{
 <script>
 /* ---------- ALLERGENS ---------- */
 const ALG={
- egg:{pt:"Ovo",en:"Egg",fr:"Œuf",de:"Ei",nl:"Ei"},
- fish:{pt:"Peixe",en:"Fish",fr:"Poisson",de:"Fisch",nl:"Vis"},
- milk:{pt:"Leite",en:"Milk",fr:"Lait",de:"Milch",nl:"Melk"},
- gluten:{pt:"Glúten",en:"Gluten",fr:"Gluten",de:"Gluten",nl:"Gluten"},
- soy:{pt:"Soja",en:"Soy",fr:"Soja",de:"Soja",nl:"Soja"},
- lupin:{pt:"Tremoço",en:"Lupin",fr:"Lupin",de:"Lupine",nl:"Lupine"},
- peanut:{pt:"Amendoim",en:"Peanut",fr:"Arachide",de:"Erdnuss",nl:"Pinda"},
- nuts:{pt:"Frutos de casca rija",en:"Tree nuts",fr:"Fruits à coque",de:"Schalenfrüchte",nl:"Noten"},
- sulphites:{pt:"Sulfitos",en:"Sulphites",fr:"Sulfites",de:"Sulfite",nl:"Sulfieten"}
+ egg:{pt:"Ovo",es:"Huevo",en:"Egg",fr:"Œuf",de:"Ei",nl:"Ei"},
+ fish:{pt:"Peixe",es:"Pescado",en:"Fish",fr:"Poisson",de:"Fisch",nl:"Vis"},
+ milk:{pt:"Leite",es:"Leche",en:"Milk",fr:"Lait",de:"Milch",nl:"Melk"},
+ gluten:{pt:"Glúten",es:"Gluten",en:"Gluten",fr:"Gluten",de:"Gluten",nl:"Gluten"},
+ soy:{pt:"Soja",es:"Soja",en:"Soy",fr:"Soja",de:"Soja",nl:"Soja"},
+ lupin:{pt:"Tremoço",es:"Altramuz",en:"Lupin",fr:"Lupin",de:"Lupine",nl:"Lupine"},
+ peanut:{pt:"Amendoim",es:"Cacahuete",en:"Peanut",fr:"Arachide",de:"Erdnuss",nl:"Pinda"},
+ nuts:{pt:"Frutos de casca rija",es:"Frutos de cáscara",en:"Tree nuts",fr:"Fruits à coque",de:"Schalenfrüchte",nl:"Noten"},
+ sulphites:{pt:"Sulfitos",es:"Sulfitos",en:"Sulphites",fr:"Sulfites",de:"Sulfite",nl:"Sulfieten"}
 };
 
 /* ---------- UI STRINGS ---------- */
@@ -110,6 +108,9 @@ const UI={
  pt:{iva:"Todos os preços com IVA à taxa em vigor.",
    legal:"Art. 35.º do Dec.-Lei 10/2025: Nenhum produto alimentar ou bebida, incluindo o couvert, pode ser cobrado se não for solicitado pelo cliente ou por este for utilizado.",
    alg:"Alergénios"},
+ es:{iva:"Todos los precios incluyen IVA al tipo vigente.",
+   legal:"Art. 35 del Decreto-Ley 10/2025: Ningún alimento o bebida, incluido el cubierto, puede cobrarse si no ha sido solicitado o utilizado por el cliente.",
+   alg:"Alérgenos"},
  en:{iva:"All prices include VAT at the current rate.",
    legal:"Art. 35 of Decree-Law 10/2025: No food or drink, including the couvert, may be charged if it was not requested or used by the customer.",
    alg:"Allergens"},
@@ -126,78 +127,74 @@ const UI={
 
 const LANGS=[
  {code:"pt",flag:"🇵🇹",label:"Português"},
+ {code:"es",flag:"🇪🇸",label:"Español"},
  {code:"en",flag:"🇬🇧",label:"English"},
  {code:"fr",flag:"🇫🇷",label:"Français"},
  {code:"de",flag:"🇩🇪",label:"Deutsch"},
  {code:"nl",flag:"🇳🇱",label:"Nederlands"}
 ];
 
-/* helper: t(field) returns per-lang or plain string */
 function tv(v,lang){ if(v==null) return ""; if(typeof v==="string") return v; return v[lang]||v.pt||v.en||""; }
 
-/* ---------- MENU DATA ----------
- item: {n:name(str|obj), p:price, d:desc(obj|str), a:[allergen keys], note:obj}
- sub: subgroup heading
----------------------------------- */
 const MENU=[
- {id:"cafes", t:{pt:"Cafetaria",en:"Coffee",fr:"Cafés",de:"Kaffee",nl:"Koffie"}, items:[
-   {n:{pt:"Café Expresso",en:"Espresso",fr:"Expresso",de:"Espresso",nl:"Espresso"},p:"1.00"},
-   {n:{pt:"Café Abatanado",en:"Long black (Abatanado)",fr:"Café allongé",de:"Verlängerter",nl:"Lungo"},p:"1.30"},
-   {n:{pt:"Café Americano",en:"Americano",fr:"Americano",de:"Americano",nl:"Americano"},p:"1.30"},
-   {n:{pt:"Café Descafeinado",en:"Decaf coffee",fr:"Café décaféiné",de:"Entkoffeinierter Kaffee",nl:"Cafeïnevrije koffie"},p:"1.10"},
-   {n:{pt:"Cevada",en:"Barley coffee",fr:"Café d'orge",de:"Gerstenkaffee",nl:"Gerstekoffie"},p:"1.00"},
-   {n:{pt:"Café Pingado",en:"Espresso with a dash of milk",fr:"Expresso avec une goutte de lait",de:"Espresso mit einem Schuss Milch",nl:"Espresso met een scheutje melk"},p:"1.10",a:["milk"]},
-   {n:{pt:"Carioca de café / limão",en:"Weak coffee / lemon infusion",fr:"Café léger / infusion de citron",de:"Dünner Kaffee / Zitronenaufguss",nl:"Slappe koffie / citroeninfusie"},p:"1.00"},
-   {n:{pt:"Galão / Latte",en:"Latte",fr:"Café au lait",de:"Milchkaffee (Latte)",nl:"Latte"},p:"2.00",a:["milk"]},
-   {n:{pt:"Meia de Leite / Cappuccino",en:"White coffee / Cappuccino",fr:"Café crème / Cappuccino",de:"Milchkaffee / Cappuccino",nl:"Koffie verkeerd / Cappuccino"},p:"2.00",a:["milk"]},
-   {n:{pt:"Galão / Latte / Cappuccino (Vegetal)",en:"Latte / Cappuccino (plant-based)",fr:"Latte / Cappuccino (végétal)",de:"Latte / Cappuccino (pflanzlich)",nl:"Latte / Cappuccino (plantaardig)"},p:"2.30",a:["soy"]},
-   {n:{pt:"Chocolate Quente",en:"Hot chocolate",fr:"Chocolat chaud",de:"Heiße Schokolade",nl:"Warme chocolademelk"},p:"2.30",a:["milk"]},
-   {n:{pt:"Copo de Leite",en:"Glass of milk",fr:"Verre de lait",de:"Glas Milch",nl:"Glas melk"},p:"1.20",a:["milk"]},
-   {n:{pt:"Ucal",en:"Ucal (malted milk drink)",fr:"Ucal (lait malté)",de:"Ucal (Malzmilchgetränk)",nl:"Ucal (moutmelkdrank)"},p:"2.00",a:["milk"]},
-   {n:{pt:"Ice Coffee",en:"Iced coffee",fr:"Café glacé",de:"Eiskaffee",nl:"Ijskoffie"},p:"2.00"},
-   {n:{pt:"Ice Latte",en:"Iced latte",fr:"Latte glacé",de:"Eis-Latte",nl:"Ijslatte"},p:"3.00",a:["milk"]}
+ {id:"cafes", t:{pt:"Cafetaria",es:"Cafetería",en:"Coffee",fr:"Cafés",de:"Kaffee",nl:"Koffie"}, items:[
+   {n:{pt:"Café Expresso",es:"Café solo",en:"Espresso",fr:"Expresso",de:"Espresso",nl:"Espresso"},p:"1.00"},
+   {n:{pt:"Café Abatanado",es:"Café largo (Abatanado)",en:"Long black (Abatanado)",fr:"Café allongé",de:"Verlängerter",nl:"Lungo"},p:"1.30"},
+   {n:{pt:"Café Americano",es:"Americano",en:"Americano",fr:"Americano",de:"Americano",nl:"Americano"},p:"1.30"},
+   {n:{pt:"Café Descafeinado",es:"Café descafeinado",en:"Decaf coffee",fr:"Café décaféiné",de:"Entkoffeinierter Kaffee",nl:"Cafeïnevrije koffie"},p:"1.10"},
+   {n:{pt:"Cevada",es:"Café de cebada",en:"Barley coffee",fr:"Café d'orge",de:"Gerstenkaffee",nl:"Gerstekoffie"},p:"1.00"},
+   {n:{pt:"Café Pingado",es:"Café solo con un toque de leche",en:"Espresso with a dash of milk",fr:"Expresso avec une goutte de lait",de:"Espresso mit einem Schuss Milch",nl:"Espresso met een scheutje melk"},p:"1.10",a:["milk"]},
+   {n:{pt:"Carioca de café / limão",es:"Café suave / infusión de limón",en:"Weak coffee / lemon infusion",fr:"Café léger / infusion de citron",de:"Dünner Kaffee / Zitronenaufguss",nl:"Slappe koffie / citroeninfusie"},p:"1.00"},
+   {n:{pt:"Galão / Latte",es:"Café con leche (Latte)",en:"Latte",fr:"Café au lait",de:"Milchkaffee (Latte)",nl:"Latte"},p:"2.00",a:["milk"]},
+   {n:{pt:"Meia de Leite / Cappuccino",es:"Café con leche / Capuchino",en:"White coffee / Cappuccino",fr:"Café crème / Cappuccino",de:"Milchkaffee / Cappuccino",nl:"Koffie verkeerd / Cappuccino"},p:"2.00",a:["milk"]},
+   {n:{pt:"Galão / Latte / Cappuccino (Vegetal)",es:"Latte / Capuchino (vegetal)",en:"Latte / Cappuccino (plant-based)",fr:"Latte / Cappuccino (végétal)",de:"Latte / Cappuccino (pflanzlich)",nl:"Latte / Cappuccino (plantaardig)"},p:"2.30",a:["soy"]},
+   {n:{pt:"Chocolate Quente",es:"Chocolate caliente",en:"Hot chocolate",fr:"Chocolat chaud",de:"Heiße Schokolade",nl:"Warme chocolademelk"},p:"2.30",a:["milk"]},
+   {n:{pt:"Copo de Leite",es:"Vaso de leche",en:"Glass of milk",fr:"Verre de lait",de:"Glas Milch",nl:"Glas melk"},p:"1.20",a:["milk"]},
+   {n:{pt:"Ucal",es:"Ucal (bebida de leche malteada)",en:"Ucal (malted milk drink)",fr:"Ucal (lait malté)",de:"Ucal (Malzmilchgetränk)",nl:"Ucal (moutmelkdrank)"},p:"2.00",a:["milk"]},
+   {n:{pt:"Ice Coffee",es:"Café con hielo",en:"Iced coffee",fr:"Café glacé",de:"Eiskaffee",nl:"Ijskoffie"},p:"2.00"},
+   {n:{pt:"Ice Latte",es:"Latte con hielo",en:"Iced latte",fr:"Latte glacé",de:"Eis-Latte",nl:"Ijslatte"},p:"3.00",a:["milk"]}
  ]},
 
- {id:"chas", t:{pt:"Chás",en:"Teas",fr:"Thés",de:"Tees",nl:"Thee"}, items:[
-   {n:{pt:"Camomila",en:"Chamomile",fr:"Camomille",de:"Kamille",nl:"Kamille"},p:"1.50"},
-   {n:{pt:"Cidreira",en:"Lemon balm",fr:"Mélisse",de:"Zitronenmelisse",nl:"Citroenmelisse"},p:"1.50"},
-   {n:{pt:"Tília",en:"Linden",fr:"Tilleul",de:"Linde",nl:"Linde"},p:"1.50"},
-   {n:{pt:"Mirtilo (folha)",en:"Blueberry leaf",fr:"Feuille de myrtille",de:"Heidelbeerblatt",nl:"Bosbesblad"},p:"1.50"},
-   {n:{pt:"Hortelã-Pimenta",en:"Peppermint",fr:"Menthe poivrée",de:"Pfefferminze",nl:"Pepermunt"},p:"1.50"},
-   {n:{pt:"Cavalinha",en:"Horsetail",fr:"Prêle",de:"Schachtelhalm",nl:"Heermoes"},p:"1.50"},
-   {n:{pt:"Perpétua Rocha",en:"Everlasting flower",fr:"Immortelle",de:"Strohblume",nl:"Strobloem"},p:"1.50"},
-   {n:{pt:"House Mix",en:"House Mix",fr:"House Mix",de:"House Mix",nl:"House Mix"},p:"2.00"},
-   {n:{pt:"Chá para dois",en:"Tea for two",fr:"Thé pour deux",de:"Tee für zwei",nl:"Thee voor twee"},p:"2.00"}
+ {id:"chas", t:{pt:"Chás",es:"Tés",en:"Teas",fr:"Thés",de:"Tees",nl:"Thee"}, items:[
+   {n:{pt:"Camomila",es:"Manzanilla",en:"Chamomile",fr:"Camomille",de:"Kamille",nl:"Kamille"},p:"1.50"},
+   {n:{pt:"Cidreira",es:"Melisa",en:"Lemon balm",fr:"Mélisse",de:"Zitronenmelisse",nl:"Citroenmelisse"},p:"1.50"},
+   {n:{pt:"Tília",es:"Tila",en:"Linden",fr:"Tilleul",de:"Linde",nl:"Linde"},p:"1.50"},
+   {n:{pt:"Mirtilo (folha)",es:"Hoja de arándano",en:"Blueberry leaf",fr:"Feuille de myrtille",de:"Heidelbeerblatt",nl:"Bosbesblad"},p:"1.50"},
+   {n:{pt:"Hortelã-Pimenta",es:"Menta piperita",en:"Peppermint",fr:"Menthe poivrée",de:"Pfefferminze",nl:"Pepermunt"},p:"1.50"},
+   {n:{pt:"Cavalinha",es:"Cola de caballo",en:"Horsetail",fr:"Prêle",de:"Schachtelhalm",nl:"Heermoes"},p:"1.50"},
+   {n:{pt:"Perpétua Rocha",es:"Siempreviva",en:"Everlasting flower",fr:"Immortelle",de:"Strohblume",nl:"Strobloem"},p:"1.50"},
+   {n:{pt:"House Mix",es:"House Mix",en:"House Mix",fr:"House Mix",de:"House Mix",nl:"House Mix"},p:"2.00"},
+   {n:{pt:"Chá para dois",es:"Té para dos",en:"Tea for two",fr:"Thé pour deux",de:"Tee für zwei",nl:"Thee voor twee"},p:"2.00"}
  ]},
 
- {id:"aguas", t:{pt:"Águas",en:"Waters",fr:"Eaux",de:"Wasser",nl:"Water"}, items:[
-   {n:{pt:"Água 0.5L",en:"Still water 0.5L",fr:"Eau plate 0,5L",de:"Stilles Wasser 0,5L",nl:"Plat water 0,5L"},p:"1.30"},
-   {n:{pt:"Água Castelo",en:"Sparkling water (Castelo)",fr:"Eau pétillante (Castelo)",de:"Sprudelwasser (Castelo)",nl:"Bruisend water (Castelo)"},p:"1.60"},
-   {n:{pt:"Água das Pedras",en:"Sparkling mineral water",fr:"Eau minérale gazeuse",de:"Mineralwasser mit Kohlensäure",nl:"Mineraalwater met prik"},p:"1.70"},
-   {n:{pt:"Água das Pedras (limão / tangerina)",en:"Sparkling water (lemon / tangerine)",fr:"Eau gazeuse (citron / mandarine)",de:"Sprudelwasser (Zitrone / Mandarine)",nl:"Bruiswater (citroen / mandarijn)"},p:"1.70"},
-   {n:{pt:"Água Frize (limão)",en:"Frize sparkling (lemon)",fr:"Frize pétillante (citron)",de:"Frize (Zitrone)",nl:"Frize bruisend (citroen)"},p:"1.80"},
-   {n:{pt:"Água Tónica Royal Bliss",en:"Tonic water (Royal Bliss)",fr:"Tonic (Royal Bliss)",de:"Tonic Water (Royal Bliss)",nl:"Tonic (Royal Bliss)"},p:"2.00"},
-   {n:{pt:"Água Tónica Fever-Tree",en:"Tonic water (Fever-Tree)",fr:"Tonic (Fever-Tree)",de:"Tonic Water (Fever-Tree)",nl:"Tonic (Fever-Tree)"},p:"2.70"}
+ {id:"aguas", t:{pt:"Águas",es:"Aguas",en:"Waters",fr:"Eaux",de:"Wasser",nl:"Water"}, items:[
+   {n:{pt:"Água 0.5L",es:"Agua 0,5L",en:"Still water 0.5L",fr:"Eau plate 0,5L",de:"Stilles Wasser 0,5L",nl:"Plat water 0,5L"},p:"1.30"},
+   {n:{pt:"Água Castelo",es:"Agua con gas (Castelo)",en:"Sparkling water (Castelo)",fr:"Eau pétillante (Castelo)",de:"Sprudelwasser (Castelo)",nl:"Bruisend water (Castelo)"},p:"1.60"},
+   {n:{pt:"Água das Pedras",es:"Agua mineral con gas",en:"Sparkling mineral water",fr:"Eau minérale gazeuse",de:"Mineralwasser mit Kohlensäure",nl:"Mineraalwater met prik"},p:"1.70"},
+   {n:{pt:"Água das Pedras (limão / tangerina)",es:"Agua con gas (limón / mandarina)",en:"Sparkling water (lemon / tangerine)",fr:"Eau gazeuse (citron / mandarine)",de:"Sprudelwasser (Zitrone / Mandarine)",nl:"Bruiswater (citroen / mandarijn)"},p:"1.70"},
+   {n:{pt:"Água Frize (limão)",es:"Frize con gas (limón)",en:"Frize sparkling (lemon)",fr:"Frize pétillante (citron)",de:"Frize (Zitrone)",nl:"Frize bruisend (citroen)"},p:"1.80"},
+   {n:{pt:"Água Tónica Royal Bliss",es:"Tónica (Royal Bliss)",en:"Tonic water (Royal Bliss)",fr:"Tonic (Royal Bliss)",de:"Tonic Water (Royal Bliss)",nl:"Tonic (Royal Bliss)"},p:"2.00"},
+   {n:{pt:"Água Tónica Fever-Tree",es:"Tónica (Fever-Tree)",en:"Tonic water (Fever-Tree)",fr:"Tonic (Fever-Tree)",de:"Tonic Water (Fever-Tree)",nl:"Tonic (Fever-Tree)"},p:"2.70"}
  ]},
 
- {id:"refri", t:{pt:"Refrigerantes & Sumos",en:"Soft Drinks & Juices",fr:"Sodas & Jus",de:"Erfrischungsgetränke & Säfte",nl:"Frisdranken & Sappen"}, items:[
+ {id:"refri", t:{pt:"Refrigerantes & Sumos",es:"Refrescos y Zumos",en:"Soft Drinks & Juices",fr:"Sodas & Jus",de:"Erfrischungsgetränke & Säfte",nl:"Frisdranken & Sappen"}, items:[
    {n:"Ginger Ale Fever-Tree",p:"2.70"},
    {n:"Ginger Ale Royal Bliss",p:"2.00"},
-   {n:{pt:"Ginger Beer (sem álcool)",en:"Ginger Beer (alcohol-free)",fr:"Ginger Beer (sans alcool)",de:"Ginger Beer (alkoholfrei)",nl:"Ginger Beer (alcoholvrij)"},p:"2.70"},
-   {n:"Fuze Tea",d:{pt:"limão, pêssego, manga / ananás",en:"lemon, peach, mango / pineapple",fr:"citron, pêche, mangue / ananas",de:"Zitrone, Pfirsich, Mango / Ananas",nl:"citroen, perzik, mango / ananas"},p:"2.00"},
-   {n:"Fanta",d:{pt:"laranja, ananás / guaraná",en:"orange, pineapple / guaraná",fr:"orange, ananas / guarana",de:"Orange, Ananas / Guaraná",nl:"sinaasappel, ananas / guaraná"},p:"2.00"},
+   {n:{pt:"Ginger Beer (sem álcool)",es:"Ginger Beer (sin alcohol)",en:"Ginger Beer (alcohol-free)",fr:"Ginger Beer (sans alcool)",de:"Ginger Beer (alkoholfrei)",nl:"Ginger Beer (alcoholvrij)"},p:"2.70"},
+   {n:"Fuze Tea",d:{pt:"limão, pêssego, manga / ananás",es:"limón, melocotón, mango / piña",en:"lemon, peach, mango / pineapple",fr:"citron, pêche, mangue / ananas",de:"Zitrone, Pfirsich, Mango / Ananas",nl:"citroen, perzik, mango / ananas"},p:"2.00"},
+   {n:"Fanta",d:{pt:"laranja, ananás / guaraná",es:"naranja, piña / guaraná",en:"orange, pineapple / guaraná",fr:"orange, ananas / guarana",de:"Orange, Ananas / Guaraná",nl:"sinaasappel, ananas / guaraná"},p:"2.00"},
    {n:"Coca-Cola / Zero",p:"2.00"},
-   {n:"Compal",d:{pt:"laranja, manga-laranja, pêssego, maçã, maracujá, ananás, frutos vermelhos",en:"orange, mango-orange, peach, apple, passion fruit, pineapple, red berries",fr:"orange, mangue-orange, pêche, pomme, fruit de la passion, ananas, fruits rouges",de:"Orange, Mango-Orange, Pfirsich, Apfel, Maracuja, Ananas, rote Früchte",nl:"sinaasappel, mango-sinaasappel, perzik, appel, passievrucht, ananas, rode vruchten"},p:"2.00"},
-   {n:{pt:"Sumo Natural de Laranja",en:"Fresh orange juice",fr:"Jus d'orange pressé",de:"Frisch gepresster Orangensaft",nl:"Vers sinaasappelsap"},p:"3.20"},
-   {n:{pt:"Limonada",en:"Lemonade",fr:"Limonade",de:"Limonade",nl:"Limonade"},p:"2.50"},
-   {n:{pt:"Limonada + pepino",en:"Lemonade with cucumber",fr:"Limonade au concombre",de:"Limonade mit Gurke",nl:"Limonade met komkommer"},p:"2.70"}
+   {n:"Compal",d:{pt:"laranja, manga-laranja, pêssego, maçã, maracujá, ananás, frutos vermelhos",es:"naranja, mango-naranja, melocotón, manzana, maracuyá, piña, frutos rojos",en:"orange, mango-orange, peach, apple, passion fruit, pineapple, red berries",fr:"orange, mangue-orange, pêche, pomme, fruit de la passion, ananas, fruits rouges",de:"Orange, Mango-Orange, Pfirsich, Apfel, Maracuja, Ananas, rote Früchte",nl:"sinaasappel, mango-sinaasappel, perzik, appel, passievrucht, ananas, rode vruchten"},p:"2.00"},
+   {n:{pt:"Sumo Natural de Laranja",es:"Zumo de naranja natural",en:"Fresh orange juice",fr:"Jus d'orange pressé",de:"Frisch gepresster Orangensaft",nl:"Vers sinaasappelsap"},p:"3.20"},
+   {n:{pt:"Limonada",es:"Limonada",en:"Lemonade",fr:"Limonade",de:"Limonade",nl:"Limonade"},p:"2.50"},
+   {n:{pt:"Limonada + pepino",es:"Limonada con pepino",en:"Lemonade with cucumber",fr:"Limonade au concombre",de:"Limonade mit Gurke",nl:"Limonade met komkommer"},p:"2.70"}
  ]},
 
- {id:"cervejas", t:{pt:"Cervejas & Cidra",en:"Beers & Cider",fr:"Bières & Cidre",de:"Biere & Cider",nl:"Bieren & Cider"}, items:[
-   {n:{pt:"Fino / Mini / Panaché Sagres 0.20L",en:"Draught / Small / Shandy Sagres 0.20L",fr:"Pression / Demi / Panaché Sagres 0,20L",de:"Fassbier / Klein / Radler Sagres 0,20L",nl:"Tap / Klein / Radler Sagres 0,20L"},p:"1.50",a:["gluten"]},
+ {id:"cervejas", t:{pt:"Cervejas & Cidra",es:"Cervezas y Sidra",en:"Beers & Cider",fr:"Bières & Cidre",de:"Biere & Cider",nl:"Bieren & Cider"}, items:[
+   {n:{pt:"Fino / Mini / Panaché Sagres 0.20L",es:"Caña / Mini / Clara Sagres 0,20L",en:"Draught / Small / Shandy Sagres 0.20L",fr:"Pression / Demi / Panaché Sagres 0,20L",de:"Fassbier / Klein / Radler Sagres 0,20L",nl:"Tap / Klein / Radler Sagres 0,20L"},p:"1.50",a:["gluten"]},
    {n:"Príncipe / Garrafa Sagres 0.33L",p:"2.20",a:["gluten"]},
-   {n:{pt:"Caneca Sagres 0.40L",en:"Sagres mug 0.40L",fr:"Chope Sagres 0,40L",de:"Sagres Krug 0,40L",nl:"Sagres pul 0,40L"},p:"3.00",a:["gluten"]},
-   {n:{pt:"Copo Sagres 0.50L",en:"Sagres glass 0.50L",fr:"Verre Sagres 0,50L",de:"Sagres Glas 0,50L",nl:"Sagres glas 0,50L"},p:"3.50",a:["gluten"]},
+   {n:{pt:"Caneca Sagres 0.40L",es:"Jarra Sagres 0,40L",en:"Sagres mug 0.40L",fr:"Chope Sagres 0,40L",de:"Sagres Krug 0,40L",nl:"Sagres pul 0,40L"},p:"3.00",a:["gluten"]},
+   {n:{pt:"Copo Sagres 0.50L",es:"Vaso Sagres 0,50L",en:"Sagres glass 0.50L",fr:"Verre Sagres 0,50L",de:"Sagres Glas 0,50L",nl:"Sagres glas 0,50L"},p:"3.50",a:["gluten"]},
    {n:"Cidra Bandida do Pomar 0.20L",p:"2.00"},
    {n:"Cidra Bandida do Pomar 0.33L",p:"3.00"},
    {n:"Cidra Bandida do Pomar 0.40L",p:"3.80"},
@@ -209,111 +206,110 @@ const MENU=[
    {n:"IPA 5 Chagas 0.33L",p:"4.00",a:["gluten"]}
  ]},
 
- {id:"vinhos", t:{pt:"Vinhos & Espumantes",en:"Wines & Sparkling",fr:"Vins & Mousseux",de:"Weine & Schaumwein",nl:"Wijnen & Mousserend"}, items:[
-   {n:{pt:"Cadão (tinto, branco, rosé)",en:"Cadão (red, white, rosé)",fr:"Cadão (rouge, blanc, rosé)",de:"Cadão (rot, weiß, rosé)",nl:"Cadão (rood, wit, rosé)"},p:"13.00",a:["sulphites"]},
-   {n:{pt:"Pouca Roupa (branco, tinto)",en:"Pouca Roupa (white, red)",fr:"Pouca Roupa (blanc, rouge)",de:"Pouca Roupa (weiß, rot)",nl:"Pouca Roupa (wit, rood)"},p:"13.00",a:["sulphites"]},
-   {n:{pt:"Copo de vinho",en:"Glass of wine",fr:"Verre de vin",de:"Glas Wein",nl:"Glas wijn"},p:"3.50",a:["sulphites"]},
-   {n:{pt:"Vinho do Porto (copo)",en:"Port wine (glass)",fr:"Porto (verre)",de:"Portwein (Glas)",nl:"Port (glas)"},p:"2.00",a:["sulphites"]},
-   {n:{pt:"Espumante PGA (Pedro Guilherme Andrade)",en:"Sparkling wine PGA",fr:"Mousseux PGA",de:"Schaumwein PGA",nl:"Mousserende wijn PGA"},p:"16.00",a:["sulphites"]},
-   {sub:{pt:"Sangria & Champanhada",en:"Sangria & Champanhada",fr:"Sangria & Champanhada",de:"Sangria & Champanhada",nl:"Sangria & Champanhada"}},
-   {n:{pt:"Sangria 1L (tinta, branca)",en:"Sangria 1L (red, white)",fr:"Sangria 1L (rouge, blanc)",de:"Sangria 1L (rot, weiß)",nl:"Sangria 1L (rood, wit)"},p:"16.00",a:["sulphites"]},
-   {n:"Sangria 2L",p:"26.00",a:["sulphites"]},
-   {n:{pt:"Champanhada 1L",en:"Sparkling sangria 1L",fr:"Sangria mousseuse 1L",de:"Sekt-Sangria 1L",nl:"Mousserende sangria 1L"},p:"17.00",a:["sulphites"]},
-   {n:{pt:"Champanhada 2L",en:"Sparkling sangria 2L",fr:"Sangria mousseuse 2L",de:"Sekt-Sangria 2L",nl:"Mousserende sangria 2L"},p:"27.00",a:["sulphites"]}
+ {id:"vinhos", t:{pt:"Vinhos & Espumantes",es:"Vinos y Espumosos",en:"Wines & Sparkling",fr:"Vins & Mousseux",de:"Weine & Schaumwein",nl:"Wijnen & Mousserend"}, items:[
+   {n:{pt:"Cadão (tinto, branco, rosé)",es:"Cadão (tinto, blanco, rosado)",en:"Cadão (red, white, rosé)",fr:"Cadão (rouge, blanc, rosé)",de:"Cadão (rot, weiß, rosé)",nl:"Cadão (rood, wit, rosé)"},p:"13.00",a:["sulphites"]},
+   {n:{pt:"Pouca Roupa (branco, tinto)",es:"Pouca Roupa (blanco, tinto)",en:"Pouca Roupa (white, red)",fr:"Pouca Roupa (blanc, rouge)",de:"Pouca Roupa (weiß, rot)",nl:"Pouca Roupa (wit, rood)"},p:"13.00",a:["sulphites"]},
+   {n:{pt:"Copo de vinho",es:"Copa de vino",en:"Glass of wine",fr:"Verre de vin",de:"Glas Wein",nl:"Glas wijn"},p:"3.50",a:["sulphites"]},
+   {n:{pt:"Vinho do Porto (copo)",es:"Vino de Oporto (copa)",en:"Port wine (glass)",fr:"Porto (verre)",de:"Portwein (Glas)",nl:"Port (glas)"},p:"2.00",a:["sulphites"]},
+   {n:{pt:"Espumante PGA (Pedro Guilherme Andrade)",es:"Espumoso PGA",en:"Sparkling wine PGA",fr:"Mousseux PGA",de:"Schaumwein PGA",nl:"Mousserende wijn PGA"},p:"16.00",a:["sulphites"]},
+   {sub:{pt:"Sangria & Champanhada",es:"Sangría & Champanhada",en:"Sangria & Champanhada",fr:"Sangria & Champanhada",de:"Sangria & Champanhada",nl:"Sangria & Champanhada"}},
+   {n:{pt:"Sangria 1L (tinta, branca)",es:"Sangría 1L (tinta, blanca)",en:"Sangria 1L (red, white)",fr:"Sangria 1L (rouge, blanc)",de:"Sangria 1L (rot, weiß)",nl:"Sangria 1L (rood, wit)"},p:"16.00",a:["sulphites"]},
+   {n:{pt:"Sangria 2L",es:"Sangría 2L",en:"Sangria 2L",fr:"Sangria 2L",de:"Sangria 2L",nl:"Sangria 2L"},p:"26.00",a:["sulphites"]},
+   {n:{pt:"Champanhada 1L",es:"Sangría espumosa 1L",en:"Sparkling sangria 1L",fr:"Sangria mousseuse 1L",de:"Sekt-Sangria 1L",nl:"Mousserende sangria 1L"},p:"17.00",a:["sulphites"]},
+   {n:{pt:"Champanhada 2L",es:"Sangría espumosa 2L",en:"Sparkling sangria 2L",fr:"Sangria mousseuse 2L",de:"Sekt-Sangria 2L",nl:"Mousserende sangria 2L"},p:"27.00",a:["sulphites"]}
  ]},
 
- {id:"brandy", t:{pt:"Aguardente & Brandy",en:"Spirits & Brandy",fr:"Eaux-de-vie & Brandy",de:"Brände & Brandy",nl:"Sterke drank & Brandy"}, items:[
+ {id:"brandy", t:{pt:"Aguardente & Brandy",es:"Aguardientes y Brandy",en:"Spirits & Brandy",fr:"Eaux-de-vie & Brandy",de:"Brände & Brandy",nl:"Sterke drank & Brandy"}, items:[
    {n:"Macieira",p:"3.00"},{n:"Croft",p:"2.50"},{n:"CRF",p:"4.00"},{n:"Martini",p:"2.50"},
    {n:"Moscatel",p:"2.50"},{n:"Vinica Marthas",p:"4.00"},{n:"Cognac Pierre Ferrand",p:"8.00"}
  ]},
 
- {id:"whiskey", t:{pt:"Whiskey",en:"Whiskey",fr:"Whiskey",de:"Whiskey",nl:"Whiskey"}, items:[
+ {id:"whiskey", t:{pt:"Whiskey",es:"Whiskey",en:"Whiskey",fr:"Whiskey",de:"Whiskey",nl:"Whiskey"}, items:[
    {n:"Jameson",p:"4.50"},{n:"Bushmills",p:"4.00"},{n:"Bushmills Black",p:"6.00"},{n:"Cutty Sark",p:"4.00"},
    {n:"Johnnie Walker Red",p:"4.00"},{n:"Johnnie Walker Black",p:"6.00"},{n:"Jack Daniel's",p:"6.00"},{n:"Logan",p:"5.00"}
  ]},
 
- {id:"rum", t:{pt:"Rum, Tequila & Vodka",en:"Rum, Tequila & Vodka",fr:"Rhum, Tequila & Vodka",de:"Rum, Tequila & Wodka",nl:"Rum, Tequila & Wodka"}, items:[
+ {id:"rum", t:{pt:"Rum, Tequila & Vodka",es:"Ron, Tequila & Vodka",en:"Rum, Tequila & Vodka",fr:"Rhum, Tequila & Vodka",de:"Rum, Tequila & Wodka",nl:"Rum, Tequila & Wodka"}, items:[
    {n:"Plantation (rum)",p:"4.00"},{n:"Captain Morgan (rum)",p:"4.50"},{n:"Contrabando (rum)",p:"5.00"},
    {n:"Canerock (rum)",p:"6.00"},{n:"Jose Cuervo (tequila)",p:"4.50"},{n:"Stolichnaya (vodka)",p:"4.00"},{n:"NoShit (vodka)",p:"4.00"}
  ]},
 
- {id:"licores", t:{pt:"Licores",en:"Liqueurs",fr:"Liqueurs",de:"Liköre",nl:"Likeuren"}, items:[
+ {id:"licores", t:{pt:"Licores",es:"Licores",en:"Liqueurs",fr:"Liqueurs",de:"Liköre",nl:"Likeuren"}, items:[
    {n:"Licor Beirão",p:"3.00"},{n:"Moscatel",p:"2.00"},{n:"Baileys",p:"4.00",a:["milk"]},{n:"Amarguinha",p:"2.00"},
-   {n:{pt:"Licor de Café",en:"Coffee liqueur",fr:"Liqueur de café",de:"Kaffeelikör",nl:"Koffielikeur"},p:"4.00"},
+   {n:{pt:"Licor de Café",es:"Licor de café",en:"Coffee liqueur",fr:"Liqueur de café",de:"Kaffeelikör",nl:"Koffielikeur"},p:"4.00"},
    {n:"Triple Sec",p:"3.00"},
-   {n:{pt:"Absinto",en:"Absinthe",fr:"Absinthe",de:"Absinth",nl:"Absint"},p:"3.00"},
-   {n:{pt:"Licor de Mel Arbun",en:"Honey liqueur (Arbun)",fr:"Liqueur de miel (Arbun)",de:"Honiglikör (Arbun)",nl:"Honinglikeur (Arbun)"},p:"5.00"},
-   {n:{pt:"Licor Cítrico Arbun",en:"Citrus liqueur (Arbun)",fr:"Liqueur d'agrumes (Arbun)",de:"Zitruslikör (Arbun)",nl:"Citruslikeur (Arbun)"},p:"5.00"}
+   {n:{pt:"Absinto",es:"Absenta",en:"Absinthe",fr:"Absinthe",de:"Absinth",nl:"Absint"},p:"3.00"},
+   {n:{pt:"Licor de Mel Arbun",es:"Licor de miel (Arbun)",en:"Honey liqueur (Arbun)",fr:"Liqueur de miel (Arbun)",de:"Honiglikör (Arbun)",nl:"Honinglikeur (Arbun)"},p:"5.00"},
+   {n:{pt:"Licor Cítrico Arbun",es:"Licor cítrico (Arbun)",en:"Citrus liqueur (Arbun)",fr:"Liqueur d'agrumes (Arbun)",de:"Zitruslikör (Arbun)",nl:"Citruslikeur (Arbun)"},p:"5.00"}
  ]},
 
- {id:"gin", t:{pt:"Gin Tónicos",en:"Gin & Tonic",fr:"Gin Tonic",de:"Gin Tonic",nl:"Gin-Tonic"}, items:[
-   {n:"Gin Tónico NoShit",d:{pt:"50ml NoShit, 200ml tónica, gelo, rodela de limão",en:"50ml NoShit, 200ml tonic, ice, lemon slice",fr:"50ml NoShit, 200ml tonic, glace, tranche de citron",de:"50ml NoShit, 200ml Tonic, Eis, Zitronenscheibe",nl:"50ml NoShit, 200ml tonic, ijs, schijfje citroen"},p:"7.00"},
-   {n:"Gin Tónico Gordon's",d:{pt:"50ml Gordon's, 200ml tónica, gelo, rodela de limão",en:"50ml Gordon's, 200ml tonic, ice, lemon slice",fr:"50ml Gordon's, 200ml tonic, glace, tranche de citron",de:"50ml Gordon's, 200ml Tonic, Eis, Zitronenscheibe",nl:"50ml Gordon's, 200ml tonic, ijs, schijfje citroen"},p:"7.50"},
-   {n:"Gin Tónico Bombay Sapphire",d:{pt:"50ml Bombay, 200ml tónica, gelo, limão e bagas de zimbro",en:"50ml Bombay, 200ml tonic, ice, lemon & juniper berries",fr:"50ml Bombay, 200ml tonic, glace, citron & baies de genièvre",de:"50ml Bombay, 200ml Tonic, Eis, Zitrone & Wacholderbeeren",nl:"50ml Bombay, 200ml tonic, ijs, citroen & jeneverbessen"},p:"8.00"},
-   {n:"Gin Tónico Tanqueray",d:{pt:"50ml Tanqueray, 200ml tónica, gelo, lima ou laranja e bagas de zimbro",en:"50ml Tanqueray, 200ml tonic, ice, lime or orange & juniper berries",fr:"50ml Tanqueray, 200ml tonic, glace, citron vert ou orange & baies de genièvre",de:"50ml Tanqueray, 200ml Tonic, Eis, Limette oder Orange & Wacholderbeeren",nl:"50ml Tanqueray, 200ml tonic, ijs, limoen of sinaasappel & jeneverbessen"},p:"9.00"},
-   {n:"Gin Tónico Citadelle",d:{pt:"50ml Citadelle, 200ml tónica, gelo, framboesa",en:"50ml Citadelle, 200ml tonic, ice, raspberry",fr:"50ml Citadelle, 200ml tonic, glace, framboise",de:"50ml Citadelle, 200ml Tonic, Eis, Himbeere",nl:"50ml Citadelle, 200ml tonic, ijs, framboos"},p:"9.00"},
-   {n:"Gin Tónico Hendrick's",d:{pt:"50ml Hendrick's, 200ml tónica, gelo, rodela de pepino",en:"50ml Hendrick's, 200ml tonic, ice, cucumber slice",fr:"50ml Hendrick's, 200ml tonic, glace, tranche de concombre",de:"50ml Hendrick's, 200ml Tonic, Eis, Gurkenscheibe",nl:"50ml Hendrick's, 200ml tonic, ijs, schijfje komkommer"},p:"10.00"},
-   {n:"Vodka Tónica Stolichnaya",d:{pt:"50ml Stolichnaya, 200ml tónica, gelo, limão ou lima",en:"50ml Stolichnaya, 200ml tonic, ice, lemon or lime",fr:"50ml Stolichnaya, 200ml tonic, glace, citron ou citron vert",de:"50ml Stolichnaya, 200ml Tonic, Eis, Zitrone oder Limette",nl:"50ml Stolichnaya, 200ml tonic, ijs, citroen of limoen"},p:"7.50"},
-   {n:"Porto Tónico (branco / tinto)",d:{pt:"60ml de Porto, 120ml tónica, gelo, rodela de limão/laranja, folha de hortelã",en:"60ml Port, 120ml tonic, ice, lemon/orange slice, mint leaf",fr:"60ml Porto, 120ml tonic, glace, tranche de citron/orange, feuille de menthe",de:"60ml Portwein, 120ml Tonic, Eis, Zitronen-/Orangenscheibe, Minzblatt",nl:"60ml Port, 120ml tonic, ijs, schijfje citroen/sinaasappel, muntblad"},p:"7.00"}
+ {id:"gin", t:{pt:"Gin Tónicos",es:"Gin Tonics",en:"Gin & Tonic",fr:"Gin Tonic",de:"Gin Tonic",nl:"Gin-Tonic"}, items:[
+   {n:"Gin Tónico NoShit",d:{pt:"50ml NoShit, 200ml tónica, gelo, rodela de limão",es:"50ml NoShit, 200ml tónica, hielo, rodaja de limón",en:"50ml NoShit, 200ml tonic, ice, lemon slice",fr:"50ml NoShit, 200ml tonic, glace, tranche de citron",de:"50ml NoShit, 200ml Tonic, Eis, Zitronenscheibe",nl:"50ml NoShit, 200ml tonic, ijs, schijfje citroen"},p:"7.00"},
+   {n:"Gin Tónico Gordon's",d:{pt:"50ml Gordon's, 200ml tónica, gelo, rodela de limão",es:"50ml Gordon's, 200ml tónica, hielo, rodaja de limón",en:"50ml Gordon's, 200ml tonic, ice, lemon slice",fr:"50ml Gordon's, 200ml tonic, glace, tranche de citron",de:"50ml Gordon's, 200ml Tonic, Eis, Zitronenscheibe",nl:"50ml Gordon's, 200ml tonic, ijs, schijfje citroen"},p:"7.50"},
+   {n:"Gin Tónico Bombay Sapphire",d:{pt:"50ml Bombay, 200ml tónica, gelo, limão e bagas de zimbro",es:"50ml Bombay, 200ml tónica, hielo, limón y bayas de enebro",en:"50ml Bombay, 200ml tonic, ice, lemon & juniper berries",fr:"50ml Bombay, 200ml tonic, glace, citron & baies de genièvre",de:"50ml Bombay, 200ml Tonic, Eis, Zitrone & Wacholderbeeren",nl:"50ml Bombay, 200ml tonic, ijs, citroen & jeneverbessen"},p:"8.00"},
+   {n:"Gin Tónico Tanqueray",d:{pt:"50ml Tanqueray, 200ml tónica, gelo, lima ou laranja e bagas de zimbro",es:"50ml Tanqueray, 200ml tónica, hielo, lima o naranja y bayas de enebro",en:"50ml Tanqueray, 200ml tonic, ice, lime or orange & juniper berries",fr:"50ml Tanqueray, 200ml tonic, glace, citron vert ou orange & baies de genièvre",de:"50ml Tanqueray, 200ml Tonic, Eis, Limette oder Orange & Wacholderbeeren",nl:"50ml Tanqueray, 200ml tonic, ijs, limoen of sinaasappel & jeneverbessen"},p:"9.00"},
+   {n:"Gin Tónico Citadelle",d:{pt:"50ml Citadelle, 200ml tónica, gelo, framboesa",es:"50ml Citadelle, 200ml tónica, hielo, frambuesa",en:"50ml Citadelle, 200ml tonic, ice, raspberry",fr:"50ml Citadelle, 200ml tonic, glace, framboise",de:"50ml Citadelle, 200ml Tonic, Eis, Himbeere",nl:"50ml Citadelle, 200ml tonic, ijs, framboos"},p:"9.00"},
+   {n:"Gin Tónico Hendrick's",d:{pt:"50ml Hendrick's, 200ml tónica, gelo, rodela de pepino",es:"50ml Hendrick's, 200ml tónica, hielo, rodaja de pepino",en:"50ml Hendrick's, 200ml tonic, ice, cucumber slice",fr:"50ml Hendrick's, 200ml tonic, glace, tranche de concombre",de:"50ml Hendrick's, 200ml Tonic, Eis, Gurkenscheibe",nl:"50ml Hendrick's, 200ml tonic, ijs, schijfje komkommer"},p:"10.00"},
+   {n:"Vodka Tónica Stolichnaya",d:{pt:"50ml Stolichnaya, 200ml tónica, gelo, limão ou lima",es:"50ml Stolichnaya, 200ml tónica, hielo, limón o lima",en:"50ml Stolichnaya, 200ml tonic, ice, lemon or lime",fr:"50ml Stolichnaya, 200ml tonic, glace, citron ou citron vert",de:"50ml Stolichnaya, 200ml Tonic, Eis, Zitrone oder Limette",nl:"50ml Stolichnaya, 200ml tonic, ijs, citroen of limoen"},p:"7.50"},
+   {n:"Porto Tónico (branco / tinto)",d:{pt:"60ml de Porto, 120ml tónica, gelo, rodela de limão/laranja, folha de hortelã",es:"60ml de Oporto, 120ml tónica, hielo, rodaja de limón/naranja, hoja de menta",en:"60ml Port, 120ml tonic, ice, lemon/orange slice, mint leaf",fr:"60ml Porto, 120ml tonic, glace, tranche de citron/orange, feuille de menthe",de:"60ml Portwein, 120ml Tonic, Eis, Zitronen-/Orangenscheibe, Minzblatt",nl:"60ml Port, 120ml tonic, ijs, schijfje citroen/sinaasappel, muntblad"},p:"7.00"}
  ]},
 
- {id:"cocktails", t:{pt:"Cocktails",en:"Cocktails",fr:"Cocktails",de:"Cocktails",nl:"Cocktails"}, items:[
-   {n:"Caipirinha",d:{pt:"lima, açúcar amarelo, cachaça, gelo",en:"lime, brown sugar, cachaça, ice",fr:"citron vert, sucre roux, cachaça, glace",de:"Limette, brauner Zucker, Cachaça, Eis",nl:"limoen, bruine suiker, cachaça, ijs"},p:"7.50"},
-   {n:"Mojito",d:{pt:"hortelã, lima, açúcar, rum branco, água com gás, gelo",en:"mint, lime, sugar, white rum, sparkling water, ice",fr:"menthe, citron vert, sucre, rhum blanc, eau gazeuse, glace",de:"Minze, Limette, Zucker, weißer Rum, Sprudelwasser, Eis",nl:"munt, limoen, suiker, witte rum, bruiswater, ijs"},p:"8.50"},
-   {n:"Moscow Mule",d:{pt:"vodka, sumo de lima, ginger beer, gelo",en:"vodka, lime juice, ginger beer, ice",fr:"vodka, jus de citron vert, ginger beer, glace",de:"Wodka, Limettensaft, Ginger Beer, Eis",nl:"wodka, limoensap, ginger beer, ijs"},p:"8.50"},
-   {n:"Cuba Libre",d:{pt:"rum, Coca-Cola, sumo de lima, gelo",en:"rum, Coca-Cola, lime juice, ice",fr:"rhum, Coca-Cola, jus de citron vert, glace",de:"Rum, Coca-Cola, Limettensaft, Eis",nl:"rum, Coca-Cola, limoensap, ijs"},p:"8.00"},
-   {n:{pt:"Margarita",en:"Margarita",fr:"Margarita",de:"Margarita",nl:"Margarita"},d:{pt:"tequila, triple sec, sumo de lima, sal",en:"tequila, triple sec, lime juice, salt",fr:"tequila, triple sec, jus de citron vert, sel",de:"Tequila, Triple Sec, Limettensaft, Salz",nl:"tequila, triple sec, limoensap, zout"},p:"8.50"},
-   {n:"Daiquiri",d:{pt:"rum branco, lima, xarope de açúcar",en:"white rum, lime, sugar syrup",fr:"rhum blanc, citron vert, sirop de sucre",de:"weißer Rum, Limette, Zuckersirup",nl:"witte rum, limoen, suikersiroop"},p:"8.50"},
-   {n:"Whisky Sour (Jack Daniel's)",d:{pt:"Jack Daniel's, sumo de limão, xarope de açúcar, gelo, clara de ovo (opcional)",en:"Jack Daniel's, lemon juice, sugar syrup, ice, egg white (optional)",fr:"Jack Daniel's, jus de citron, sirop de sucre, glace, blanc d'œuf (facultatif)",de:"Jack Daniel's, Zitronensaft, Zuckersirup, Eis, Eiweiß (optional)",nl:"Jack Daniel's, citroensap, suikersiroop, ijs, eiwit (optioneel)"},p:"9.00",a:["egg"]},
-   {n:"Aperol Spritz",d:{pt:"Prosecco, Aperol, água com gás, gelo",en:"Prosecco, Aperol, sparkling water, ice",fr:"Prosecco, Aperol, eau gazeuse, glace",de:"Prosecco, Aperol, Sprudelwasser, Eis",nl:"Prosecco, Aperol, bruiswater, ijs"},p:"7.50",a:["sulphites"]},
-   {n:"Piña Colada",d:{pt:"rum, sumo de limão, xarope de côco, sumo de ananás, gelo, canela (opcional)",en:"rum, lemon juice, coconut syrup, pineapple juice, ice, cinnamon (optional)",fr:"rhum, jus de citron, sirop de coco, jus d'ananas, glace, cannelle (facultatif)",de:"Rum, Zitronensaft, Kokossirup, Ananassaft, Eis, Zimt (optional)",nl:"rum, citroensap, kokossiroop, ananassap, ijs, kaneel (optioneel)"},p:"9.00"}
+ {id:"cocktails", t:{pt:"Cocktails",es:"Cócteles",en:"Cocktails",fr:"Cocktails",de:"Cocktails",nl:"Cocktails"}, items:[
+   {n:"Caipirinha",d:{pt:"lima, açúcar amarelo, cachaça, gelo",es:"lima, azúcar moreno, cachaça, hielo",en:"lime, brown sugar, cachaça, ice",fr:"citron vert, sucre roux, cachaça, glace",de:"Limette, brauner Zucker, Cachaça, Eis",nl:"limoen, bruine suiker, cachaça, ijs"},p:"7.50"},
+   {n:"Mojito",d:{pt:"hortelã, lima, açúcar, rum branco, água com gás, gelo",es:"menta, lima, azúcar, ron blanco, agua con gas, hielo",en:"mint, lime, sugar, white rum, sparkling water, ice",fr:"menthe, citron vert, sucre, rhum blanc, eau gazeuse, glace",de:"Minze, Limette, Zucker, weißer Rum, Sprudelwasser, Eis",nl:"munt, limoen, suiker, witte rum, bruiswater, ijs"},p:"8.50"},
+   {n:"Moscow Mule",d:{pt:"vodka, sumo de lima, ginger beer, gelo",es:"vodka, zumo de lima, ginger beer, hielo",en:"vodka, lime juice, ginger beer, ice",fr:"vodka, jus de citron vert, ginger beer, glace",de:"Wodka, Limettensaft, Ginger Beer, Eis",nl:"wodka, limoensap, ginger beer, ijs"},p:"8.50"},
+   {n:"Cuba Libre",d:{pt:"rum, Coca-Cola, sumo de lima, gelo",es:"ron, Coca-Cola, zumo de lima, hielo",en:"rum, Coca-Cola, lime juice, ice",fr:"rhum, Coca-Cola, jus de citron vert, glace",de:"Rum, Coca-Cola, Limettensaft, Eis",nl:"rum, Coca-Cola, limoensap, ijs"},p:"8.00"},
+   {n:"Margarita",d:{pt:"tequila, triple sec, sumo de lima, sal",es:"tequila, triple seco, zumo de lima, sal",en:"tequila, triple sec, lime juice, salt",fr:"tequila, triple sec, jus de citron vert, sel",de:"Tequila, Triple Sec, Limettensaft, Salz",nl:"tequila, triple sec, limoensap, zout"},p:"8.50"},
+   {n:"Daiquiri",d:{pt:"rum branco, lima, xarope de açúcar",es:"ron blanco, lima, sirope de azúcar",en:"white rum, lime, sugar syrup",fr:"rhum blanc, citron vert, sirop de sucre",de:"weißer Rum, Limette, Zuckersirup",nl:"witte rum, limoen, suikersiroop"},p:"8.50"},
+   {n:"Whisky Sour (Jack Daniel's)",d:{pt:"Jack Daniel's, sumo de limão, xarope de açúcar, gelo, clara de ovo (opcional)",es:"Jack Daniel's, zumo de limón, sirope de azúcar, hielo, clara de huevo (opcional)",en:"Jack Daniel's, lemon juice, sugar syrup, ice, egg white (optional)",fr:"Jack Daniel's, jus de citron, sirop de sucre, glace, blanc d'œuf (facultatif)",de:"Jack Daniel's, Zitronensaft, Zuckersirup, Eis, Eiweiß (optional)",nl:"Jack Daniel's, citroensap, suikersiroop, ijs, eiwit (optioneel)"},p:"9.00",a:["egg"]},
+   {n:"Aperol Spritz",d:{pt:"Prosecco, Aperol, água com gás, gelo",es:"Prosecco, Aperol, agua con gas, hielo",en:"Prosecco, Aperol, sparkling water, ice",fr:"Prosecco, Aperol, eau gazeuse, glace",de:"Prosecco, Aperol, Sprudelwasser, Eis",nl:"Prosecco, Aperol, bruiswater, ijs"},p:"7.50",a:["sulphites"]},
+   {n:"Piña Colada",d:{pt:"rum, sumo de limão, xarope de côco, sumo de ananás, gelo, canela (opcional)",es:"ron, zumo de limón, sirope de coco, zumo de piña, hielo, canela (opcional)",en:"rum, lemon juice, coconut syrup, pineapple juice, ice, cinnamon (optional)",fr:"rhum, jus de citron, sirop de coco, jus d'ananas, glace, cannelle (facultatif)",de:"Rum, Zitronensaft, Kokossirup, Ananassaft, Eis, Zimt (optional)",nl:"rum, citroensap, kokossiroop, ananassap, ijs, kaneel (optioneel)"},p:"9.00"}
  ]},
 
- {id:"almocinhos", t:{pt:"Almocinhos",en:"Light Meals",fr:"Petits Plats",de:"Kleine Gerichte",nl:"Kleine Gerechten"}, items:[
-   {n:{pt:"Hambúrguer Beyond",en:"Beyond Burger",fr:"Burger Beyond",de:"Beyond Burger",nl:"Beyond Burger"},d:{pt:"hambúrguer vegan, alface, tomate, cebola caramelizada, maionese, com batata frita tipo pála-pála",en:"vegan burger, lettuce, tomato, caramelised onion, mayo, with crinkle-cut fries",fr:"burger végan, laitue, tomate, oignon caramélisé, mayonnaise, avec frites",de:"veganer Burger, Salat, Tomate, karamellisierte Zwiebel, Mayo, mit Pommes",nl:"veganistische burger, sla, tomaat, gekarameliseerde ui, mayo, met friet"},p:"10.00",a:["egg","gluten"]},
-   {n:{pt:"Tosta de Atum",en:"Tuna Toastie",fr:"Croque au Thon",de:"Thunfisch-Toast",nl:"Tonijntosti"},d:{pt:"atum, cebola, maionese, tomate, queijo, pimenta preta",en:"tuna, onion, mayo, tomato, cheese, black pepper",fr:"thon, oignon, mayonnaise, tomate, fromage, poivre noir",de:"Thunfisch, Zwiebel, Mayo, Tomate, Käse, schwarzer Pfeffer",nl:"tonijn, ui, mayo, tomaat, kaas, zwarte peper"},p:"6.50",a:["egg","fish","milk","gluten"]},
-   {n:{pt:"Tosta de Salsicha",en:"Sausage Toastie",fr:"Croque à la Saucisse",de:"Wurst-Toast",nl:"Worsttosti"},d:{pt:"salsicha de soja/tofu, tomate, queijo, maionese, alho",en:"soy/tofu sausage, tomato, cheese, mayo, garlic",fr:"saucisse soja/tofu, tomate, fromage, mayonnaise, ail",de:"Soja-/Tofu-Wurst, Tomate, Käse, Mayo, Knoblauch",nl:"soja-/tofuworst, tomaat, kaas, mayo, knoflook"},p:"6.50",a:["egg","soy","milk","gluten"]},
-   {n:{pt:"Cachorro Vegan",en:"Vegan Hot Dog",fr:"Hot-dog Végan",de:"Veganer Hot Dog",nl:"Vegan Hotdog"},d:{pt:"salsicha de soja/tofu, cebola caramelizada, molhos e batata palha",en:"soy/tofu sausage, caramelised onion, sauces & straw fries",fr:"saucisse soja/tofu, oignon caramélisé, sauces & pommes paille",de:"Soja-/Tofu-Wurst, karamellisierte Zwiebel, Saucen & Strohpommes",nl:"soja-/tofuworst, gekarameliseerde ui, sauzen & stroreepjes"},p:"6.50",a:["soy","gluten"]},
-   {n:"Green Wrap",d:{pt:"cenoura, couve roxa, alface, preparado vegan, cebola caramelizada e molho tártaro ou vegan",en:"carrot, red cabbage, lettuce, vegan filling, caramelised onion & tartar or vegan sauce",fr:"carotte, chou rouge, laitue, préparation végane, oignon caramélisé & sauce tartare ou végane",de:"Karotte, Rotkohl, Salat, vegane Füllung, karamellisierte Zwiebel & Sauce Tartar oder vegan",nl:"wortel, rode kool, sla, veganvulling, gekarameliseerde ui & tartaar- of vegansaus"},p:"10.00",a:["gluten"]},
-   {sub:{pt:"Torradas & Tostas",en:"Toasts & Toasties",fr:"Toasts & Croques",de:"Toasts",nl:"Toasts & Tosti's"}},
-   {n:{pt:"Torrada c/ Manteiga / Azeite",en:"Toast with butter / olive oil",fr:"Toast beurre / huile d'olive",de:"Toast mit Butter / Olivenöl",nl:"Toast met boter / olijfolie"},p:"2.50",a:["milk","gluten"]},
-   {n:{pt:"Torrada c/ Húmus, azeite e sal",en:"Toast with hummus, olive oil & salt",fr:"Toast houmous, huile d'olive & sel",de:"Toast mit Hummus, Olivenöl & Salz",nl:"Toast met hummus, olijfolie & zout"},p:"4.00",a:["gluten"]},
-   {n:{pt:"Torrada c/ Tomate, azeite e sal",en:"Toast with tomato, olive oil & salt",fr:"Toast tomate, huile d'olive & sel",de:"Toast mit Tomate, Olivenöl & Salz",nl:"Toast met tomaat, olijfolie & zout"},p:"3.50",a:["gluten"]},
-   {n:{pt:"Tosta Juliana",en:"Juliana Toastie",fr:"Croque Juliana",de:"Juliana-Toast",nl:"Juliana Tosti"},d:{pt:"queijo, tomate, azeite e orégãos",en:"cheese, tomato, olive oil & oregano",fr:"fromage, tomate, huile d'olive & origan",de:"Käse, Tomate, Olivenöl & Oregano",nl:"kaas, tomaat, olijfolie & oregano"},p:"4.00",a:["milk","gluten"]},
-   {n:{pt:"Tosta Mista",en:"Ham & Cheese Toastie",fr:"Croque Mixte",de:"Schinken-Käse-Toast",nl:"Tosti Ham-Kaas"},d:{pt:"queijo, fiambre, manteiga",en:"cheese, ham, butter",fr:"fromage, jambon, beurre",de:"Käse, Schinken, Butter",nl:"kaas, ham, boter"},p:"4.00",a:["milk","gluten"]},
-   {n:{pt:"Sandes à la Maria",en:"Sandwich à la Maria",fr:"Sandwich à la Maria",de:"Sandwich à la Maria",nl:"Broodje à la Maria"},d:{pt:"sandes fria em pão de forma: alface, tomate, azeitonas, queijo, azeite e orégãos",en:"cold sandwich in sliced bread: lettuce, tomato, olives, cheese, olive oil & oregano",fr:"sandwich froid en pain de mie : laitue, tomate, olives, fromage, huile d'olive & origan",de:"kaltes Sandwich in Toastbrot: Salat, Tomate, Oliven, Käse, Olivenöl & Oregano",nl:"koud broodje in casinobrood: sla, tomaat, olijven, kaas, olijfolie & oregano"},p:"3.50",a:["milk","gluten"]},
-   {n:{pt:"Sandes à la Maria (pão rústico)",en:"Sandwich à la Maria (rustic bread)",fr:"Sandwich à la Maria (pain rustique)",de:"Sandwich à la Maria (Bauernbrot)",nl:"Broodje à la Maria (rustiek brood)"},d:{pt:"igual à anterior, mas em pão rústico",en:"same as above, in rustic bread",fr:"identique, en pain rustique",de:"wie oben, in Bauernbrot",nl:"zoals hierboven, in rustiek brood"},p:"6.00",a:["milk","gluten"]},
-   {n:{pt:"Tosta V Boost",en:"V Boost Toastie",fr:"Croque V Boost",de:"V Boost Toast",nl:"V Boost Tosti"},d:{pt:"queijo, fiambre, cebola caramelizada, ovo cozido",en:"cheese, ham, caramelised onion, boiled egg",fr:"fromage, jambon, oignon caramélisé, œuf dur",de:"Käse, Schinken, karamellisierte Zwiebel, gekochtes Ei",nl:"kaas, ham, gekarameliseerde ui, gekookt ei"},p:"7.00",a:["egg","milk","gluten"]},
-   {sub:{pt:"Saladas & Sopa",en:"Salads & Soup",fr:"Salades & Soupe",de:"Salate & Suppe",nl:"Salades & Soep"}},
-   {n:{pt:"Salada de Atum",en:"Tuna Salad",fr:"Salade de Thon",de:"Thunfischsalat",nl:"Tonijnsalade"},d:{pt:"couve roxa, alface, rúcula, cenoura, gengibre, pepino, atum, croutons",en:"red cabbage, lettuce, rocket, carrot, ginger, cucumber, tuna, croutons",fr:"chou rouge, laitue, roquette, carotte, gingembre, concombre, thon, croûtons",de:"Rotkohl, Salat, Rucola, Karotte, Ingwer, Gurke, Thunfisch, Croutons",nl:"rode kool, sla, rucola, wortel, gember, komkommer, tonijn, croutons"},p:"9.00",a:["fish","gluten"]},
-   {n:{pt:"Sopa do dia",en:"Soup of the day",fr:"Soupe du jour",de:"Tagessuppe",nl:"Soep van de dag"},d:{pt:"feita sem batata",en:"made without potato",fr:"préparée sans pomme de terre",de:"ohne Kartoffel zubereitet",nl:"bereid zonder aardappel"},p:"3.00"}
+ {id:"almocinhos", t:{pt:"Almocinhos",es:"Platos Ligeros",en:"Light Meals",fr:"Petits Plats",de:"Kleine Gerichte",nl:"Kleine Gerechten"}, items:[
+   {n:{pt:"Hambúrguer Beyond",es:"Hamburguesa Beyond",en:"Beyond Burger",fr:"Burger Beyond",de:"Beyond Burger",nl:"Beyond Burger"},d:{pt:"hambúrguer vegan, alface, tomate, cebola caramelizada, maionese, com batata frita tipo pála-pála",es:"hamburguesa vegana, lechuga, tomate, cebolla caramelizada, mayonesa, con patatas fritas",en:"vegan burger, lettuce, tomato, caramelised onion, mayo, with crinkle-cut fries",fr:"burger végan, laitue, tomate, oignon caramélisé, mayonnaise, avec frites",de:"veganer Burger, Salat, Tomate, karamellisierte Zwiebel, Mayo, mit Pommes",nl:"veganistische burger, sla, tomaat, gekarameliseerde ui, mayo, met friet"},p:"10.00",a:["egg","gluten"]},
+   {n:{pt:"Tosta de Atum",es:"Tostada de Atún",en:"Tuna Toastie",fr:"Croque au Thon",de:"Thunfisch-Toast",nl:"Tonijntosti"},d:{pt:"atum, cebola, maionese, tomate, queijo, pimenta preta",es:"atún, cebolla, mayonesa, tomate, queso, pimienta negra",en:"tuna, onion, mayo, tomato, cheese, black pepper",fr:"thon, oignon, mayonnaise, tomate, fromage, poivre noir",de:"Thunfisch, Zwiebel, Mayo, Tomate, Käse, schwarzer Pfeffer",nl:"tonijn, ui, mayo, tomaat, kaas, zwarte peper"},p:"6.50",a:["egg","fish","milk","gluten"]},
+   {n:{pt:"Tosta de Salsicha",es:"Tostada de Salchicha",en:"Sausage Toastie",fr:"Croque à la Saucisse",de:"Wurst-Toast",nl:"Worsttosti"},d:{pt:"salsicha de soja/tofu, tomate, queijo, maionese, alho",es:"salchicha de soja/tofu, tomate, queso, mayonesa, ajo",en:"soy/tofu sausage, tomato, cheese, mayo, garlic",fr:"saucisse soja/tofu, tomate, fromage, mayonnaise, ail",de:"Soja-/Tofu-Wurst, Tomate, Käse, Mayo, Knoblauch",nl:"soja-/tofuworst, tomaat, kaas, mayo, knoflook"},p:"6.50",a:["egg","soy","milk","gluten"]},
+   {n:{pt:"Cachorro Vegan",es:"Perrito Vegano",en:"Vegan Hot Dog",fr:"Hot-dog Végan",de:"Veganer Hot Dog",nl:"Vegan Hotdog"},d:{pt:"salsicha de soja/tofu, cebola caramelizada, molhos e batata palha",es:"salchicha de soja/tofu, cebolla caramelizada, salsas y patatas paja",en:"soy/tofu sausage, caramelised onion, sauces & straw fries",fr:"saucisse soja/tofu, oignon caramélisé, sauces & pommes paille",de:"Soja-/Tofu-Wurst, karamellisierte Zwiebel, Saucen & Strohpommes",nl:"soja-/tofuworst, gekarameliseerde ui, sauzen & stroreepjes"},p:"6.50",a:["soy","gluten"]},
+   {n:"Green Wrap",d:{pt:"cenoura, couve roxa, alface, preparado vegan, cebola caramelizada e molho tártaro ou vegan",es:"zanahoria, col lombarda, lechuga, preparado vegano, cebolla caramelizada y salsa tártara o vegana",en:"carrot, red cabbage, lettuce, vegan filling, caramelised onion & tartar or vegan sauce",fr:"carotte, chou rouge, laitue, préparation végane, oignon caramélisé & sauce tartare ou végane",de:"Karotte, Rotkohl, Salat, vegane Füllung, karamellisierte Zwiebel & Sauce Tartar oder vegan",nl:"wortel, rode kool, sla, veganvulling, gekarameliseerde ui & tartaar- of vegansaus"},p:"10.00",a:["gluten"]},
+   {sub:{pt:"Torradas & Tostas",es:"Tostadas y Sándwiches Calientes",en:"Toasts & Toasties",fr:"Toasts & Croques",de:"Toasts",nl:"Toasts & Tosti's"}},
+   {n:{pt:"Torrada c/ Manteiga / Azeite",es:"Tostada con mantequilla / aceite de oliva",en:"Toast with butter / olive oil",fr:"Toast beurre / huile d'olive",de:"Toast mit Butter / Olivenöl",nl:"Toast met boter / olijfolie"},p:"2.50",a:["milk","gluten"]},
+   {n:{pt:"Torrada c/ Húmus, azeite e sal",es:"Tostada con hummus, aceite de oliva y sal",en:"Toast with hummus, olive oil & salt",fr:"Toast houmous, huile d'olive & sel",de:"Toast mit Hummus, Olivenöl & Salz",nl:"Toast met hummus, olijfolie & zout"},p:"4.00",a:["gluten"]},
+   {n:{pt:"Torrada c/ Tomate, azeite e sal",es:"Tostada con tomate, aceite de oliva y sal",en:"Toast with tomato, olive oil & salt",fr:"Toast tomate, huile d'olive & sel",de:"Toast mit Tomate, Olivenöl & Salz",nl:"Toast met tomaat, olijfolie & zout"},p:"3.50",a:["gluten"]},
+   {n:{pt:"Tosta Juliana",es:"Tostada Juliana",en:"Juliana Toastie",fr:"Croque Juliana",de:"Juliana-Toast",nl:"Juliana Tosti"},d:{pt:"queijo, tomate, azeite e orégãos",es:"queso, tomate, aceite de oliva y orégano",en:"cheese, tomato, olive oil & oregano",fr:"fromage, tomate, huile d'olive & origan",de:"Käse, Tomate, Olivenöl & Oregano",nl:"kaas, tomaat, olijfolie & oregano"},p:"4.00",a:["milk","gluten"]},
+   {n:{pt:"Tosta Mista",es:"Sándwich Mixto",en:"Ham & Cheese Toastie",fr:"Croque Mixte",de:"Schinken-Käse-Toast",nl:"Tosti Ham-Kaas"},d:{pt:"queijo, fiambre, manteiga",es:"queso, jamón, mantequilla",en:"cheese, ham, butter",fr:"fromage, jambon, beurre",de:"Käse, Schinken, Butter",nl:"kaas, ham, boter"},p:"4.00",a:["milk","gluten"]},
+   {n:{pt:"Sandes à la Maria",es:"Sándwich à la Maria",en:"Sandwich à la Maria",fr:"Sandwich à la Maria",de:"Sandwich à la Maria",nl:"Broodje à la Maria"},d:{pt:"sandes fria em pão de forma: alface, tomate, azeitonas, queijo, azeite e orégãos",es:"sándwich frío en pan de molde: lechuga, tomate, aceitunas, queso, aceite de oliva y orégano",en:"cold sandwich in sliced bread: lettuce, tomato, olives, cheese, olive oil & oregano",fr:"sandwich froid en pain de mie : laitue, tomate, olives, fromage, huile d'olive & origan",de:"kaltes Sandwich in Toastbrot: Salat, Tomate, Oliven, Käse, Olivenöl & Oregano",nl:"koud broodje in casinobrood: sla, tomaat, olijven, kaas, olijfolie & oregano"},p:"3.50",a:["milk","gluten"]},
+   {n:{pt:"Sandes à la Maria (pão rústico)",es:"Sándwich à la Maria (pan rústico)",en:"Sandwich à la Maria (rustic bread)",fr:"Sandwich à la Maria (pain rustique)",de:"Sandwich à la Maria (Bauernbrot)",nl:"Broodje à la Maria (rustiek brood)"},d:{pt:"igual à anterior, mas em pão rústico",es:"igual que el anterior, en pan rústico",en:"same as above, in rustic bread",fr:"identique, en pain rustique",de:"wie oben, in Bauernbrot",nl:"zoals hierboven, in rustiek brood"},p:"6.00",a:["milk","gluten"]},
+   {n:{pt:"Tosta V Boost",es:"Tostada V Boost",en:"V Boost Toastie",fr:"Croque V Boost",de:"V Boost Toast",nl:"V Boost Tosti"},d:{pt:"queijo, fiambre, cebola caramelizada, ovo cozido",es:"queso, jamón, cebolla caramelizada, huevo cocido",en:"cheese, ham, caramelised onion, boiled egg",fr:"fromage, jambon, oignon caramélisé, œuf dur",de:"Käse, Schinken, karamellisierte Zwiebel, gekochtes Ei",nl:"kaas, ham, gekarameliseerde ui, gekookt ei"},p:"7.00",a:["egg","milk","gluten"]},
+   {sub:{pt:"Saladas & Sopa",es:"Ensaladas y Sopa",en:"Salads & Soup",fr:"Salades & Soupe",de:"Salate & Suppe",nl:"Salades & Soep"}},
+   {n:{pt:"Salada de Atum",es:"Ensalada de Atún",en:"Tuna Salad",fr:"Salade de Thon",de:"Thunfischsalat",nl:"Tonijnsalade"},d:{pt:"couve roxa, alface, rúcula, cenoura, gengibre, pepino, atum, croutons",es:"col lombarda, lechuga, rúcula, zanahoria, jengibre, pepino, atún, picatostes",en:"red cabbage, lettuce, rocket, carrot, ginger, cucumber, tuna, croutons",fr:"chou rouge, laitue, roquette, carotte, gingembre, concombre, thon, croûtons",de:"Rotkohl, Salat, Rucola, Karotte, Ingwer, Gurke, Thunfisch, Croutons",nl:"rode kool, sla, rucola, wortel, gember, komkommer, tonijn, croutons"},p:"9.00",a:["fish","gluten"]},
+   {n:{pt:"Sopa do dia",es:"Sopa del día",en:"Soup of the day",fr:"Soupe du jour",de:"Tagessuppe",nl:"Soep van de dag"},d:{pt:"feita sem batata",es:"elaborada sin patata",en:"made without potato",fr:"préparée sans pomme de terre",de:"ohne Kartoffel zubereitet",nl:"bereid zonder aardappel"},p:"3.00"}
  ]},
 
- {id:"petiscos", t:{pt:"Petiscos",en:"Snacks",fr:"À Grignoter",de:"Snacks",nl:"Hapjes"}, items:[
-   {n:{pt:"Batata frita",en:"French fries",fr:"Frites",de:"Pommes frites",nl:"Friet"},d:{pt:"tipo palito",en:"matchstick style",fr:"allumettes",de:"in Streifen",nl:"lucifer-stijl"},p:"3.00"},
-   {n:{pt:"Queijo Brie",en:"Brie Cheese",fr:"Fromage Brie",de:"Brie-Käse",nl:"Brie-kaas"},d:{pt:"aquecido no forno, temperado, com mini-tostas",en:"oven-warmed, seasoned, with mini toasts",fr:"réchauffé au four, assaisonné, avec mini-toasts",de:"im Ofen erwärmt, gewürzt, mit Mini-Toasts",nl:"in de oven verwarmd, gekruid, met mini-toastjes"},p:"6.00",a:["milk","gluten"]},
-   {n:{pt:"Húmus",en:"Hummus",fr:"Houmous",de:"Hummus",nl:"Hummus"},d:{pt:"servido com palitos de pepino e cenoura, ou com pãozinho",en:"served with cucumber & carrot sticks, or with bread",fr:"servi avec bâtonnets de concombre et carotte, ou avec du pain",de:"serviert mit Gurken- und Karottensticks oder mit Brot",nl:"geserveerd met komkommer- en wortelreepjes, of met broodje"},p:"6.00",a:["gluten"]},
-   {n:{pt:"Empalhada",en:"Empalhada (bar snacks)",fr:"Empalhada (à grignoter)",de:"Empalhada (Knabbereien)",nl:"Empalhada (borrelhapjes)"},d:{pt:"tremoços, amendoins e azeitonas",en:"lupin beans, peanuts & olives",fr:"lupins, cacahuètes & olives",de:"Lupinen, Erdnüsse & Oliven",nl:"lupinebonen, pinda's & olijven"},p:"2.50",a:["lupin","peanut"]},
-   {n:{pt:"Nachos c/ guacamole",en:"Nachos with guacamole",fr:"Nachos au guacamole",de:"Nachos mit Guacamole",nl:"Nacho's met guacamole"},p:"6.00"}
+ {id:"petiscos", t:{pt:"Petiscos",es:"Para Picar",en:"Snacks",fr:"À Grignoter",de:"Snacks",nl:"Hapjes"}, items:[
+   {n:{pt:"Batata frita",es:"Patatas fritas",en:"French fries",fr:"Frites",de:"Pommes frites",nl:"Friet"},d:{pt:"tipo palito",es:"estilo cerilla",en:"matchstick style",fr:"allumettes",de:"in Streifen",nl:"lucifer-stijl"},p:"3.00"},
+   {n:{pt:"Queijo Brie",es:"Queso Brie",en:"Brie Cheese",fr:"Fromage Brie",de:"Brie-Käse",nl:"Brie-kaas"},d:{pt:"aquecido no forno, temperado, com mini-tostas",es:"calentado al horno, aliñado, con mini-tostadas",en:"oven-warmed, seasoned, with mini toasts",fr:"réchauffé au four, assaisonné, avec mini-toasts",de:"im Ofen erwärmt, gewürzt, mit Mini-Toasts",nl:"in de oven verwarmd, gekruid, met mini-toastjes"},p:"6.00",a:["milk","gluten"]},
+   {n:{pt:"Húmus",es:"Hummus",en:"Hummus",fr:"Houmous",de:"Hummus",nl:"Hummus"},d:{pt:"servido com palitos de pepino e cenoura, ou com pãozinho",es:"servido con bastones de pepino y zanahoria, o con pan",en:"served with cucumber & carrot sticks, or with bread",fr:"servi avec bâtonnets de concombre et carotte, ou avec du pain",de:"serviert mit Gurken- und Karottensticks oder mit Brot",nl:"geserveerd met komkommer- en wortelreepjes, of met broodje"},p:"6.00",a:["gluten"]},
+   {n:{pt:"Empalhada",es:"Empalhada (para picar)",en:"Empalhada (bar snacks)",fr:"Empalhada (à grignoter)",de:"Empalhada (Knabbereien)",nl:"Empalhada (borrelhapjes)"},d:{pt:"tremoços, amendoins e azeitonas",es:"altramuces, cacahuetes y aceitunas",en:"lupin beans, peanuts & olives",fr:"lupins, cacahuètes & olives",de:"Lupinen, Erdnüsse & Oliven",nl:"lupinebonen, pinda's & olijven"},p:"2.50",a:["lupin","peanut"]},
+   {n:{pt:"Nachos c/ guacamole",es:"Nachos con guacamole",en:"Nachos with guacamole",fr:"Nachos au guacamole",de:"Nachos mit Guacamole",nl:"Nacho's met guacamole"},p:"6.00"}
  ]},
 
- {id:"docinhos", t:{pt:"Docinhos",en:"Desserts",fr:"Desserts",de:"Süßspeisen",nl:"Zoetigheden"}, items:[
-   {n:{pt:"Bolo de Chocolate (vegan)",en:"Chocolate cake (vegan)",fr:"Gâteau au chocolat (végan)",de:"Schokoladenkuchen (vegan)",nl:"Chocoladecake (vegan)"},p:"3.00",a:["gluten"]},
-   {n:{pt:"Bolo de Canela e Caju (sem lactose)",en:"Cinnamon & cashew cake (lactose-free)",fr:"Gâteau cannelle & noix de cajou (sans lactose)",de:"Zimt-Cashew-Kuchen (laktosefrei)",nl:"Kaneel-cashewcake (lactosevrij)"},p:"3.00",a:["nuts","gluten"]},
-   {n:{pt:"Torta de Laranja",en:"Orange roll cake",fr:"Roulé à l'orange",de:"Orangen-Biskuitrolle",nl:"Sinaasappelcakerol"},p:"3.00",a:["egg"]},
-   {n:{pt:"Gelado de Açaí (130g)",en:"Açaí ice cream (130g)",fr:"Glace açaï (130g)",de:"Açaí-Eis (130g)",nl:"Açaí-ijs (130g)"},p:"4.00"}
+ {id:"docinhos", t:{pt:"Docinhos",es:"Postres",en:"Desserts",fr:"Desserts",de:"Süßspeisen",nl:"Zoetigheden"}, items:[
+   {n:{pt:"Bolo de Chocolate (vegan)",es:"Tarta de chocolate (vegana)",en:"Chocolate cake (vegan)",fr:"Gâteau au chocolat (végan)",de:"Schokoladenkuchen (vegan)",nl:"Chocoladecake (vegan)"},p:"3.00",a:["gluten"]},
+   {n:{pt:"Bolo de Canela e Caju (sem lactose)",es:"Bizcocho de canela y anacardo (sin lactosa)",en:"Cinnamon & cashew cake (lactose-free)",fr:"Gâteau cannelle & noix de cajou (sans lactose)",de:"Zimt-Cashew-Kuchen (laktosefrei)",nl:"Kaneel-cashewcake (lactosevrij)"},p:"3.00",a:["nuts","gluten"]},
+   {n:{pt:"Torta de Laranja",es:"Brazo de naranja",en:"Orange roll cake",fr:"Roulé à l'orange",de:"Orangen-Biskuitrolle",nl:"Sinaasappelcakerol"},p:"3.00",a:["egg"]},
+   {n:{pt:"Gelado de Açaí (130g)",es:"Helado de açaí (130g)",en:"Açaí ice cream (130g)",fr:"Glace açaï (130g)",de:"Açaí-Eis (130g)",nl:"Açaí-ijs (130g)"},p:"4.00"}
  ]},
 
- {id:"extras", t:{pt:"Extras",en:"Extras",fr:"Extras",de:"Extras",nl:"Extra's"}, note:{pt:"Para qualquer prato ou tosta",en:"For any dish or toastie",fr:"Pour tout plat ou croque",de:"Für jedes Gericht oder Toast",nl:"Bij elk gerecht of tosti"}, items:[
-   {n:{pt:"Ovo cozido",en:"Boiled egg",fr:"Œuf dur",de:"Gekochtes Ei",nl:"Gekookt ei"},p:"1.50",a:["egg"]},
-   {n:{pt:"Cebola caramelizada",en:"Caramelised onion",fr:"Oignon caramélisé",de:"Karamellisierte Zwiebel",nl:"Gekarameliseerde ui"},p:"1.50"}
+ {id:"extras", t:{pt:"Extras",es:"Extras",en:"Extras",fr:"Extras",de:"Extras",nl:"Extra's"}, note:{pt:"Para qualquer prato ou tosta",es:"Para cualquier plato o tostada",en:"For any dish or toastie",fr:"Pour tout plat ou croque",de:"Für jedes Gericht oder Toast",nl:"Bij elk gerecht of tosti"}, items:[
+   {n:{pt:"Ovo cozido",es:"Huevo cocido",en:"Boiled egg",fr:"Œuf dur",de:"Gekochtes Ei",nl:"Gekookt ei"},p:"1.50",a:["egg"]},
+   {n:{pt:"Cebola caramelizada",es:"Cebolla caramelizada",en:"Caramelised onion",fr:"Oignon caramélisé",de:"Karamellisierte Zwiebel",nl:"Gekarameliseerde ui"},p:"1.50"}
  ]}
 ];
 
-/* ---------- RENDER ---------- */
 let LANG = (function(){
   const nav=(navigator.language||"pt").slice(0,2).toLowerCase();
-  return ["pt","en","fr","de","nl"].includes(nav)?nav:"pt";
+  return ["pt","es","en","fr","de","nl"].includes(nav)?nav:"pt";
 })();
 
 function renderLangbar(){
