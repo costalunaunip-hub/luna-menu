@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#7fb0ac">
-<meta name="description" content="Luna Bar — beach bar at Praia da Vagueira, Aveiro, Portugal. Menu in 6 languages: coffee, teas, fresh juices, beers, wines, gin & tonics, cocktails, light meals, vegan options, snacks and desserts. Open daily 10:00–22:00.">
+<meta name="description" content="Luna Bar — beach bar at Praia da Vagueira, Aveiro. Menu in 6 languages: coffee, cocktails, beers, snacks & vegan bites. Open daily 10:00–22:00.">
 <link rel="canonical" href="https://costalunaunip-hub.github.io/luna-menu/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%8C%99%3C/text%3E%3C/svg%3E">
 <meta property="og:type" content="website">
@@ -104,7 +104,7 @@ h2.cat-title{
 .legal{margin-top:34px;padding:14px;border-top:1px solid var(--line);font-size:.72rem;color:var(--muted);text-align:center}
 .footer-brand{text-align:center;margin-top:18px;font-family:Georgia,serif;color:var(--accent);font-size:1.1rem}
 .footer-info{text-align:center;margin-top:10px;font-size:.85rem;color:var(--muted);line-height:1.7}
-.footer-info a{color:var(--accent2);font-weight:600;text-decoration:none;border-bottom:1px dotted var(--accent2)}
+.footer-info a{color:var(--accent2);font-weight:600;text-decoration:none;border-bottom:1px dotted var(--accent2);display:inline-block;padding:6px 10px}
 .iva{text-align:center;font-size:.75rem;color:var(--muted);margin-top:20px}
 .back-top{position:fixed;right:14px;bottom:16px;z-index:40;background:var(--accent2);color:#fff;
   border:none;border-radius:50%;width:44px;height:44px;font-size:1.1rem;box-shadow:var(--shadow);cursor:pointer;opacity:.9}
@@ -121,6 +121,7 @@ h2.cat-title{
 <div class="chips" id="chips"></div>
 
 <div class="wrap">
+  <noscript><div style="text-align:center;padding:28px 16px;font-size:1rem;line-height:1.6">Para ver o menu, ative o JavaScript no seu navegador.<br>To view the menu, please enable JavaScript in your browser.</div></noscript>
   <div id="menu"></div>
   <div class="iva" id="ivaNote"></div>
   <div class="legal" id="legalNote"></div>
@@ -273,7 +274,7 @@ const MENU=[
 
  {id:"brandy", t:{pt:"Aguardente & Brandy",es:"Aguardientes y Brandy",en:"Spirits & Brandy",fr:"Eaux-de-vie & Brandy",de:"Brände & Brandy",nl:"Sterke drank & Brandy"}, items:[
    {n:"Macieira",p:"3.00"},{n:"Croft",p:"2.50"},{n:"CRF",p:"4.00"},{n:"Martini",p:"2.50"},
-   {n:"Moscatel",p:"2.50"},{n:"Vinica Marthas",p:"4.00"},{n:"Cognac Pierre Ferrand",p:"8.00"}
+   {n:"Vinica Marthas",p:"4.00"},{n:"Cognac Pierre Ferrand",p:"8.00"}
  ]},
 
  {id:"whiskey", t:{pt:"Whiskey",es:"Whiskey",en:"Whiskey",fr:"Whiskey",de:"Whiskey",nl:"Whiskey"}, items:[
@@ -360,6 +361,8 @@ const MENU=[
 ];
 
 let LANG = (function(){
+  let saved=null; try{ saved=localStorage.getItem("lunaLang"); }catch(e){}
+  if(["pt","es","en","fr","de","nl"].includes(saved)) return saved;
   const nav=(navigator.language||"pt").slice(0,2).toLowerCase();
   return ["pt","es","en","fr","de","nl"].includes(nav)?nav:"pt";
 })();
@@ -391,7 +394,7 @@ function renderMenu(){
       if(it.a&&it.a.length){
         alg=`<div class="alg">`+it.a.map(k=>`<span>${tv(ALG[k],LANG)}</span>`).join("")+`</div>`;
       }
-      html+=`<div class="item"><div class="row"><div class="name">${tv(it.n,LANG)}</div><div class="price">${it.p}€</div></div>${desc}${alg}</div>`;
+      html+=`<div class="item"><div class="row"><div class="name">${tv(it.n,LANG)}</div><div class="price">${it.p.replace('.',',')} €</div></div>${desc}${alg}</div>`;
     });
     html+=`</section>`;
     return html;
@@ -402,7 +405,7 @@ function renderMenu(){
     `🕙 ${UI[LANG].hours}<br>📍 ${UI[LANG].place} · <a href="https://www.google.com/maps/search/?api=1&query=Luna+Bar+Praia+da+Vagueira" target="_blank" rel="noopener">${UI[LANG].map}</a>`;
   document.documentElement.lang=LANG;
 }
-function setLang(l){ LANG=l; renderLangbar(); renderChips(); renderMenu(); window.scrollTo({top:0,behavior:'smooth'}); }
+function setLang(l){ LANG=l; try{ localStorage.setItem("lunaLang",l); }catch(e){} renderLangbar(); renderChips(); renderMenu(); window.scrollTo({top:0,behavior:'smooth'}); }
 
 renderLangbar(); renderChips(); renderMenu();
 </script>
