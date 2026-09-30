@@ -146,15 +146,23 @@ details.cfg .pad{border-top:1px solid var(--hair);display:grid;gap:10px}
   <h1>Luna <small>Gestão</small></h1>
   <span class="pill mut" id="srcPill">a carregar…</span>
   <button class="iconbtn" id="themeBtn" aria-label="Alternar tema" title="Tema">☾</button>
-  <a class="iconbtn" href="index.html" target="_blank" rel="noopener" aria-label="Abrir o menu público" title="Menu público">🌙</a>
+  <a class="iconbtn" id="publicLink" href="novo.html" target="_blank" rel="noopener" aria-label="Abrir o menu público" title="Menu público">🌙</a>
 </div></header>
 
 <main class="wrap">
   <div id="resume" hidden></div>
 
+  <section class="sec" id="secLive">
+    <h2>Disponibilidade do dia</h2>
+    <div class="card pad" style="display:grid;gap:10px">
+      <p class="note" style="margin:0">Esgotados de hoje, itens a esconder por um dia e o <b>aviso do dia</b> fazem-se na folha <b>«Luna Menu - Disponibilidade»</b> (app Google Sheets): muda a célula <i>Estado</i> e o site reflecte em segundos, sem publicar nada. Este editor é para o que dura mais: preços, itens, categorias, horário.</p>
+      <div class="row"><a class="btn sm" href="https://docs.google.com/spreadsheets/d/1cwCwPJcP_IwmigxbZ2WBn7lReJPGhVPELCgvE5Nlsn4/edit" target="_blank" rel="noopener">Abrir a folha de disponibilidade</a></div>
+    </div>
+  </section>
+
   <section class="sec" id="secInfo">
-    <h2>Aviso no topo do menu</h2>
-    <p class="hint">Aparece por cima do menu enquanto tiver texto. Apague o texto para o retirar.</p>
+    <h2>Aviso fixo no topo do menu</h2>
+    <p class="hint">Para avisos de longa duração. O aviso do dia da folha tem prioridade enquanto existir. Apague o texto para o retirar.</p>
     <div class="card pad">
       <label class="f" for="ann">Mensagem</label>
       <textarea class="inp" id="ann" placeholder="ex.: Hoje encerramos às 20:00 · Concerto sábado às 18h"></textarea>
@@ -177,7 +185,7 @@ details.cfg .pad{border-top:1px solid var(--hair);display:grid;gap:10px}
 
   <section class="sec">
     <h2>Categorias e itens</h2>
-    <p class="hint">Toque numa categoria para abrir. <b>Esgotado</b> mantém o item visível, riscado. <b>Oculto</b> retira-o do menu sem o apagar (útil para itens sazonais).</p>
+    <p class="hint">Toque numa categoria para abrir. <b>Esgotado</b> mantém o item visível, riscado; <b>Oculto</b> retira-o do menu sem o apagar (sazonal). Para um só dia use a folha de disponibilidade. O <b>nome em português</b> é a chave que liga o item à folha: se o mudar, mude também a linha na folha.</p>
     <div id="cats"></div>
     <div class="row" style="margin-top:12px"><button class="btn" id="addCat">+ Nova categoria</button></div>
   </section>
@@ -229,6 +237,7 @@ details.cfg .pad{border-top:1px solid var(--hair);display:grid;gap:10px}
    ============================================================ */
 var L="pt";
 var DEF={owner:"costalunaunip-hub",repo:"luna-menu",branch:"main",path:"menu.json"};
+var PUBLIC_PAGE="novo.html"; // página pública que lê menu.json — mudar para "index.html" quando a v2 substituir o site actual
 var DAYS=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
 var DAYS_PT=[["domingo","m"],["segunda","f"],["terça","f"],["quarta","f"],["quinta","f"],["sexta","f"],["sábado","m"]];
 var ORIG=null, DATA=null, SHA=null, SOURCE="", openCats={}, openItems={}, previewWin=null;
@@ -415,11 +424,11 @@ $("addCat").addEventListener("click",function(){ var id="cat-"+Date.now().toStri
 /* ---------- preview ---------- */
 $("previewBtn").addEventListener("click",function(){
   var ok=store("lunaDraft",JSON.stringify(DATA));
-  var w=window.open("index.html#preview","lunaPreview");
+  var w=window.open(PUBLIC_PAGE+"#preview","lunaPreview");
   if(w){ previewWin=w; if(ok===null) toast("Armazenamento bloqueado: a enviar rascunho directamente"); }
   else { // popup blocked (or sandboxed): fall back to a plain link the user taps
     if(ok===null) return toast("Pré-visualização indisponível neste ambiente");
-    var a=document.createElement("a"); a.href="index.html#preview"; a.target="_blank"; a.rel="noopener"; a.click(); toast("Rascunho guardado · abra o menu para o ver");
+    var a=document.createElement("a"); a.href=PUBLIC_PAGE+"#preview"; a.target="_blank"; a.rel="noopener"; a.click(); toast("Rascunho guardado · abra o menu para o ver");
   }
 });
 window.addEventListener("message",function(ev){ if(ev.origin===location.origin&&ev.data&&ev.data.type==="luna-preview-ready"&&ev.source){ try{ ev.source.postMessage({type:"luna-draft",data:DATA},location.origin); }catch(e){} } });
@@ -464,7 +473,7 @@ function verifyLive(c,stamp,n){
 }
 window.addEventListener("beforeunload",function(ev){ if(diff(ORIG,DATA).length){ ev.preventDefault(); ev.returnValue=""; } });
 
-fillCfg(); load();
+$("publicLink").href=PUBLIC_PAGE; fillCfg(); load();
 </script>
 </body>
 </html>

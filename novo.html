@@ -83,8 +83,17 @@ button{font:inherit;color:inherit}
 .hero h1{font-family:var(--display);font-weight:600;font-size:clamp(2.4rem,11vw,3.4rem);line-height:1;margin:0;color:var(--ink);letter-spacing:-.01em;text-wrap:balance}
 .hero .sub{margin-top:8px;font-size:.74rem;letter-spacing:.22em;text-transform:uppercase;color:var(--teal-ink);font-weight:600}
 
+
+/* ---------- LANGUAGE (not sticky) ---------- */
+.langbar{display:grid;grid-template-columns:repeat(3,max-content);justify-content:center;gap:6px 8px;padding:12px 12px 0;max-width:760px;margin:0 auto}
+@media(min-width:480px){.langbar{grid-template-columns:repeat(6,max-content)}}
+.langbar button{font-size:.8rem;font-weight:600;color:var(--ink);border:1px solid var(--line);background:var(--card);border-radius:999px;min-height:36px;padding:6px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .15s,color .15s,border-color .15s}
+.langbar button .flag{font-size:1rem;line-height:1}
+.langbar button.active{background:var(--teal);color:var(--on-teal);border-color:var(--teal)}
+.nota{font-size:.8rem;color:var(--terra);margin-top:3px;font-weight:600}
+
 /* ---------- ANNOUNCEMENT ---------- */
-.announce{max-width:760px;margin:10px auto 0;padding:0 14px}
+.announce{max-width:760px;margin:12px auto 0;padding:0 14px}
 .announce div{display:flex;gap:10px;align-items:flex-start;background:var(--terra-soft);border:1px solid var(--terra);color:var(--ink);border-radius:14px;padding:10px 12px;font-size:.92rem;line-height:1.4}
 .announce .ic{flex:0 0 auto}
 .announce p{margin:0;flex:1 1 auto;min-width:0}
@@ -185,12 +194,14 @@ h2.cat-title{font-family:var(--display);font-weight:600;font-size:1.5rem;line-he
   <div class="sub">Praia da Vagueira · Aveiro</div>
 </header>
 
+<nav class="langbar" id="langbar" aria-label="Idioma / Language"></nav>
+
 <div class="announce" id="announce" hidden></div>
 
 <div class="tools">
   <div class="search">
     <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-    <label class="sr" for="q">Procurar no menu</label>
+    <label class="sr" for="q" id="qLabel">Procurar no menu</label>
     <input id="q" type="search" placeholder="Procurar no menu…" autocomplete="off" autocorrect="off" spellcheck="false">
     <button class="clear" id="qClear" aria-label="Limpar pesquisa" hidden>✕</button>
   </div>
@@ -222,38 +233,90 @@ h2.cat-title{font-family:var(--display);font-weight:600;font-size:1.5rem;line-he
 <script type="application/ld+json" id="ld"></script>
 
 <script>
+var ICON={share:"<svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3v13\"/><path d=\"m7 8 5-5 5 5\"/><path d=\"M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6\"/></svg>",copy:"<svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"9\" y=\"9\" width=\"11\" height=\"11\" rx=\"2\"/><path d=\"M5 15V6a2 2 0 0 1 2-2h9\"/></svg>"};
 /* ============================================================
-   Luna Bar menu — client. Data: menu.json (edited via gestao.html).
-   Language: PT for this test build; all strings live in T and data
-   is read through tv(), so other languages plug in without changes.
+   Luna Bar menu — client.
+   Content:      menu.json (edited via gestao.html; versioned in Git).
+   Availability: Google Sheet "Luna Menu - Disponibilidade" (Estado / Aviso tabs),
+                 read on load and every 5 min; union with menu.json flags.
+   Languages:    PT ES EN FR DE NL — UI strings in T, data read through tv().
    ============================================================ */
-var L="pt";
+var LANGS=[{code:"pt",flag:"🇵🇹",label:"Português"},{code:"es",flag:"🇪🇸",label:"Español"},{code:"en",flag:"🇬🇧",label:"English"},{code:"fr",flag:"🇫🇷",label:"Français"},{code:"de",flag:"🇩🇪",label:"Deutsch"},{code:"nl",flag:"🇳🇱",label:"Nederlands"}];
+var CODES=LANGS.map(function(l){return l.code;});
 var T={
-  results:function(n,q){return n===0?"Nenhum resultado para <b>"+esc(q)+"</b>":"<b>"+n+"</b> "+(n===1?"resultado":"resultados")+" para <b>"+esc(q)+"</b>";},
-  hiding:function(list,n){return "A ocultar itens com <b>"+list.join(", ")+"</b> · "+n+" "+(n===1?"item visível":"itens visíveis");},
-  clear:"limpar", soldOut:"Esgotado", share:"Partilhar", copy:"Copiar ligação", copied:"Ligação copiada",
-  shareFail:"Não foi possível partilhar", without:"Sem", map:"Ver no mapa", updated:"Menu actualizado", alg:"Alergénios",
-  open:"Aberto", allDays:"Aberto todos os dias", closed:"Encerrado", noItems:"Nenhum item corresponde à pesquisa.",
-  loadErr:"Não foi possível carregar o menu.", retry:"Tentar novamente", shareTitle:"Luna Bar · Menu",
-  shareText:"Menu do Luna Bar · Praia da Vagueira"
+ pt:{search:"Procurar no menu…",clearSearch:"Limpar pesquisa",results:function(n,q){return n===0?"Nenhum resultado para <b>"+q+"</b>":"<b>"+n+"</b> "+(n===1?"resultado":"resultados")+" para <b>"+q+"</b>";},
+   hiding:function(l,n){return "A ocultar itens com <b>"+l.join(", ")+"</b> · "+n+" "+(n===1?"item visível":"itens visíveis");},
+   clear:"limpar",soldOut:"Esgotado",share:"Partilhar",copy:"Copiar ligação",copied:"Ligação copiada",shareFail:"Não foi possível partilhar",without:"Sem",map:"Ver no mapa",updated:"Menu actualizado",alg:"Alergénios",
+   open:"Aberto",allDays:"Aberto todos os dias",closed:"Encerrado",noItems:"Nenhum item corresponde à pesquisa.",loadErr:"Não foi possível carregar o menu.",retry:"Tentar novamente",
+   shareTitle:"Luna Bar · Menu",shareText:"Menu do Luna Bar · Praia da Vagueira",theme:"Alternar tema claro/escuro",shareMenu:"Partilhar o menu",closeNotice:"Fechar aviso",top:"Voltar ao topo",cats:"Categorias",preview:"PRÉ-VISUALIZAÇÃO DO RASCUNHO · não publicado",filters:"Ocultar itens com alergénios"},
+ es:{search:"Buscar en la carta…",clearSearch:"Borrar búsqueda",results:function(n,q){return n===0?"Sin resultados para <b>"+q+"</b>":"<b>"+n+"</b> "+(n===1?"resultado":"resultados")+" para <b>"+q+"</b>";},
+   hiding:function(l,n){return "Ocultando artículos con <b>"+l.join(", ")+"</b> · "+n+" visibles";},
+   clear:"quitar",soldOut:"Agotado",share:"Compartir",copy:"Copiar enlace",copied:"Enlace copiado",shareFail:"No se pudo compartir",without:"Sin",map:"Ver en el mapa",updated:"Carta actualizada",alg:"Alérgenos",
+   open:"Abierto",allDays:"Abierto todos los días",closed:"Cerrado",noItems:"Ningún artículo coincide con la búsqueda.",loadErr:"No se pudo cargar la carta.",retry:"Reintentar",
+   shareTitle:"Luna Bar · Carta",shareText:"Carta del Luna Bar · Praia da Vagueira",theme:"Cambiar tema claro/oscuro",shareMenu:"Compartir la carta",closeNotice:"Cerrar aviso",top:"Volver arriba",cats:"Categorías",preview:"VISTA PREVIA DEL BORRADOR · no publicado",filters:"Ocultar artículos con alérgenos"},
+ en:{search:"Search the menu…",clearSearch:"Clear search",results:function(n,q){return n===0?"No results for <b>"+q+"</b>":"<b>"+n+"</b> "+(n===1?"result":"results")+" for <b>"+q+"</b>";},
+   hiding:function(l,n){return "Hiding items with <b>"+l.join(", ")+"</b> · "+n+" shown";},
+   clear:"clear",soldOut:"Sold out",share:"Share",copy:"Copy link",copied:"Link copied",shareFail:"Couldn't share",without:"Without",map:"View on map",updated:"Menu updated",alg:"Allergens",
+   open:"Open",allDays:"Open daily",closed:"Closed",noItems:"No items match your search.",loadErr:"The menu could not be loaded.",retry:"Try again",
+   shareTitle:"Luna Bar · Menu",shareText:"Luna Bar menu · Praia da Vagueira",theme:"Toggle light/dark theme",shareMenu:"Share the menu",closeNotice:"Dismiss notice",top:"Back to top",cats:"Categories",preview:"DRAFT PREVIEW · not published",filters:"Hide items with allergens"},
+ fr:{search:"Rechercher dans la carte…",clearSearch:"Effacer la recherche",results:function(n,q){return n===0?"Aucun résultat pour <b>"+q+"</b>":"<b>"+n+"</b> "+(n===1?"résultat":"résultats")+" pour <b>"+q+"</b>";},
+   hiding:function(l,n){return "Articles masqués avec <b>"+l.join(", ")+"</b> · "+n+" affichés";},
+   clear:"effacer",soldOut:"Épuisé",share:"Partager",copy:"Copier le lien",copied:"Lien copié",shareFail:"Partage impossible",without:"Sans",map:"Voir sur la carte",updated:"Carte mise à jour",alg:"Allergènes",
+   open:"Ouvert",allDays:"Ouvert tous les jours",closed:"Fermé",noItems:"Aucun article ne correspond à la recherche.",loadErr:"Impossible de charger la carte.",retry:"Réessayer",
+   shareTitle:"Luna Bar · Carte",shareText:"Carte du Luna Bar · Praia da Vagueira",theme:"Basculer thème clair/sombre",shareMenu:"Partager la carte",closeNotice:"Fermer l'avis",top:"Retour en haut",cats:"Catégories",preview:"APERÇU DU BROUILLON · non publié",filters:"Masquer les articles avec allergènes"},
+ de:{search:"Speisekarte durchsuchen…",clearSearch:"Suche löschen",results:function(n,q){return n===0?"Keine Treffer für <b>"+q+"</b>":"<b>"+n+"</b> "+(n===1?"Treffer":"Treffer")+" für <b>"+q+"</b>";},
+   hiding:function(l,n){return "Ausgeblendet: Artikel mit <b>"+l.join(", ")+"</b> · "+n+" sichtbar";},
+   clear:"aufheben",soldOut:"Ausverkauft",share:"Teilen",copy:"Link kopieren",copied:"Link kopiert",shareFail:"Teilen nicht möglich",without:"Ohne",map:"Auf der Karte ansehen",updated:"Karte aktualisiert",alg:"Allergene",
+   open:"Geöffnet",allDays:"Täglich geöffnet",closed:"geschlossen",noItems:"Kein Artikel passt zur Suche.",loadErr:"Die Karte konnte nicht geladen werden.",retry:"Erneut versuchen",
+   shareTitle:"Luna Bar · Karte",shareText:"Karte der Luna Bar · Praia da Vagueira",theme:"Helles/dunkles Design umschalten",shareMenu:"Karte teilen",closeNotice:"Hinweis schließen",top:"Nach oben",cats:"Kategorien",preview:"ENTWURFSVORSCHAU · nicht veröffentlicht",filters:"Artikel mit Allergenen ausblenden"},
+ nl:{search:"Zoeken in de kaart…",clearSearch:"Zoekopdracht wissen",results:function(n,q){return n===0?"Geen resultaten voor <b>"+q+"</b>":"<b>"+n+"</b> "+(n===1?"resultaat":"resultaten")+" voor <b>"+q+"</b>";},
+   hiding:function(l,n){return "Verborgen: items met <b>"+l.join(", ")+"</b> · "+n+" zichtbaar";},
+   clear:"wissen",soldOut:"Uitverkocht",share:"Delen",copy:"Link kopiëren",copied:"Link gekopieerd",shareFail:"Delen niet mogelijk",without:"Zonder",map:"Bekijk op de kaart",updated:"Kaart bijgewerkt",alg:"Allergenen",
+   open:"Open",allDays:"Dagelijks geopend",closed:"gesloten",noItems:"Geen items gevonden voor deze zoekopdracht.",loadErr:"De kaart kon niet worden geladen.",retry:"Opnieuw proberen",
+   shareTitle:"Luna Bar · Kaart",shareText:"Kaart van Luna Bar · Praia da Vagueira",theme:"Licht/donker thema wisselen",shareMenu:"Kaart delen",closeNotice:"Melding sluiten",top:"Terug naar boven",cats:"Categorieën",preview:"CONCEPTVOORBEELD · niet gepubliceerd",filters:"Items met allergenen verbergen"}
 };
-var DAYS_PT=[["domingo","m"],["segunda","f"],["terça","f"],["quarta","f"],["quinta","f"],["sexta","f"],["sábado","m"]];
+/* day names, Sunday first; PT entries carry grammatical gender for the article */
+var DAYS={
+ pt:[["domingo","m"],["segunda","f"],["terça","f"],["quarta","f"],["quinta","f"],["sexta","f"],["sábado","m"]],
+ es:["domingo","lunes","martes","miércoles","jueves","viernes","sábado"],
+ en:["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+ fr:["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"],
+ de:["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"],
+ nl:["zondag","maandag","dinsdag","woensdag","donderdag","vrijdag","zaterdag"]
+};
+var AND={pt:" e ",es:" y ",en:" & ",fr:" et ",de:" und ",nl:" en "};
 var DAY_LD=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+var LIVE_SHEET_ID="1cwCwPJcP_IwmigxbZ2WBn7lReJPGhVPELCgvE5Nlsn4"; // "Luna Menu - Disponibilidade" (read-only by link)
+var LIVE_REFRESH_MS=5*60*1000;
 
-var DATA=null, excluded={}, query="", activeCat=null, lockUntil=0, ticking=false, openItem=null;
+var L="pt", DATA=null, LIVE={items:{},aviso:null,sig:JSON.stringify({items:{},aviso:null})}, pendingHash=null, excluded={}, query="", activeCat=null, lockUntil=0, ticking=false, openItem=null;
 
 function tv(v,lang){ if(v==null) return ""; if(typeof v==="string") return v; return v[lang]||v.pt||v.en||""; }
 function esc(s){ return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
-function norm(s){ return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase(); }
+function norm(s){ return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/\s+/g," ").trim(); }
 function price(p){ return Number(p).toFixed(2).replace(".",",")+" €"; }
 function $(id){ return document.getElementById(id); }
 function store(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v); }catch(e){ return null; } }
 
-/* ---------- theme ---------- */
-(function initTheme(){
-  var t=store("lunaTheme"); if(t==="dark"||t==="light") document.documentElement.setAttribute("data-theme",t);
-  syncThemeMeta();
+/* ---------- language ---------- */
+(function initLang(){
+  var saved=store("lunaLang"); if(CODES.indexOf(saved)>=0){ L=saved; return; }
+  var nav=(navigator.language||"pt").slice(0,2).toLowerCase(); L=CODES.indexOf(nav)>=0?nav:"pt";
 })();
+function renderLangbar(){
+  $("langbar").innerHTML=LANGS.map(function(l){ return '<button type="button" data-l="'+l.code+'" class="'+(l.code===L?"active":"")+'" title="'+l.label+'" aria-label="'+l.label+'" aria-pressed="'+(l.code===L)+'"><span class="flag">'+l.flag+'</span>'+l.code.toUpperCase()+'</button>'; }).join("");
+  $("langbar").querySelectorAll("button").forEach(function(b){ b.addEventListener("click",function(){ setLang(b.dataset.l); }); });
+}
+function setLang(l){ if(CODES.indexOf(l)<0) return; L=l; store("lunaLang",l); applyStatic(); renderLangbar(); if(DATA) renderAll(); }
+function applyStatic(){
+  var t=T[L]; document.documentElement.lang=L;
+  $("q").placeholder=t.search; $("qLabel").textContent=t.search; $("qClear").setAttribute("aria-label",t.clearSearch);
+  $("themeBtn").setAttribute("aria-label",t.theme); $("themeBtn").title=t.theme; $("shareBtn").setAttribute("aria-label",t.shareMenu); $("shareBtn").title=t.shareMenu;
+  $("filters").setAttribute("aria-label",t.filters); $("chips").setAttribute("aria-label",t.cats); $("backTop").setAttribute("aria-label",t.top); $("previewBar").textContent=t.preview;
+}
+
+/* ---------- theme ---------- */
+(function initTheme(){ var t=store("lunaTheme"); if(t==="dark"||t==="light") document.documentElement.setAttribute("data-theme",t); syncThemeMeta(); })();
 function isDark(){ var t=document.documentElement.getAttribute("data-theme"); if(t) return t==="dark"; return window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches; }
 function syncThemeMeta(){ $("metaTheme").setAttribute("content",isDark()?"#16201f":"#f3ebdb"); var b=$("themeBtn"); if(b) b.textContent=isDark()?"☀":"☾"; }
 $("themeBtn").addEventListener("click",function(){ var next=isDark()?"light":"dark"; document.documentElement.setAttribute("data-theme",next); store("lunaTheme",next); syncThemeMeta(); });
@@ -270,12 +333,12 @@ function copyText(txt){
 }
 function legacyCopy(txt){ try{ var ta=document.createElement("textarea"); ta.value=txt; ta.setAttribute("readonly",""); ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select(); var ok=document.execCommand("copy"); document.body.removeChild(ta); return ok; }catch(e){ return false; } }
 function share(title,text,url){
-  if(navigator.share){ return navigator.share({title:title,text:text,url:url}).then(function(){return true;},function(err){ if(err&&err.name==="AbortError") return true; return copyText(url).then(function(ok){ toast(ok?T.copied:T.shareFail); return ok; }); }); }
-  return copyText(url).then(function(ok){ toast(ok?T.copied:T.shareFail); return ok; });
+  if(navigator.share){ return navigator.share({title:title,text:text,url:url}).then(function(){return true;},function(err){ if(err&&err.name==="AbortError") return true; return copyText(url).then(function(ok){ toast(ok?T[L].copied:T[L].shareFail); return ok; }); }); }
+  return copyText(url).then(function(ok){ toast(ok?T[L].copied:T[L].shareFail); return ok; });
 }
-$("shareBtn").addEventListener("click",function(){ share(T.shareTitle,T.shareText,baseUrl()); });
+$("shareBtn").addEventListener("click",function(){ share(T[L].shareTitle,T[L].shareText,baseUrl()); });
 
-/* ---------- data ---------- */
+/* ---------- data: menu.json ---------- */
 function loadMenu(){
   if(location.hash==="#preview"){
     var d=store("lunaDraft");
@@ -284,8 +347,8 @@ function loadMenu(){
   return fetch("menu.json?v="+Date.now(),{cache:"no-store"}).then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); });
 }
 function boot(){
-  loadMenu().then(function(data){ DATA=data; renderAll(); handleHash(true); }).catch(function(err){
-    $("menu").innerHTML='<div class="err">'+esc(T.loadErr)+'<br><small>'+esc(err.message||err)+'</small><br><button id="retry">'+esc(T.retry)+'</button></div>';
+  loadMenu().then(function(data){ DATA=data; renderAll(); handleHash(true); loadLive(); }).catch(function(err){
+    $("menu").innerHTML='<div class="err">'+esc(T[L].loadErr)+'<br><small>'+esc(err.message||err)+'</small><br><button id="retry">'+esc(T[L].retry)+'</button></div>';
     $("retry").addEventListener("click",boot);
   });
 }
@@ -295,6 +358,44 @@ window.addEventListener("message",function(ev){ // draft handed over by gestao.h
 });
 if(location.hash==="#preview"&&window.opener){ try{ window.opener.postMessage({type:"luna-preview-ready"},location.origin); }catch(e){} }
 
+/* ---------- data: live availability (Google Sheet) ---------- */
+function liveUrl(sheet){ return "https://docs.google.com/spreadsheets/d/"+LIVE_SHEET_ID+"/gviz/tq?tqx=out:csv&sheet="+encodeURIComponent(sheet)+"&_="+Date.now(); }
+function parseCSV(text){ // RFC 4180: quoted fields may contain commas, quotes ("") and newlines
+  var rows=[], row=[], field="", q=false;
+  for(var i=0;i<text.length;i++){ var c=text[i];
+    if(q){ if(c==='"'){ if(text[i+1]==='"'){ field+='"'; i++; } else q=false; } else field+=c; }
+    else if(c==='"') q=true; else if(c===','){ row.push(field); field=""; }
+    else if(c==='\n'){ row.push(field); rows.push(row); row=[]; field=""; } else if(c!=='\r') field+=c; }
+  if(field!==""||row.length){ row.push(field); rows.push(row); }
+  return rows;
+}
+function fetchCSV(sheet){
+  var ctl=("AbortController" in window)?new AbortController():null, t=setTimeout(function(){ if(ctl) ctl.abort(); },6000);
+  return fetch(liveUrl(sheet),{cache:"no-store",signal:ctl?ctl.signal:undefined}).then(function(r){ if(!r.ok) throw new Error(r.status); return r.text(); }).then(function(txt){ clearTimeout(t); return parseCSV(txt); },function(e){ clearTimeout(t); throw e; });
+}
+function colIndex(hdr,name){ for(var i=0;i<hdr.length;i++){ if(norm(hdr[i]).indexOf(name)===0) return i; } return -1; }
+function loadLive(){
+  if(!("fetch" in window)||!LIVE_SHEET_ID) return;
+  var pEstado=fetchCSV("Estado").then(function(rows){
+    var hdr=rows[0]||[], ci=colIndex(hdr,"item"), cs=colIndex(hdr,"estado"), cn=colIndex(hdr,"nota"), cid=colIndex(hdr,"id"), items={};
+    if(ci<0||cs<0) return {};
+    rows.slice(1).forEach(function(r){ var k=norm(r[ci]); if(!k) return; var st=norm(r[cs]), nota=(cn>=0?r[cn]||"":"").trim();
+      if(st==="esgotado"||st==="oculto"||nota){ var o={st:st,nota:nota}; items["n:"+k]=o; if(cid>=0&&r[cid]) items["i:"+r[cid].trim()]=o; } });
+    return items;
+  }).catch(function(){ return null; });
+  var pAviso=fetchCSV("Aviso").then(function(rows){ var r=null; rows.slice(1).some(function(x){ if(((x[0]||"")+(x[1]||"")).trim()){ r=x; return true; } return false; }); r=r||[]; var pt=(r[0]||"").trim(), en=(r[1]||"").trim(); return (pt||en)?{pt:pt,en:en}:""; }).catch(function(){ return null; });
+  Promise.all([pEstado,pAviso]).then(function(res){
+    var next={items:res[0]===null?LIVE.items:res[0],aviso:res[1]===null?LIVE.aviso:res[1]}, sig=JSON.stringify(next);
+    if(sig===LIVE.sig) return; LIVE={items:next.items,aviso:next.aviso,sig:sig}; if(DATA) renderMenu();
+  });
+}
+var liveTimer=null;
+function scheduleLive(){ clearInterval(liveTimer); liveTimer=setInterval(function(){ if(!document.hidden) loadLive(); },LIVE_REFRESH_MS); }
+document.addEventListener("visibilitychange",function(){ if(!document.hidden&&DATA) loadLive(); });
+scheduleLive();
+function liveOf(it){ return LIVE.items["i:"+it.id]||LIVE.items["n:"+norm(tv(it.name,"pt"))]||null; }
+function effective(it){ var lv=liveOf(it); return {soldOut:!!it.soldOut||!!(lv&&lv.st==="esgotado"),hidden:!!it.hidden||!!(lv&&lv.st==="oculto"),nota:lv?lv.nota:""}; }
+
 /* ---------- rendering ---------- */
 function usedAllergens(){
   var set={}; DATA.categories.forEach(function(c){ c.items.forEach(function(it){ (it.allergens||[]).forEach(function(a){ set[a]=1; }); }); });
@@ -302,9 +403,7 @@ function usedAllergens(){
 }
 function renderFilters(){
   var f=$("filters");
-  f.innerHTML='<span class="lbl">'+esc(T.without)+'</span>'+usedAllergens().map(function(k){
-    return '<button type="button" data-a="'+k+'" aria-pressed="'+(excluded[k]?"true":"false")+'">'+esc(tv(DATA.allergens[k],L))+'</button>';
-  }).join("");
+  f.innerHTML='<span class="lbl">'+esc(T[L].without)+'</span>'+usedAllergens().map(function(k){ return '<button type="button" data-a="'+k+'" aria-pressed="'+(excluded[k]?"true":"false")+'">'+esc(tv(DATA.allergens[k],L))+'</button>'; }).join("");
   f.querySelectorAll("button").forEach(function(b){ b.addEventListener("click",function(){ var k=b.dataset.a; if(excluded[k]) delete excluded[k]; else excluded[k]=1; b.setAttribute("aria-pressed",excluded[k]?"true":"false"); applyFilters(); }); });
 }
 function renderChips(){
@@ -314,79 +413,87 @@ function renderChips(){
   activeCat=null; syncOffsets();
 }
 function itemHtml(it){
+  var ef=effective(it), t=T[L];
   var pills=(it.allergens||[]).map(function(k){ return "<span>"+esc(tv(DATA.allergens[k],L))+"</span>"; }).join("");
   var desc=it.desc?'<div class="desc">'+esc(tv(it.desc,L))+'</div>':"";
-  var algInline=(pills&&!it.desc)?' <span class="alg alg-inline" aria-label="'+T.alg+'">'+pills+'</span>':"";
-  var algBlock=(pills&&it.desc)?'<div class="alg" aria-label="'+T.alg+'">'+pills+'</div>':"";
-  var out=it.soldOut?'<span class="badge-out">'+T.soldOut+'</span>':"";
+  var algInline=(pills&&!it.desc)?' <span class="alg alg-inline" aria-label="'+t.alg+'">'+pills+'</span>':"";
+  var algBlock=(pills&&it.desc)?'<div class="alg" aria-label="'+t.alg+'">'+pills+'</div>':"";
+  var out=ef.soldOut?'<span class="badge-out">'+t.soldOut+'</span>':"";
+  var nota=ef.nota?'<div class="nota">'+esc(ef.nota)+'</div>':"";
   var name=tv(it.name,L);
-  return '<article class="item'+(it.soldOut?" out":"")+'" id="it-'+it.id+'" data-id="'+it.id+'" data-s="'+esc(norm(name+" "+tv(it.desc,L)))+'" data-a="'+(it.allergens||[]).join(" ")+'" tabindex="0" aria-label="'+esc(name)+(it.soldOut?", "+T.soldOut:"")+'">'+
-    '<div class="row"><div class="name">'+esc(name)+algInline+'</div>'+out+'<div class="price">'+price(it.price)+'</div></div>'+desc+algBlock+
-    '<div class="actions" hidden><button type="button" data-act="share"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v13"/><path d="m7 8 5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg> '+T.share+'</button><button type="button" data-act="copy"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg> '+T.copy+'</button></div>'+
+  return '<article class="item'+(ef.soldOut?" out":"")+'" id="it-'+it.id+'" data-id="'+it.id+'" data-s="'+esc(norm(name+" "+tv(it.desc,L)))+'" data-a="'+(it.allergens||[]).join(" ")+'" tabindex="0" aria-label="'+esc(name)+(ef.soldOut?", "+t.soldOut:"")+'">'+
+    '<div class="row"><div class="name">'+esc(name)+algInline+'</div>'+out+'<div class="price">'+price(it.price)+'</div></div>'+desc+nota+algBlock+
+    '<div class="actions" hidden><button type="button" data-act="share">'+ICON.share+' '+t.share+'</button><button type="button" data-act="copy">'+ICON.copy+' '+t.copy+'</button></div>'+
   '</article>';
 }
 function renderMenu(){
-  var m=$("menu");
+  var m=$("menu"), t=T[L], wasOpen=openItem?openItem.dataset.id:null;
   m.innerHTML=DATA.categories.map(function(cat){
-    var visible=cat.items.filter(function(it){ return it.sub||!it.hidden; });
+    var visible=cat.items.filter(function(it){ return it.sub||!effective(it).hidden; });
     if(!visible.some(function(it){return !it.sub;})) return "";
     var html='<section class="cat" id="'+cat.id+'" data-s="'+esc(norm(tv(cat.title,L)))+'"><h2 class="cat-title">'+esc(tv(cat.title,L))+'</h2>';
     if(cat.note) html+='<div class="cat-note">'+esc(tv(cat.note,L))+'</div>';
     html+='<div class="card">'+visible.map(function(it){ return it.sub?'<div class="sub-h">'+esc(tv(it.sub,L))+'</div>':itemHtml(it); }).join("")+'</div></section>';
     return html;
-  }).join("")+'<div class="empty" id="empty" hidden>'+esc(T.noItems)+'</div>';
+  }).join("")+'<div class="empty" id="empty" hidden>'+esc(t.noItems)+'</div>';
+  openItem=null; if(wasOpen){ var el=document.getElementById("it-"+wasOpen); if(el) toggleItem(el,true); }
+  if(pendingHash&&Date.now()-pendingHash.at<4000) focusItem(pendingHash.id,false); // re-apply a fresh deep link after a live re-render
   $("ivaNote").textContent=tv(DATA.info.iva,L);
   $("legalNote").textContent=tv(DATA.info.legal,L);
-  renderFooter();
-  renderAnnouncement();
-  applyFilters();
-  updateActive(true);
+  renderFooter(); renderAnnouncement(); applyFilters(); updateActive(true);
+}
+function dayList(days,lang){
+  var names=days.map(function(d){ var x=DAYS[lang][d]; return lang==="pt"?((x[1]==="f"?"à ":"ao ")+x[0]):x; });
+  return names.reduce(function(acc,cur,i,arr){ return acc+(i===0?"":(i===arr.length-1?AND[lang]:", "))+cur; },"");
 }
 function hoursText(h){
-  var closed=(h.closedDays||[]).slice().sort();
-  var range=h.open+"–"+h.close;
-  var s=closed.length?T.open+" "+range+" · "+T.closed+" "+closed.map(function(d){ var x=DAYS_PT[d]; return (x[1]==="f"?"à ":"ao ")+x[0]; }).reduce(function(acc,cur,i,arr){ return acc+(i===0?"":(i===arr.length-1?" e ":", "))+cur; },""):T.allDays+" · "+range;
+  var t=T[L], closed=(h.closedDays||[]).slice().sort(), fmt=function(x){ return L==="fr"?String(x).replace(":","h"):x; }, range=fmt(h.open)+"–"+fmt(h.close), s;
+  if(!closed.length) s=t.allDays+" · "+range;
+  else if(L==="de"||L==="nl") s=t.open+" "+range+" · "+dayList(closed,L).replace(/^./,function(c){return c.toUpperCase();})+" "+t.closed;
+  else s=t.open+" "+range+" · "+t.closed+" "+dayList(closed,L);
   var note=tv(h.note,L); if(note) s+=" ("+note+")";
   return s;
 }
 function renderFooter(){
-  var i=DATA.info;
-  $("footerInfo").innerHTML="🕙 "+esc(hoursText(i.hours))+"<br>📍 "+esc(i.place)+'<br><a class="map" href="'+esc(i.mapUrl)+'" target="_blank" rel="noopener">🗺️ '+T.map+'</a>';
-  var d=new Date(DATA.updatedAt); var when=isNaN(d)?"":new Intl.DateTimeFormat("pt-PT",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}).format(d);
-  $("updated").textContent=when?T.updated+": "+when:"";
+  var i=DATA.info, t=T[L];
+  $("footerInfo").innerHTML="🕙 "+esc(hoursText(i.hours))+"<br>📍 "+esc(i.place)+'<br><a class="map" href="'+esc(i.mapUrl)+'" target="_blank" rel="noopener">🗺️ '+t.map+'</a>';
+  var d=new Date(DATA.updatedAt), loc={pt:"pt-PT",es:"es-ES",en:"en-GB",fr:"fr-FR",de:"de-DE",nl:"nl-NL"}[L];
+  var when=isNaN(d)?"":new Intl.DateTimeFormat(loc,{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}).format(d);
+  $("updated").textContent=when?t.updated+": "+when:"";
   var openDays=[0,1,2,3,4,5,6].filter(function(d){ return (i.hours.closedDays||[]).indexOf(d)<0; }).map(function(d){ return DAY_LD[d]; });
   $("ld").textContent=JSON.stringify({"@context":"https://schema.org","@type":"BarOrPub","name":i.name,"url":"https://costalunaunip-hub.github.io/luna-menu/","menu":"https://costalunaunip-hub.github.io/luna-menu/","image":"https://costalunaunip-hub.github.io/luna-menu/luna-og.jpg","priceRange":"€","address":{"@type":"PostalAddress","addressLocality":"Praia da Vagueira, Vagos","addressRegion":"Aveiro","addressCountry":"PT"},"openingHoursSpecification":{"@type":"OpeningHoursSpecification","dayOfWeek":openDays,"opens":i.hours.open,"closes":i.hours.close}});
 }
+function announcementText(){
+  if(LIVE.aviso){ return (L!=="pt"&&LIVE.aviso.en)?LIVE.aviso.en:(LIVE.aviso.pt||LIVE.aviso.en); } // day notice from the Sheet wins
+  return tv(DATA.info.announcement,L).trim();
+}
 function renderAnnouncement(){
-  var a=$("announce"), msg=tv(DATA.info.announcement,L).trim();
+  var a=$("announce"), msg=announcementText();
   var dismissed=false; try{ dismissed=sessionStorage.getItem("lunaAnnDismissed")===msg; }catch(e){}
   if(!msg||dismissed){ a.hidden=true; a.innerHTML=""; return; }
-  a.innerHTML='<div><span class="ic" aria-hidden="true">📣</span><p>'+esc(msg)+'</p><button type="button" aria-label="Fechar aviso">✕</button></div>'; a.hidden=false;
+  a.innerHTML='<div><span class="ic" aria-hidden="true">📣</span><p>'+esc(msg)+'</p><button type="button" aria-label="'+T[L].closeNotice+'">✕</button></div>'; a.hidden=false;
   a.querySelector("button").addEventListener("click",function(){ a.hidden=true; try{ sessionStorage.setItem("lunaAnnDismissed",msg); }catch(e){} });
 }
 function renderAll(){ renderFilters(); renderChips(); renderMenu(); }
 
 /* ---------- search + allergen filter ---------- */
 function applyFilters(){
-  var q=norm(query.trim()), ex=Object.keys(excluded), shown=0, total=0;
+  var q=norm(query), ex=Object.keys(excluded), shown=0, t=T[L];
   document.querySelectorAll("section.cat").forEach(function(sec){
     var catMatch=q&&sec.dataset.s.indexOf(q)>=0, any=false;
     sec.querySelectorAll(".item").forEach(function(el){
-      total++;
       var hit=!q||catMatch||el.dataset.s.indexOf(q)>=0;
       if(hit&&ex.length){ var a=el.dataset.a.split(" "); hit=!ex.some(function(k){ return a.indexOf(k)>=0; }); }
       el.hidden=!hit; if(hit){ any=true; shown++; }
     });
-    // hide sub-headers that have no visible item until the next sub-header
-    var subs=sec.querySelectorAll(".sub-h");
-    subs.forEach(function(sh){ var n=sh.nextElementSibling, vis=false; while(n&&!n.classList.contains("sub-h")){ if(!n.hidden){vis=true;break;} n=n.nextElementSibling; } sh.hidden=!vis; });
+    sec.querySelectorAll(".sub-h").forEach(function(sh){ var n=sh.nextElementSibling, vis=false; while(n&&!n.classList.contains("sub-h")){ if(!n.hidden){vis=true;break;} n=n.nextElementSibling; } sh.hidden=!vis; });
     sec.hidden=!any;
     var chip=document.querySelector('.chips a[data-cat="'+sec.id+'"]'); if(chip) chip.hidden=!any;
   });
   $("empty").hidden=shown>0;
-  var st=$("status");
-  if(q) st.innerHTML=T.results(shown,query.trim())+(ex.length?" · "+T.hiding(ex.map(function(k){return esc(tv(DATA.allergens[k],L));}),shown):"");
-  else if(ex.length) st.innerHTML=T.hiding(ex.map(function(k){return esc(tv(DATA.allergens[k],L));}),shown)+'<button type="button" id="clearEx">'+T.clear+'</button>';
+  var st=$("status"), exNames=ex.map(function(k){return esc(tv(DATA.allergens[k],L));});
+  if(q) st.innerHTML=t.results(shown,esc(query.trim()))+(ex.length?" · "+t.hiding(exNames,shown):"");
+  else if(ex.length) st.innerHTML=t.hiding(exNames,shown)+'<button type="button" id="clearEx">'+t.clear+'</button>';
   else st.innerHTML="";
   var ce=$("clearEx"); if(ce) ce.addEventListener("click",function(){ excluded={}; renderFilters(); applyFilters(); });
   activeCat=null; updateActive(true);
@@ -399,7 +506,7 @@ $("qClear").addEventListener("click",function(){ $("q").value=""; query=""; this
 $("menu").addEventListener("click",function(ev){
   var act=ev.target.closest("button[data-act]");
   if(act){ var el=act.closest(".item"), it=findItem(el.dataset.id), url=baseUrl()+"#it-"+el.dataset.id, txt=tv(it.name,L)+" · "+price(it.price)+" · Luna Bar";
-    if(act.dataset.act==="share") share(tv(it.name,L)+" · Luna Bar",txt,url); else copyText(url).then(function(ok){ toast(ok?T.copied:T.shareFail); });
+    if(act.dataset.act==="share") share(tv(it.name,L)+" · Luna Bar",txt,url); else copyText(url).then(function(ok){ toast(ok?T[L].copied:T[L].shareFail); });
     return; }
   var item=ev.target.closest(".item"); if(item) toggleItem(item);
 });
@@ -412,10 +519,17 @@ function toggleItem(el,forceOpen){
 function findItem(id){ var f=null; DATA.categories.forEach(function(c){ c.items.forEach(function(it){ if(it.id===id) f=it; }); }); return f; }
 function handleHash(initial){
   var h=location.hash||"";
-  if(h.indexOf("#it-")===0){ var el=document.getElementById(h.slice(1)); if(el){ el.hidden=false; el.closest("section").hidden=false; setTimeout(function(){ jumpTo(el); },initial?150:0); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); toggleItem(el,true); el.focus({preventScroll:true}); } }
+  if(h.indexOf("#it-")===0){ pendingHash={id:h.slice(1),at:Date.now()}; focusItem(h.slice(1),initial); }
   else if(h.length>1&&h!=="#preview"){ var sec=document.getElementById(h.slice(1)); if(sec&&initial) setTimeout(function(){ sec.scrollIntoView(); setActiveChip(sec.id); },150); }
 }
-function jumpTo(el){ // instant jump for deep links (smooth scrolling is for in-page navigation only)
+function focusItem(id,initial){
+  var el=document.getElementById(id); if(!el) return;
+  el.hidden=false; el.closest("section").hidden=false;
+  el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); toggleItem(el,true); el.focus({preventScroll:true});
+  setTimeout(function(){ jumpTo(id); },initial?150:0);
+}
+function jumpTo(id){ // instant jump for deep links (smooth scrolling is for in-page navigation only); resolves the element at call time
+  var el=document.getElementById(id); if(!el) return;
   var root=document.documentElement, prev=root.style.scrollBehavior; root.style.scrollBehavior="auto";
   el.scrollIntoView({block:"center"}); root.style.scrollBehavior=prev; updateActive(true);
 }
@@ -443,7 +557,7 @@ function updateActive(force){
 window.addEventListener("scroll",function(){ if(ticking) return; ticking=true; requestAnimationFrame(function(){ ticking=false; updateActive(false); }); },{passive:true});
 $("backTop").addEventListener("click",function(){ window.scrollTo({top:0,behavior:"smooth"}); });
 
-boot();
+applyStatic(); renderLangbar(); boot();
 </script>
 </body>
 </html>
