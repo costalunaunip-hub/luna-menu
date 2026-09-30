@@ -35,7 +35,7 @@
   --field:#fffdf8; --focus:#2f6b66;
   --shadow:0 1px 2px rgba(50,36,12,.05),0 10px 28px -14px rgba(50,36,12,.22);
   --skeleton:rgba(88,66,36,.08); --skeleton-hi:rgba(255,255,255,.55);
-  --barH:52px;
+  --barH:48px;
   --display:"Fraunces",Georgia,"Iowan Old Style","Palatino Linotype",serif;
   --body:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   color-scheme:light;
@@ -116,12 +116,26 @@ button{font:inherit;color:inherit}
 .status b{color:var(--ink);font-weight:600}
 .status button{border:none;background:none;color:var(--teal-ink);font-weight:600;text-decoration:underline;cursor:pointer;padding:0 0 0 6px}
 
-/* ---------- CATEGORY CHIPS (sticky) ---------- */
-.chips-wrap{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;margin-top:10px;background:rgba(var(--bg-rgb),.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--hair)}
-.chips{display:flex;gap:8px;overflow-x:auto;padding:8px 12px;max-width:760px;margin:0 auto;scrollbar-width:none;scroll-behavior:smooth}
-.chips::-webkit-scrollbar{display:none}
-.chips a{flex:0 0 auto;white-space:nowrap;text-decoration:none;font-size:.82rem;font-weight:600;color:var(--teal-ink);background:var(--card);border:1px solid var(--line);border-radius:999px;min-height:36px;padding:7px 13px;display:inline-flex;align-items:center;transition:background .15s,color .15s,border-color .15s}
+/* ---------- CATEGORIES: wrapped index at the top + fixed compact bar while reading ---------- */
+.toc{max-width:760px;margin:12px auto 0;padding:0 14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips a{flex:0 1 auto;white-space:nowrap;text-decoration:none;font-size:.8rem;font-weight:600;color:var(--teal-ink);background:var(--card);border:1px solid var(--line);border-radius:999px;min-height:36px;padding:6px 12px;display:inline-flex;align-items:center;transition:background .15s,color .15s,border-color .15s}
 .chips a.active{background:var(--teal);color:var(--on-teal);border-color:var(--teal)}
+.chips-wrap{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:30;transform:translateY(-110%);transition:transform .22s ease;pointer-events:none}
+.chips-wrap.show{transform:none;pointer-events:auto}
+.preview:not([hidden])~.chips-wrap{top:calc(env(safe-area-inset-top,0px) + 34px)}
+.curbar{background:rgba(var(--bg-rgb),.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--hair)}
+.cur{display:flex;align-items:center;gap:10px;width:100%;max-width:760px;margin:0 auto;min-height:48px;padding:6px 14px;border:none;background:none;cursor:pointer;text-align:left}
+.cur .ico{flex:0 0 auto;color:var(--teal-ink);display:inline-flex}
+.cur .lbl{flex:0 0 auto;font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.cur .name{flex:1 1 auto;min-width:0;font-weight:700;font-size:.98rem;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cur .chev{flex:0 0 auto;width:28px;height:28px;border-radius:50%;background:var(--teal);color:var(--on-teal);display:inline-flex;align-items:center;justify-content:center;transition:transform .2s}
+.chips-wrap.open .cur .chev{transform:rotate(180deg)}
+.panel{display:none;background:var(--bg);border-bottom:1px solid var(--line);box-shadow:var(--shadow);max-height:min(62vh,520px);overflow-y:auto}
+.chips-wrap.open .panel{display:block}
+.panel .chips{max-width:760px;margin:0 auto;padding:10px 14px 14px}
+.scrim{position:fixed;top:0;right:0;bottom:0;left:0;z-index:29;background:rgba(20,30,30,.28);opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim.show{opacity:1;pointer-events:auto}
 
 /* ---------- MENU ---------- */
 .wrap{max-width:760px;margin:0 auto;padding:4px 14px 72px}
@@ -211,7 +225,12 @@ h2.cat-title{font-family:var(--display);font-weight:600;font-size:1.5rem;line-he
 <div class="filters" id="filters" aria-label="Ocultar itens com alergénios"></div>
 <div class="status" id="status" aria-live="polite"></div>
 
-<div class="chips-wrap" id="chipsWrap"><nav class="chips" id="chips" aria-label="Categorias"></nav></div>
+<nav class="toc" id="toc" aria-label="Categorias"><div class="chips" id="chips"></div></nav>
+<div class="chips-wrap" id="chipsWrap">
+  <div class="curbar"><button type="button" class="cur" id="curBtn" aria-expanded="false" aria-controls="chipsPanel"><span class="ico" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></span><span class="name" id="curName"></span><span class="chev" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span></button></div>
+  <nav class="panel" id="chipsPanel" aria-label="Categorias"><div class="chips" id="chips2"></div></nav>
+</div>
+<div class="scrim" id="scrim"></div>
 
 <main class="wrap">
   <noscript><div style="text-align:center;padding:28px 16px;font-size:1rem;line-height:1.6">Para ver o menu, active o JavaScript no seu navegador.<br>To view the menu, please enable JavaScript in your browser.</div></noscript>
@@ -312,7 +331,7 @@ function applyStatic(){
   var t=T[L]; document.documentElement.lang=L;
   $("q").placeholder=t.search; $("qLabel").textContent=t.search; $("qClear").setAttribute("aria-label",t.clearSearch);
   $("themeBtn").setAttribute("aria-label",t.theme); $("themeBtn").title=t.theme; $("shareBtn").setAttribute("aria-label",t.shareMenu); $("shareBtn").title=t.shareMenu;
-  $("filters").setAttribute("aria-label",t.filters); $("chips").setAttribute("aria-label",t.cats); $("backTop").setAttribute("aria-label",t.top); $("previewBar").textContent=t.preview;
+  $("filters").setAttribute("aria-label",t.filters); $("toc").setAttribute("aria-label",t.cats); $("chipsPanel").setAttribute("aria-label",t.cats); $("curBtn").setAttribute("aria-label",t.cats); $("backTop").setAttribute("aria-label",t.top); $("previewBar").textContent=t.preview;
 }
 
 /* ---------- theme ---------- */
@@ -406,10 +425,10 @@ function renderFilters(){
   f.innerHTML='<span class="lbl">'+esc(T[L].without)+'</span>'+usedAllergens().map(function(k){ return '<button type="button" data-a="'+k+'" aria-pressed="'+(excluded[k]?"true":"false")+'">'+esc(tv(DATA.allergens[k],L))+'</button>'; }).join("");
   f.querySelectorAll("button").forEach(function(b){ b.addEventListener("click",function(){ var k=b.dataset.a; if(excluded[k]) delete excluded[k]; else excluded[k]=1; b.setAttribute("aria-pressed",excluded[k]?"true":"false"); applyFilters(); }); });
 }
+function chipsHtml(){ return DATA.categories.map(function(cat){ return '<a href="#'+cat.id+'" data-cat="'+cat.id+'">'+esc(tv(cat.title,L))+'</a>'; }).join(""); }
 function renderChips(){
-  var c=$("chips");
-  c.innerHTML=DATA.categories.map(function(cat){ return '<a href="#'+cat.id+'" data-cat="'+cat.id+'">'+esc(tv(cat.title,L))+'</a>'; }).join("");
-  c.querySelectorAll("a").forEach(function(a){ a.addEventListener("click",function(){ setActiveChip(a.dataset.cat); lockUntil=Date.now()+900; setTimeout(function(){updateActive(true);},950); }); });
+  var html=chipsHtml(); $("chips").innerHTML=html; $("chips2").innerHTML=html;
+  document.querySelectorAll(".chips a").forEach(function(a){ a.addEventListener("click",function(){ closePanel(); setActiveChip(a.dataset.cat); lockUntil=Date.now()+900; setTimeout(function(){updateActive(true);},950); }); });
   activeCat=null; syncOffsets();
 }
 function itemHtml(it){
@@ -488,7 +507,7 @@ function applyFilters(){
     });
     sec.querySelectorAll(".sub-h").forEach(function(sh){ var n=sh.nextElementSibling, vis=false; while(n&&!n.classList.contains("sub-h")){ if(!n.hidden){vis=true;break;} n=n.nextElementSibling; } sh.hidden=!vis; });
     sec.hidden=!any;
-    var chip=document.querySelector('.chips a[data-cat="'+sec.id+'"]'); if(chip) chip.hidden=!any;
+    document.querySelectorAll('.chips a[data-cat="'+sec.id+'"]').forEach(function(chip){ chip.hidden=!any; });
   });
   $("empty").hidden=shown>0;
   var st=$("status"), exNames=ex.map(function(k){return esc(tv(DATA.allergens[k],L));});
@@ -535,18 +554,25 @@ function jumpTo(id){ // instant jump for deep links (smooth scrolling is for in-
 }
 window.addEventListener("hashchange",function(){ handleHash(false); });
 
-/* ---------- sticky bar + active category ---------- */
-function syncOffsets(){ var w=$("chipsWrap"); if(w) document.documentElement.style.setProperty("--barH",w.offsetHeight+"px"); }
+/* ---------- fixed category bar (appears once the index scrolls away) + active category ---------- */
+function syncOffsets(){ var w=$("chipsWrap"); if(w){ var h=w.querySelector(".curbar").offsetHeight||48; document.documentElement.style.setProperty("--barH",h+"px"); } }
 window.addEventListener("resize",syncOffsets); window.addEventListener("load",syncOffsets);
+function barVisible(){ var t=$("toc").getBoundingClientRect(); return t.bottom<0; } // index scrolled out above the viewport
+function syncBar(){ var show=barVisible(); $("chipsWrap").classList.toggle("show",show); if(!show) closePanel(); }
+function openPanel(){ var w=$("chipsWrap"); w.classList.add("open"); $("curBtn").setAttribute("aria-expanded","true"); $("scrim").classList.add("show"); var a=$("chips2").querySelector("a.active"); if(a&&a.scrollIntoView) a.scrollIntoView({block:"nearest"}); }
+function closePanel(){ var w=$("chipsWrap"); if(!w.classList.contains("open")) return; w.classList.remove("open"); $("curBtn").setAttribute("aria-expanded","false"); $("scrim").classList.remove("show"); }
+$("curBtn").addEventListener("click",function(){ if($("chipsWrap").classList.contains("open")) closePanel(); else openPanel(); });
+$("scrim").addEventListener("click",closePanel);
+document.addEventListener("keydown",function(ev){ if(ev.key==="Escape") closePanel(); });
 function setActiveChip(id){
   if(id===activeCat) return; activeCat=id;
-  var bar=$("chips"); bar.querySelectorAll("a").forEach(function(a){ a.classList.toggle("active",a.dataset.cat===id); });
-  var chip=bar.querySelector('a[data-cat="'+id+'"]');
-  if(chip){ var left=chip.offsetLeft-(bar.clientWidth-chip.offsetWidth)/2; try{ bar.scrollTo({left:Math.max(0,left),behavior:"smooth"}); }catch(e){ bar.scrollLeft=Math.max(0,left); } }
+  document.querySelectorAll(".chips a").forEach(function(a){ a.classList.toggle("active",a.dataset.cat===id); });
+  var cat=null; if(DATA) DATA.categories.forEach(function(c){ if(c.id===id) cat=c; }); $("curName").textContent=cat?tv(cat.title,L):"";
 }
 function updateActive(force){
+  syncBar();
   if(!force&&Date.now()<lockUntil) return;
-  var barH=($("chipsWrap")||{}).offsetHeight||52, y=window.scrollY+barH+24;
+  var barH=parseInt(getComputedStyle(document.documentElement).getPropertyValue("--barH"))||48, y=window.scrollY+barH+24;
   var secs=Array.prototype.filter.call(document.querySelectorAll("section.cat"),function(s){ return !s.hidden; });
   if(!secs.length) return;
   var cur=secs[0].id; secs.forEach(function(s){ if(s.offsetTop<=y) cur=s.id; });
@@ -555,7 +581,7 @@ function updateActive(force){
   var bt=$("backTop"); if(bt) bt.classList.toggle("show",window.scrollY>700);
 }
 window.addEventListener("scroll",function(){ if(ticking) return; ticking=true; requestAnimationFrame(function(){ ticking=false; updateActive(false); }); },{passive:true});
-$("backTop").addEventListener("click",function(){ window.scrollTo({top:0,behavior:"smooth"}); });
+$("backTop").addEventListener("click",function(){ closePanel(); window.scrollTo({top:0,behavior:"smooth"}); });
 
 applyStatic(); renderLangbar(); boot();
 </script>
