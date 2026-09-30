@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="pt" data-page="menu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f3ebdb" id="metaTheme">
+<meta name="description" content="Luna Bar — bar de praia na Praia da Vagueira, Aveiro. Cafetaria, cocktails, cervejas, petiscos e opções vegan. Menu actualizado em tempo real.">
+<link rel="canonical" href="https://costalunaunip-hub.github.io/luna-menu/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%8C%99%3C/text%3E%3C/svg%3E">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="preload" href="fraunces-600.woff2" as="font" type="font/woff2" crossorigin>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Luna Bar">
+<meta property="og:title" content="Luna Bar · Menu · Praia da Vagueira">
+<meta property="og:description" content="Menu do bar de praia — cafetaria, cocktails, petiscos e opções vegan. Praia da Vagueira, Aveiro.">
+<meta property="og:url" content="https://costalunaunip-hub.github.io/luna-menu/">
+<meta property="og:image" content="https://costalunaunip-hub.github.io/luna-menu/luna-og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="pt_PT">
+<meta name="twitter:card" content="summary_large_image">
+<title>Luna Bar · Menu · Praia da Vagueira</title>
+<style>
+/* Layout: photo hero → tools (search, filters, theme) → one sticky category strip → dense one-card-per-category list.
+   Data comes from menu.json at runtime; nothing about the menu is hardcoded here. */
+@font-face{font-family:"Fraunces";font-style:normal;font-weight:600;font-display:swap;src:url(fraunces-600.woff2) format("woff2")}
+:root{
+  --bg:#f3ebdb; --bg-rgb:243,235,219; --bg2:#ece1cc;
+  --card:#fffdf8; --line:rgba(88,66,36,.12); --hair:rgba(88,66,36,.10);
+  --ink:#22302f; --muted:#5b6866;
+  --teal:#2f6b66; --teal-ink:#245a55; --teal-soft:rgba(47,107,102,.10); --on-teal:#fff;
+  --terra:#a8502a; --terra-soft:rgba(168,80,42,.10);
+  --tag-bg:#f5e6cd; --tag-ink:#6b431f; --tag-line:#e3cda6;
+  --field:#fffdf8; --focus:#2f6b66;
+  --shadow:0 1px 2px rgba(50,36,12,.05),0 10px 28px -14px rgba(50,36,12,.22);
+  --skeleton:rgba(88,66,36,.08); --skeleton-hi:rgba(255,255,255,.55);
+  --barH:52px;
+  --display:"Fraunces",Georgia,"Iowan Old Style","Palatino Linotype",serif;
+  --body:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  color-scheme:light;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#16201f; --bg-rgb:22,32,31; --bg2:#1b2726;
+  --card:#1f2b2a; --line:rgba(237,230,216,.12); --hair:rgba(237,230,216,.09);
+  --ink:#ede6d8; --muted:#a9b3b0;
+  --teal:#7fb8b2; --teal-ink:#9fd0ca; --teal-soft:rgba(127,184,178,.14); --on-teal:#10201e;
+  --terra:#e0916a; --terra-soft:rgba(224,145,106,.14);
+  --tag-bg:#2e2a22; --tag-ink:#e3cda6; --tag-line:#4a4232;
+  --field:#1a2423; --focus:#9fd0ca;
+  --shadow:0 1px 2px rgba(0,0,0,.25),0 10px 28px -14px rgba(0,0,0,.5);
+  --skeleton:rgba(237,230,216,.08); --skeleton-hi:rgba(237,230,216,.10);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#16201f; --bg-rgb:22,32,31; --bg2:#1b2726;
+  --card:#1f2b2a; --line:rgba(237,230,216,.12); --hair:rgba(237,230,216,.09);
+  --ink:#ede6d8; --muted:#a9b3b0;
+  --teal:#7fb8b2; --teal-ink:#9fd0ca; --teal-soft:rgba(127,184,178,.14); --on-teal:#10201e;
+  --terra:#e0916a; --terra-soft:rgba(224,145,106,.14);
+  --tag-bg:#2e2a22; --tag-ink:#e3cda6; --tag-line:#4a4232;
+  --field:#1a2423; --focus:#9fd0ca;
+  --shadow:0 1px 2px rgba(0,0,0,.25),0 10px 28px -14px rgba(0,0,0,.5);
+  --skeleton:rgba(237,230,216,.08); --skeleton-hi:rgba(237,230,216,.10);
+  color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto} *{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+body{margin:0;font-family:var(--body);font-size:16px;color:var(--ink);background:var(--bg);line-height:1.45}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+[hidden]{display:none!important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- HERO ---------- */
+.hero{position:relative;height:clamp(250px,66vw,360px);background:#9cc0bc;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;text-align:center;padding:0 16px 16px}
+.hero img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;object-position:center 45%}
+.hero::after{content:"";position:absolute;top:0;right:0;bottom:0;left:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(20,30,30,.10) 0%,rgba(20,30,30,0) 30%,rgba(var(--bg-rgb),0) 50%,rgba(var(--bg-rgb),.90) 76%,var(--bg) 100%)}
+.hero>*{position:relative;z-index:1}
+.hero img{z-index:0}
+.hero h1{font-family:var(--display);font-weight:600;font-size:clamp(2.4rem,11vw,3.4rem);line-height:1;margin:0;color:var(--ink);letter-spacing:-.01em;text-wrap:balance}
+.hero .sub{margin-top:8px;font-size:.74rem;letter-spacing:.22em;text-transform:uppercase;color:var(--teal-ink);font-weight:600}
+
+/* ---------- ANNOUNCEMENT ---------- */
+.announce{max-width:760px;margin:10px auto 0;padding:0 14px}
+.announce div{display:flex;gap:10px;align-items:flex-start;background:var(--terra-soft);border:1px solid var(--terra);color:var(--ink);border-radius:14px;padding:10px 12px;font-size:.92rem;line-height:1.4}
+.announce .ic{flex:0 0 auto}
+.announce p{margin:0;flex:1 1 auto;min-width:0}
+.announce button{flex:0 0 auto;border:none;background:none;width:32px;height:32px;margin:-6px -6px -6px 0;border-radius:50%;cursor:pointer;color:var(--muted)}
+
+/* ---------- TOOLS ---------- */
+.tools{max-width:760px;margin:12px auto 0;padding:0 14px;display:flex;gap:8px;align-items:center}
+.search{flex:1 1 auto;min-width:0;position:relative}
+.search input{width:100%;min-height:44px;border-radius:999px;border:1px solid var(--line);background:var(--field);color:var(--ink);padding:10px 40px 10px 40px;font:inherit;font-size:1rem}
+.search input::placeholder{color:var(--muted)}
+.search .ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted)}
+.search .clear{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:none;background:none;border-radius:50%;cursor:pointer;color:var(--muted);font-size:1.1rem}
+.iconbtn{flex:0 0 auto;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:1.05rem;color:var(--teal-ink)}
+.filters{max-width:760px;margin:10px auto 0;padding:0 14px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.filters .lbl{font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-right:2px}
+.filters button{border:1px solid var(--tag-line);background:var(--tag-bg);color:var(--tag-ink);border-radius:999px;min-height:32px;padding:4px 11px;font-size:.78rem;font-weight:600;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+.filters button[aria-pressed="true"]{background:var(--terra);border-color:var(--terra);color:#fff;text-decoration:line-through;text-decoration-thickness:2px}
+.status{max-width:760px;margin:8px auto 0;padding:0 14px;font-size:.82rem;color:var(--muted);min-height:1.2em}
+.status:empty{display:none}
+.status b{color:var(--ink);font-weight:600}
+.status button{border:none;background:none;color:var(--teal-ink);font-weight:600;text-decoration:underline;cursor:pointer;padding:0 0 0 6px}
+
+/* ---------- CATEGORY CHIPS (sticky) ---------- */
+.chips-wrap{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;margin-top:10px;background:rgba(var(--bg-rgb),.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--hair)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:8px 12px;max-width:760px;margin:0 auto;scrollbar-width:none;scroll-behavior:smooth}
+.chips::-webkit-scrollbar{display:none}
+.chips a{flex:0 0 auto;white-space:nowrap;text-decoration:none;font-size:.82rem;font-weight:600;color:var(--teal-ink);background:var(--card);border:1px solid var(--line);border-radius:999px;min-height:36px;padding:7px 13px;display:inline-flex;align-items:center;transition:background .15s,color .15s,border-color .15s}
+.chips a.active{background:var(--teal);color:var(--on-teal);border-color:var(--teal)}
+
+/* ---------- MENU ---------- */
+.wrap{max-width:760px;margin:0 auto;padding:4px 14px 72px}
+section.cat{margin:30px 0 0;scroll-margin-top:calc(var(--barH) + 14px)}
+h2.cat-title{font-family:var(--display);font-weight:600;font-size:1.5rem;line-height:1.15;color:var(--terra);margin:0 0 6px 4px;letter-spacing:-.005em}
+.cat-note{font-size:.8rem;color:var(--muted);margin:-2px 0 10px 4px;font-style:italic}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+.item{padding:11px 14px;cursor:pointer;scroll-margin-top:calc(var(--barH) + 60px);transition:background .2s}
+.item+.item{border-top:1px solid var(--hair)}
+.item .row{display:flex;align-items:baseline;gap:10px}
+.item .name{font-weight:600;font-size:1rem;flex:1 1 auto;min-width:0}
+.item .price{font-weight:600;font-size:.98rem;color:var(--teal-ink);white-space:nowrap;font-variant-numeric:tabular-nums;flex:0 0 auto}
+.item .desc{font-size:.85rem;color:var(--muted);margin-top:2px;line-height:1.4}
+.alg{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.alg span{font-size:.66rem;font-weight:600;letter-spacing:.01em;background:var(--tag-bg);color:var(--tag-ink);border:1px solid var(--tag-line);border-radius:999px;padding:2px 8px;line-height:1.45;white-space:nowrap}
+.alg-inline{display:inline-flex;vertical-align:middle;margin:-2px 0 0 4px;position:relative;top:-1px}
+.sub-h{font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--teal-ink);background:var(--teal-soft);padding:7px 14px}
+.sub-h+.item{border-top:none}
+/* sold out */
+.item.out .name,.item.out .desc,.item.out .alg{opacity:.5}
+.item.out .price{opacity:.6;text-decoration:line-through;text-decoration-thickness:1.5px}
+.badge-out{flex:0 0 auto;font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--terra);border:1.5px solid var(--terra);border-radius:6px;padding:2px 6px;line-height:1.3;align-self:center}
+/* open state / actions */
+.item.open{background:var(--teal-soft)}
+.actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.actions button{border:1px solid var(--line);background:var(--card);border-radius:999px;min-height:36px;padding:6px 12px;font-size:.82rem;font-weight:600;color:var(--teal-ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+@keyframes flash{0%{box-shadow:inset 0 0 0 2px var(--terra)}100%{box-shadow:inset 0 0 0 2px transparent}}
+.item.flash{animation:flash 1.8s ease-out 1}
+/* skeleton */
+.sk{margin:30px 0 0}
+.sk .t{height:26px;width:46%;border-radius:8px;background:var(--skeleton);margin:0 0 10px 4px}
+.sk .card{padding:4px 0}
+.sk .r{height:46px;margin:0 14px;border-bottom:1px solid var(--hair);position:relative;overflow:hidden}
+.sk .r::before{content:"";position:absolute;top:15px;left:0;height:12px;width:55%;border-radius:6px;background:var(--skeleton)}
+.sk .r::after{content:"";position:absolute;top:15px;right:0;height:12px;width:12%;border-radius:6px;background:var(--skeleton)}
+.sk .r:last-child{border-bottom:none}
+@keyframes shimmer{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.sk .card{position:relative}
+.sk .card::after{content:"";position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,transparent,var(--skeleton-hi),transparent);animation:shimmer 1.4s infinite}
+.err{margin:30px 0;padding:18px;border:1px solid var(--terra);background:var(--terra-soft);border-radius:16px;text-align:center}
+.err button{margin-top:10px;border:none;border-radius:999px;background:var(--teal);color:var(--on-teal);min-height:44px;padding:10px 18px;font-weight:600;cursor:pointer}
+.empty{margin:30px 0;padding:22px 16px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:16px}
+
+/* ---------- FOOTER ---------- */
+.iva{text-align:center;font-size:.76rem;color:var(--muted);margin-top:22px}
+.legal{margin-top:14px;padding:12px 8px 0;border-top:1px solid var(--hair);font-size:.72rem;color:var(--muted);text-align:center;line-height:1.5}
+.footer{margin-top:26px;text-align:center;padding:20px 14px 0;border-top:1px solid var(--hair)}
+.footer-brand{font-family:var(--display);font-weight:600;color:var(--terra);font-size:1.35rem}
+.footer-info{margin-top:8px;font-size:.88rem;color:var(--muted);line-height:1.65}
+.footer-info .map{display:inline-flex;align-items:center;gap:6px;margin-top:10px;min-height:44px;padding:10px 18px;border-radius:999px;background:var(--teal);color:var(--on-teal);font-weight:600;text-decoration:none;font-size:.9rem}
+.updated{margin-top:14px;font-size:.72rem;color:var(--muted)}
+.updated a{color:var(--muted)}
+
+/* ---------- FLOATING ---------- */
+.back-top{position:fixed;right:14px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:40;width:44px;height:44px;border-radius:50%;border:none;background:var(--teal);color:var(--on-teal);font-size:1.15rem;box-shadow:var(--shadow);cursor:pointer;opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity .2s,transform .2s}
+.back-top.show{opacity:.94;transform:none;pointer-events:auto}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);z-index:50;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:.88rem;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:calc(100vw - 32px);text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.preview{position:sticky;top:0;z-index:60;background:var(--terra);color:#fff;text-align:center;font-size:.82rem;font-weight:700;padding:8px 12px;letter-spacing:.04em}
+
+@media(min-width:760px){.hero{height:360px}.item{padding:12px 18px}}
+</style>
+</head>
+<body>
+<div class="preview" id="previewBar" hidden>PRÉ-VISUALIZAÇÃO DO RASCUNHO · não publicado</div>
+
+<header class="hero">
+  <img src="hero.jpg" alt="" width="1200" height="575" fetchpriority="high" decoding="async">
+  <h1>Luna Bar</h1>
+  <div class="sub">Praia da Vagueira · Aveiro</div>
+</header>
+
+<div class="announce" id="announce" hidden></div>
+
+<div class="tools">
+  <div class="search">
+    <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <label class="sr" for="q">Procurar no menu</label>
+    <input id="q" type="search" placeholder="Procurar no menu…" autocomplete="off" autocorrect="off" spellcheck="false">
+    <button class="clear" id="qClear" aria-label="Limpar pesquisa" hidden>✕</button>
+  </div>
+  <button class="iconbtn" id="themeBtn" aria-label="Alternar tema claro/escuro" title="Tema">☾</button>
+  <button class="iconbtn" id="shareBtn" aria-label="Partilhar o menu" title="Partilhar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v13"/><path d="m7 8 5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button>
+</div>
+<div class="filters" id="filters" aria-label="Ocultar itens com alergénios"></div>
+<div class="status" id="status" aria-live="polite"></div>
+
+<div class="chips-wrap" id="chipsWrap"><nav class="chips" id="chips" aria-label="Categorias"></nav></div>
+
+<main class="wrap">
+  <noscript><div style="text-align:center;padding:28px 16px;font-size:1rem;line-height:1.6">Para ver o menu, active o JavaScript no seu navegador.<br>To view the menu, please enable JavaScript in your browser.</div></noscript>
+  <div id="menu">
+    <div class="sk"><div class="t"></div><div class="card"><div class="r"></div><div class="r"></div><div class="r"></div><div class="r"></div></div></div>
+    <div class="sk"><div class="t"></div><div class="card"><div class="r"></div><div class="r"></div><div class="r"></div></div></div>
+    <div class="sk"><div class="t"></div><div class="card"><div class="r"></div><div class="r"></div><div class="r"></div><div class="r"></div><div class="r"></div></div></div>
+  </div>
+  <div class="iva" id="ivaNote"></div>
+  <div class="legal" id="legalNote"></div>
+  <footer class="footer">
+    <div class="footer-brand">🌙 Luna Bar</div>
+    <div class="footer-info" id="footerInfo"></div>
+    <div class="updated" id="updated"></div>
+  </footer>
+</main>
+<button class="back-top" id="backTop" aria-label="Voltar ao topo">↑</button>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script type="application/ld+json" id="ld"></script>
+
+<script>
+/* ============================================================
+   Luna Bar menu — client. Data: menu.json (edited via gestao.html).
+   Language: PT for this test build; all strings live in T and data
+   is read through tv(), so other languages plug in without changes.
+   ============================================================ */
+var L="pt";
+var T={
+  results:function(n,q){return n===0?"Nenhum resultado para <b>"+esc(q)+"</b>":"<b>"+n+"</b> "+(n===1?"resultado":"resultados")+" para <b>"+esc(q)+"</b>";},
+  hiding:function(list,n){return "A ocultar itens com <b>"+list.join(", ")+"</b> · "+n+" "+(n===1?"item visível":"itens visíveis");},
+  clear:"limpar", soldOut:"Esgotado", share:"Partilhar", copy:"Copiar ligação", copied:"Ligação copiada",
+  shareFail:"Não foi possível partilhar", without:"Sem", map:"Ver no mapa", updated:"Menu actualizado", alg:"Alergénios",
+  open:"Aberto", allDays:"Aberto todos os dias", closed:"Encerrado", noItems:"Nenhum item corresponde à pesquisa.",
+  loadErr:"Não foi possível carregar o menu.", retry:"Tentar novamente", shareTitle:"Luna Bar · Menu",
+  shareText:"Menu do Luna Bar · Praia da Vagueira"
+};
+var DAYS_PT=[["domingo","m"],["segunda","f"],["terça","f"],["quarta","f"],["quinta","f"],["sexta","f"],["sábado","m"]];
+var DAY_LD=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+var DATA=null, excluded={}, query="", activeCat=null, lockUntil=0, ticking=false, openItem=null;
+
+function tv(v,lang){ if(v==null) return ""; if(typeof v==="string") return v; return v[lang]||v.pt||v.en||""; }
+function esc(s){ return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+function norm(s){ return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase(); }
+function price(p){ return Number(p).toFixed(2).replace(".",",")+" €"; }
+function $(id){ return document.getElementById(id); }
+function store(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v); }catch(e){ return null; } }
+
+/* ---------- theme ---------- */
+(function initTheme(){
+  var t=store("lunaTheme"); if(t==="dark"||t==="light") document.documentElement.setAttribute("data-theme",t);
+  syncThemeMeta();
+})();
+function isDark(){ var t=document.documentElement.getAttribute("data-theme"); if(t) return t==="dark"; return window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches; }
+function syncThemeMeta(){ $("metaTheme").setAttribute("content",isDark()?"#16201f":"#f3ebdb"); var b=$("themeBtn"); if(b) b.textContent=isDark()?"☀":"☾"; }
+$("themeBtn").addEventListener("click",function(){ var next=isDark()?"light":"dark"; document.documentElement.setAttribute("data-theme",next); store("lunaTheme",next); syncThemeMeta(); });
+
+/* ---------- toast ---------- */
+var toastT=null;
+function toast(msg){ var t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(function(){t.classList.remove("show");},2200); }
+
+/* ---------- share / links ---------- */
+function baseUrl(){ return location.origin+location.pathname; }
+function copyText(txt){
+  if(navigator.clipboard&&navigator.clipboard.writeText){ return navigator.clipboard.writeText(txt).then(function(){return true;},function(){return legacyCopy(txt);}); }
+  return Promise.resolve(legacyCopy(txt));
+}
+function legacyCopy(txt){ try{ var ta=document.createElement("textarea"); ta.value=txt; ta.setAttribute("readonly",""); ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select(); var ok=document.execCommand("copy"); document.body.removeChild(ta); return ok; }catch(e){ return false; } }
+function share(title,text,url){
+  if(navigator.share){ return navigator.share({title:title,text:text,url:url}).then(function(){return true;},function(err){ if(err&&err.name==="AbortError") return true; return copyText(url).then(function(ok){ toast(ok?T.copied:T.shareFail); return ok; }); }); }
+  return copyText(url).then(function(ok){ toast(ok?T.copied:T.shareFail); return ok; });
+}
+$("shareBtn").addEventListener("click",function(){ share(T.shareTitle,T.shareText,baseUrl()); });
+
+/* ---------- data ---------- */
+function loadMenu(){
+  if(location.hash==="#preview"){
+    var d=store("lunaDraft");
+    if(d){ try{ var j=JSON.parse(d); $("previewBar").hidden=false; return Promise.resolve(j); }catch(e){} }
+  }
+  return fetch("menu.json?v="+Date.now(),{cache:"no-store"}).then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); });
+}
+function boot(){
+  loadMenu().then(function(data){ DATA=data; renderAll(); handleHash(true); }).catch(function(err){
+    $("menu").innerHTML='<div class="err">'+esc(T.loadErr)+'<br><small>'+esc(err.message||err)+'</small><br><button id="retry">'+esc(T.retry)+'</button></div>';
+    $("retry").addEventListener("click",boot);
+  });
+}
+window.addEventListener("message",function(ev){ // draft handed over by gestao.html when storage is unavailable
+  if(ev.origin!==location.origin||!ev.data||ev.data.type!=="luna-draft") return;
+  DATA=ev.data.data; $("previewBar").hidden=false; renderAll();
+});
+if(location.hash==="#preview"&&window.opener){ try{ window.opener.postMessage({type:"luna-preview-ready"},location.origin); }catch(e){} }
+
+/* ---------- rendering ---------- */
+function usedAllergens(){
+  var set={}; DATA.categories.forEach(function(c){ c.items.forEach(function(it){ (it.allergens||[]).forEach(function(a){ set[a]=1; }); }); });
+  return Object.keys(DATA.allergens).filter(function(k){ return set[k]; });
+}
+function renderFilters(){
+  var f=$("filters");
+  f.innerHTML='<span class="lbl">'+esc(T.without)+'</span>'+usedAllergens().map(function(k){
+    return '<button type="button" data-a="'+k+'" aria-pressed="'+(excluded[k]?"true":"false")+'">'+esc(tv(DATA.allergens[k],L))+'</button>';
+  }).join("");
+  f.querySelectorAll("button").forEach(function(b){ b.addEventListener("click",function(){ var k=b.dataset.a; if(excluded[k]) delete excluded[k]; else excluded[k]=1; b.setAttribute("aria-pressed",excluded[k]?"true":"false"); applyFilters(); }); });
+}
+function renderChips(){
+  var c=$("chips");
+  c.innerHTML=DATA.categories.map(function(cat){ return '<a href="#'+cat.id+'" data-cat="'+cat.id+'">'+esc(tv(cat.title,L))+'</a>'; }).join("");
+  c.querySelectorAll("a").forEach(function(a){ a.addEventListener("click",function(){ setActiveChip(a.dataset.cat); lockUntil=Date.now()+900; setTimeout(function(){updateActive(true);},950); }); });
+  activeCat=null; syncOffsets();
+}
+function itemHtml(it){
+  var pills=(it.allergens||[]).map(function(k){ return "<span>"+esc(tv(DATA.allergens[k],L))+"</span>"; }).join("");
+  var desc=it.desc?'<div class="desc">'+esc(tv(it.desc,L))+'</div>':"";
+  var algInline=(pills&&!it.desc)?' <span class="alg alg-inline" aria-label="'+T.alg+'">'+pills+'</span>':"";
+  var algBlock=(pills&&it.desc)?'<div class="alg" aria-label="'+T.alg+'">'+pills+'</div>':"";
+  var out=it.soldOut?'<span class="badge-out">'+T.soldOut+'</span>':"";
+  var name=tv(it.name,L);
+  return '<article class="item'+(it.soldOut?" out":"")+'" id="it-'+it.id+'" data-id="'+it.id+'" data-s="'+esc(norm(name+" "+tv(it.desc,L)))+'" data-a="'+(it.allergens||[]).join(" ")+'" tabindex="0" aria-label="'+esc(name)+(it.soldOut?", "+T.soldOut:"")+'">'+
+    '<div class="row"><div class="name">'+esc(name)+algInline+'</div>'+out+'<div class="price">'+price(it.price)+'</div></div>'+desc+algBlock+
+    '<div class="actions" hidden><button type="button" data-act="share"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v13"/><path d="m7 8 5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg> '+T.share+'</button><button type="button" data-act="copy"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg> '+T.copy+'</button></div>'+
+  '</article>';
+}
+function renderMenu(){
+  var m=$("menu");
+  m.innerHTML=DATA.categories.map(function(cat){
+    var visible=cat.items.filter(function(it){ return it.sub||!it.hidden; });
+    if(!visible.some(function(it){return !it.sub;})) return "";
+    var html='<section class="cat" id="'+cat.id+'" data-s="'+esc(norm(tv(cat.title,L)))+'"><h2 class="cat-title">'+esc(tv(cat.title,L))+'</h2>';
+    if(cat.note) html+='<div class="cat-note">'+esc(tv(cat.note,L))+'</div>';
+    html+='<div class="card">'+visible.map(function(it){ return it.sub?'<div class="sub-h">'+esc(tv(it.sub,L))+'</div>':itemHtml(it); }).join("")+'</div></section>';
+    return html;
+  }).join("")+'<div class="empty" id="empty" hidden>'+esc(T.noItems)+'</div>';
+  $("ivaNote").textContent=tv(DATA.info.iva,L);
+  $("legalNote").textContent=tv(DATA.info.legal,L);
+  renderFooter();
+  renderAnnouncement();
+  applyFilters();
+  updateActive(true);
+}
+function hoursText(h){
+  var closed=(h.closedDays||[]).slice().sort();
+  var range=h.open+"–"+h.close;
+  var s=closed.length?T.open+" "+range+" · "+T.closed+" "+closed.map(function(d){ var x=DAYS_PT[d]; return (x[1]==="f"?"à ":"ao ")+x[0]; }).reduce(function(acc,cur,i,arr){ return acc+(i===0?"":(i===arr.length-1?" e ":", "))+cur; },""):T.allDays+" · "+range;
+  var note=tv(h.note,L); if(note) s+=" ("+note+")";
+  return s;
+}
+function renderFooter(){
+  var i=DATA.info;
+  $("footerInfo").innerHTML="🕙 "+esc(hoursText(i.hours))+"<br>📍 "+esc(i.place)+'<br><a class="map" href="'+esc(i.mapUrl)+'" target="_blank" rel="noopener">🗺️ '+T.map+'</a>';
+  var d=new Date(DATA.updatedAt); var when=isNaN(d)?"":new Intl.DateTimeFormat("pt-PT",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}).format(d);
+  $("updated").textContent=when?T.updated+": "+when:"";
+  var openDays=[0,1,2,3,4,5,6].filter(function(d){ return (i.hours.closedDays||[]).indexOf(d)<0; }).map(function(d){ return DAY_LD[d]; });
+  $("ld").textContent=JSON.stringify({"@context":"https://schema.org","@type":"BarOrPub","name":i.name,"url":"https://costalunaunip-hub.github.io/luna-menu/","menu":"https://costalunaunip-hub.github.io/luna-menu/","image":"https://costalunaunip-hub.github.io/luna-menu/luna-og.jpg","priceRange":"€","address":{"@type":"PostalAddress","addressLocality":"Praia da Vagueira, Vagos","addressRegion":"Aveiro","addressCountry":"PT"},"openingHoursSpecification":{"@type":"OpeningHoursSpecification","dayOfWeek":openDays,"opens":i.hours.open,"closes":i.hours.close}});
+}
+function renderAnnouncement(){
+  var a=$("announce"), msg=tv(DATA.info.announcement,L).trim();
+  var dismissed=false; try{ dismissed=sessionStorage.getItem("lunaAnnDismissed")===msg; }catch(e){}
+  if(!msg||dismissed){ a.hidden=true; a.innerHTML=""; return; }
+  a.innerHTML='<div><span class="ic" aria-hidden="true">📣</span><p>'+esc(msg)+'</p><button type="button" aria-label="Fechar aviso">✕</button></div>'; a.hidden=false;
+  a.querySelector("button").addEventListener("click",function(){ a.hidden=true; try{ sessionStorage.setItem("lunaAnnDismissed",msg); }catch(e){} });
+}
+function renderAll(){ renderFilters(); renderChips(); renderMenu(); }
+
+/* ---------- search + allergen filter ---------- */
+function applyFilters(){
+  var q=norm(query.trim()), ex=Object.keys(excluded), shown=0, total=0;
+  document.querySelectorAll("section.cat").forEach(function(sec){
+    var catMatch=q&&sec.dataset.s.indexOf(q)>=0, any=false;
+    sec.querySelectorAll(".item").forEach(function(el){
+      total++;
+      var hit=!q||catMatch||el.dataset.s.indexOf(q)>=0;
+      if(hit&&ex.length){ var a=el.dataset.a.split(" "); hit=!ex.some(function(k){ return a.indexOf(k)>=0; }); }
+      el.hidden=!hit; if(hit){ any=true; shown++; }
+    });
+    // hide sub-headers that have no visible item until the next sub-header
+    var subs=sec.querySelectorAll(".sub-h");
+    subs.forEach(function(sh){ var n=sh.nextElementSibling, vis=false; while(n&&!n.classList.contains("sub-h")){ if(!n.hidden){vis=true;break;} n=n.nextElementSibling; } sh.hidden=!vis; });
+    sec.hidden=!any;
+    var chip=document.querySelector('.chips a[data-cat="'+sec.id+'"]'); if(chip) chip.hidden=!any;
+  });
+  $("empty").hidden=shown>0;
+  var st=$("status");
+  if(q) st.innerHTML=T.results(shown,query.trim())+(ex.length?" · "+T.hiding(ex.map(function(k){return esc(tv(DATA.allergens[k],L));}),shown):"");
+  else if(ex.length) st.innerHTML=T.hiding(ex.map(function(k){return esc(tv(DATA.allergens[k],L));}),shown)+'<button type="button" id="clearEx">'+T.clear+'</button>';
+  else st.innerHTML="";
+  var ce=$("clearEx"); if(ce) ce.addEventListener("click",function(){ excluded={}; renderFilters(); applyFilters(); });
+  activeCat=null; updateActive(true);
+}
+var qT=null;
+$("q").addEventListener("input",function(){ query=this.value; $("qClear").hidden=!query; clearTimeout(qT); qT=setTimeout(applyFilters,120); });
+$("qClear").addEventListener("click",function(){ $("q").value=""; query=""; this.hidden=true; applyFilters(); $("q").focus(); });
+
+/* ---------- item interaction (delegated) ---------- */
+$("menu").addEventListener("click",function(ev){
+  var act=ev.target.closest("button[data-act]");
+  if(act){ var el=act.closest(".item"), it=findItem(el.dataset.id), url=baseUrl()+"#it-"+el.dataset.id, txt=tv(it.name,L)+" · "+price(it.price)+" · Luna Bar";
+    if(act.dataset.act==="share") share(tv(it.name,L)+" · Luna Bar",txt,url); else copyText(url).then(function(ok){ toast(ok?T.copied:T.shareFail); });
+    return; }
+  var item=ev.target.closest(".item"); if(item) toggleItem(item);
+});
+$("menu").addEventListener("keydown",function(ev){ if((ev.key==="Enter"||ev.key===" ")&&ev.target.classList.contains("item")){ ev.preventDefault(); toggleItem(ev.target); } });
+function toggleItem(el,forceOpen){
+  var open=forceOpen||!el.classList.contains("open");
+  if(openItem&&openItem!==el){ openItem.classList.remove("open"); openItem.querySelector(".actions").hidden=true; }
+  el.classList.toggle("open",open); el.querySelector(".actions").hidden=!open; openItem=open?el:null;
+}
+function findItem(id){ var f=null; DATA.categories.forEach(function(c){ c.items.forEach(function(it){ if(it.id===id) f=it; }); }); return f; }
+function handleHash(initial){
+  var h=location.hash||"";
+  if(h.indexOf("#it-")===0){ var el=document.getElementById(h.slice(1)); if(el){ el.hidden=false; el.closest("section").hidden=false; setTimeout(function(){ jumpTo(el); },initial?150:0); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); toggleItem(el,true); el.focus({preventScroll:true}); } }
+  else if(h.length>1&&h!=="#preview"){ var sec=document.getElementById(h.slice(1)); if(sec&&initial) setTimeout(function(){ sec.scrollIntoView(); setActiveChip(sec.id); },150); }
+}
+function jumpTo(el){ // instant jump for deep links (smooth scrolling is for in-page navigation only)
+  var root=document.documentElement, prev=root.style.scrollBehavior; root.style.scrollBehavior="auto";
+  el.scrollIntoView({block:"center"}); root.style.scrollBehavior=prev; updateActive(true);
+}
+window.addEventListener("hashchange",function(){ handleHash(false); });
+
+/* ---------- sticky bar + active category ---------- */
+function syncOffsets(){ var w=$("chipsWrap"); if(w) document.documentElement.style.setProperty("--barH",w.offsetHeight+"px"); }
+window.addEventListener("resize",syncOffsets); window.addEventListener("load",syncOffsets);
+function setActiveChip(id){
+  if(id===activeCat) return; activeCat=id;
+  var bar=$("chips"); bar.querySelectorAll("a").forEach(function(a){ a.classList.toggle("active",a.dataset.cat===id); });
+  var chip=bar.querySelector('a[data-cat="'+id+'"]');
+  if(chip){ var left=chip.offsetLeft-(bar.clientWidth-chip.offsetWidth)/2; try{ bar.scrollTo({left:Math.max(0,left),behavior:"smooth"}); }catch(e){ bar.scrollLeft=Math.max(0,left); } }
+}
+function updateActive(force){
+  if(!force&&Date.now()<lockUntil) return;
+  var barH=($("chipsWrap")||{}).offsetHeight||52, y=window.scrollY+barH+24;
+  var secs=Array.prototype.filter.call(document.querySelectorAll("section.cat"),function(s){ return !s.hidden; });
+  if(!secs.length) return;
+  var cur=secs[0].id; secs.forEach(function(s){ if(s.offsetTop<=y) cur=s.id; });
+  if(window.innerHeight+window.scrollY>=document.documentElement.scrollHeight-2) cur=secs[secs.length-1].id;
+  setActiveChip(cur);
+  var bt=$("backTop"); if(bt) bt.classList.toggle("show",window.scrollY>700);
+}
+window.addEventListener("scroll",function(){ if(ticking) return; ticking=true; requestAnimationFrame(function(){ ticking=false; updateActive(false); }); },{passive:true});
+$("backTop").addEventListener("click",function(){ window.scrollTo({top:0,behavior:"smooth"}); });
+
+boot();
+</script>
+</body>
+</html>

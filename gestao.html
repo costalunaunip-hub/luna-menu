@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="pt" data-page="gestao">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#f3ebdb" id="metaTheme">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%8C%99%3C/text%3E%3C/svg%3E">
+<title>Luna · Gestão do menu</title>
+<style>
+/* Utilitarian editor for menu.json. Same palette as the public menu; forms first, 44px targets, phone-first. */
+@font-face{font-family:"Fraunces";font-style:normal;font-weight:600;font-display:swap;src:url(fraunces-600.woff2) format("woff2")}
+:root{
+  --bg:#f3ebdb; --bg-rgb:243,235,219; --card:#fffdf8; --line:rgba(88,66,36,.14); --hair:rgba(88,66,36,.10);
+  --ink:#22302f; --muted:#5b6866; --teal:#2f6b66; --teal-ink:#245a55; --teal-soft:rgba(47,107,102,.10); --on-teal:#fff;
+  --terra:#a8502a; --terra-soft:rgba(168,80,42,.12); --ok:#2f6b3a; --ok-soft:rgba(47,107,58,.12); --warn:#8a6a1a; --warn-soft:rgba(190,150,40,.16);
+  --field:#fff; --focus:#2f6b66; --shadow:0 1px 2px rgba(50,36,12,.05),0 10px 28px -14px rgba(50,36,12,.22);
+  --display:"Fraunces",Georgia,serif; --body:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#16201f; --bg-rgb:22,32,31; --card:#1f2b2a; --line:rgba(237,230,216,.14); --hair:rgba(237,230,216,.09);
+  --ink:#ede6d8; --muted:#a9b3b0; --teal:#7fb8b2; --teal-ink:#9fd0ca; --teal-soft:rgba(127,184,178,.14); --on-teal:#10201e;
+  --terra:#e0916a; --terra-soft:rgba(224,145,106,.16); --ok:#8fcf9a; --ok-soft:rgba(143,207,154,.14); --warn:#e6c26a; --warn-soft:rgba(230,194,106,.14);
+  --field:#1a2423; --focus:#9fd0ca; --shadow:0 1px 2px rgba(0,0,0,.25),0 10px 28px -14px rgba(0,0,0,.5); color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#16201f; --bg-rgb:22,32,31; --card:#1f2b2a; --line:rgba(237,230,216,.14); --hair:rgba(237,230,216,.09);
+  --ink:#ede6d8; --muted:#a9b3b0; --teal:#7fb8b2; --teal-ink:#9fd0ca; --teal-soft:rgba(127,184,178,.14); --on-teal:#10201e;
+  --terra:#e0916a; --terra-soft:rgba(224,145,106,.16); --ok:#8fcf9a; --ok-soft:rgba(143,207,154,.14); --warn:#e6c26a; --warn-soft:rgba(230,194,106,.14);
+  --field:#1a2423; --focus:#9fd0ca; --shadow:0 1px 2px rgba(0,0,0,.25),0 10px 28px -14px rgba(0,0,0,.5); color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:var(--body);font-size:16px;color:var(--ink);background:var(--bg);line-height:1.4}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+[hidden]{display:none!important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+h1,h2,h3{margin:0}
+.wrap{max-width:760px;margin:0 auto;padding:0 14px calc(120px + env(safe-area-inset-bottom,0px))}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:rgba(var(--bg-rgb),.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--hair)}
+.top .in{max-width:760px;margin:0 auto;padding:10px 14px;display:flex;align-items:center;gap:10px}
+.top h1{font-family:var(--display);font-weight:600;font-size:1.25rem;flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top h1 small{font-family:var(--body);font-weight:600;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--teal-ink);margin-left:8px}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 10px;font-size:.74rem;font-weight:700;letter-spacing:.02em;white-space:nowrap}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.warn{background:var(--warn-soft);color:var(--warn)} .pill.err{background:var(--terra-soft);color:var(--terra)} .pill.mut{background:var(--teal-soft);color:var(--teal-ink)}
+.iconbtn{flex:0 0 auto;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--card);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:1rem;color:var(--teal-ink)}
+
+/* sections */
+.sec{margin-top:22px}
+.sec>h2{font-family:var(--display);font-weight:600;font-size:1.3rem;color:var(--terra);margin:0 0 8px 4px}
+.sec .hint{font-size:.8rem;color:var(--muted);margin:-4px 0 10px 4px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+.pad{padding:14px}
+label.f{display:block;font-size:.74rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.inp{width:100%;min-height:44px;border:1px solid var(--line);border-radius:12px;background:var(--field);padding:10px 12px;font-size:1rem}
+textarea.inp{min-height:70px;resize:vertical;line-height:1.4}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.days{display:flex;flex-wrap:wrap;gap:6px}
+.days button{min-height:40px;min-width:44px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--field);font-weight:600;font-size:.86rem;cursor:pointer}
+.days button[aria-pressed="true"]{background:var(--teal);border-color:var(--teal);color:var(--on-teal)}
+.days button[aria-pressed="false"]{text-decoration:line-through;color:var(--muted)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{min-height:44px;padding:10px 16px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;justify-content:center}
+.btn.primary{background:var(--teal);border-color:var(--teal);color:var(--on-teal)}
+.btn.danger{color:var(--terra);border-color:var(--terra)}
+.btn.danger.arm{background:var(--terra);color:#fff}
+.btn.sm{min-height:36px;padding:6px 12px;font-size:.84rem}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* categories */
+.cat{margin-top:12px}
+.cat-h{display:flex;align-items:center;gap:8px;padding:10px 10px 10px 14px;cursor:pointer;user-select:none}
+.cat-h .t{flex:1 1 auto;min-width:0;font-weight:700;font-size:1.02rem}
+.cat-h .n{font-size:.76rem;color:var(--muted);white-space:nowrap}
+.cat-h .chev{width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);transition:transform .2s}
+.cat.open .cat-h .chev{transform:rotate(90deg)}
+.cat-body{border-top:1px solid var(--hair)}
+.cat-tools{display:flex;gap:6px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--hair);background:var(--teal-soft)}
+.cat-tools .inp{flex:1 1 160px;min-height:40px}
+.mini{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--card);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:var(--teal-ink);flex:0 0 auto}
+.mini:disabled{opacity:.3;cursor:default}
+
+/* item rows */
+.it{border-top:1px solid var(--hair);padding:10px 12px 10px 14px}
+.it:first-child{border-top:none}
+.it.hid{background:repeating-linear-gradient(135deg,transparent 0 8px,var(--hair) 8px 9px)}
+.it .l1{display:flex;align-items:center;gap:8px}
+.it .name{flex:1 1 auto;min-width:0;border:1px solid transparent;background:transparent;padding:8px 8px;border-radius:10px;font-weight:600;font-size:1rem;min-height:40px}
+.it .name:focus,.it .price:focus{border-color:var(--line);background:var(--field)}
+.it .price{width:78px;flex:0 0 auto;text-align:right;border:1px solid transparent;background:transparent;padding:8px 6px;border-radius:10px;font-weight:600;font-variant-numeric:tabular-nums;min-height:40px;color:var(--teal-ink)}
+.it .eur{color:var(--muted);font-size:.9rem;margin-left:-4px}
+.it .l2{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px;padding-left:2px}
+.tog{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:4px 10px 4px 6px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:.8rem;font-weight:600;cursor:pointer;color:var(--muted)}
+.tog i{width:30px;height:18px;border-radius:999px;background:var(--line);position:relative;transition:background .15s;flex:0 0 auto}
+.tog i::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .15s;box-shadow:0 1px 2px rgba(0,0,0,.3)}
+.tog[aria-pressed="true"]{color:var(--ink)}
+.tog[aria-pressed="true"] i{background:var(--terra)} .tog[aria-pressed="true"] i::after{transform:translateX(12px)}
+.tog.hide[aria-pressed="true"] i{background:var(--muted)}
+.it .more{margin-left:auto}
+.it.sub .name{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--teal-ink)}
+.it .det{margin-top:10px;padding:12px;border-radius:12px;background:var(--teal-soft);display:grid;gap:10px}
+.algs{display:flex;flex-wrap:wrap;gap:6px}
+.algs label{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:.8rem;font-weight:600;cursor:pointer;background:var(--card);min-height:34px}
+.algs input{margin:0;width:16px;height:16px;accent-color:var(--terra)}
+.algs label.on{border-color:var(--terra);background:var(--terra-soft)}
+.lang{font-size:.78rem;color:var(--muted);line-height:1.5}
+.lang b{color:var(--ink);font-weight:600}
+.badge{font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:2px 6px;border:1.5px solid currentColor}
+.badge.out{color:var(--terra)} .badge.new{color:var(--ok)}
+.add{padding:10px 14px;border-top:1px solid var(--hair);display:flex;gap:8px;flex-wrap:wrap}
+
+/* publish dock */
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(var(--bg-rgb),.96);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--hair);padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px))}
+.dock .in{max-width:760px;margin:0 auto;display:flex;gap:8px;align-items:center}
+.dock .cnt{flex:1 1 auto;min-width:0;font-size:.84rem;color:var(--muted)}
+.dock .cnt b{color:var(--ink)}
+
+/* publish sheet */
+.sheet{position:fixed;left:0;right:0;bottom:0;top:0;z-index:50;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}
+.sheet .box{background:var(--bg);width:100%;max-width:760px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));box-shadow:var(--shadow)}
+.sheet h2{font-family:var(--display);font-weight:600;font-size:1.3rem;color:var(--terra);margin-bottom:10px}
+.diff{margin:0;padding:0;list-style:none;display:grid;gap:6px;font-size:.9rem}
+.diff li{padding:8px 10px;border-radius:10px;background:var(--card);border:1px solid var(--line)}
+.diff li.n{border-color:var(--ok)} .diff li.d{border-color:var(--terra)}
+.diff .k{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-right:6px}
+.log{font-family:var(--mono);font-size:.78rem;white-space:pre-wrap;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;max-height:160px;overflow:auto;margin-top:10px;line-height:1.5}
+.note{font-size:.82rem;color:var(--muted);line-height:1.5}
+.note code{font-family:var(--mono);font-size:.8em;background:var(--teal-soft);padding:1px 5px;border-radius:5px}
+details.cfg{border:1px solid var(--line);border-radius:14px;background:var(--card);margin-top:12px}
+details.cfg summary{padding:12px 14px;cursor:pointer;font-weight:600;list-style:none;display:flex;align-items:center;gap:8px}
+details.cfg summary::-webkit-details-marker{display:none}
+details.cfg .pad{border-top:1px solid var(--hair);display:grid;gap:10px}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);z-index:60;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:.88rem;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:calc(100vw - 32px);text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.resume{margin:14px 0 0;padding:12px 14px;border-radius:14px;background:var(--warn-soft);border:1px solid var(--warn);display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:.9rem}
+.resume span{flex:1 1 200px}
+@media(min-width:600px){.it .l1{gap:10px}.it .price{width:90px}}
+</style>
+</head>
+<body>
+<header class="top"><div class="in">
+  <h1>Luna <small>Gestão</small></h1>
+  <span class="pill mut" id="srcPill">a carregar…</span>
+  <button class="iconbtn" id="themeBtn" aria-label="Alternar tema" title="Tema">☾</button>
+  <a class="iconbtn" href="index.html" target="_blank" rel="noopener" aria-label="Abrir o menu público" title="Menu público">🌙</a>
+</div></header>
+
+<main class="wrap">
+  <div id="resume" hidden></div>
+
+  <section class="sec" id="secInfo">
+    <h2>Aviso no topo do menu</h2>
+    <p class="hint">Aparece por cima do menu enquanto tiver texto. Apague o texto para o retirar.</p>
+    <div class="card pad">
+      <label class="f" for="ann">Mensagem</label>
+      <textarea class="inp" id="ann" placeholder="ex.: Hoje encerramos às 20:00 · Concerto sábado às 18h"></textarea>
+    </div>
+  </section>
+
+  <section class="sec">
+    <h2>Horário</h2>
+    <p class="hint">Toque num dia para o marcar como encerrado. O rodapé e os dados para o Google são gerados a partir daqui.</p>
+    <div class="card pad" style="display:grid;gap:12px">
+      <div class="grid2">
+        <div><label class="f" for="hOpen">Abre</label><input class="inp" id="hOpen" type="time" step="300"></div>
+        <div><label class="f" for="hClose">Fecha</label><input class="inp" id="hClose" type="time" step="300"></div>
+      </div>
+      <div><label class="f">Dias</label><div class="days" id="days"></div></div>
+      <div><label class="f" for="hNote">Nota (opcional)</label><input class="inp" id="hNote" placeholder="pode variar com a época"></div>
+      <div class="note" id="hPreview"></div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <h2>Categorias e itens</h2>
+    <p class="hint">Toque numa categoria para abrir. <b>Esgotado</b> mantém o item visível, riscado. <b>Oculto</b> retira-o do menu sem o apagar (útil para itens sazonais).</p>
+    <div id="cats"></div>
+    <div class="row" style="margin-top:12px"><button class="btn" id="addCat">+ Nova categoria</button></div>
+  </section>
+</main>
+
+<div class="dock"><div class="in">
+  <div class="cnt" id="cnt">Sem alterações</div>
+  <button class="btn" id="previewBtn">Pré-visualizar</button>
+  <button class="btn primary" id="publishBtn">Publicar…</button>
+</div></div>
+
+<div class="sheet" id="sheet" hidden><div class="box" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="row" style="justify-content:space-between"><h2 id="sheetTitle">Publicar alterações</h2><button class="btn sm" id="sheetClose">Fechar</button></div>
+  <ul class="diff" id="diff"></ul>
+  <div class="row" style="margin-top:12px">
+    <button class="btn primary" id="doPublish">Publicar no site</button>
+    <button class="btn" id="copyJson">Copiar JSON</button>
+    <button class="btn" id="dlJson">Descarregar menu.json</button>
+    <button class="btn danger" id="discard">Descartar alterações</button>
+  </div>
+  <div class="log" id="log" hidden></div>
+  <details class="cfg" id="cfg">
+    <summary>⚙ Ligação ao GitHub <span class="pill mut" id="cfgPill"></span></summary>
+    <div class="pad">
+      <p class="note">Para publicar directamente a partir daqui é preciso um <b>token de acesso pessoal</b> do GitHub (fine-grained), limitado a este repositório com permissão <code>Contents: Read and write</code>. O token fica guardado <b>apenas neste dispositivo</b> (armazenamento do navegador) e pode ser revogado em qualquer altura em github.com → Settings → Developer settings. Sem token, use «Copiar JSON» ou «Descarregar» e substitua o ficheiro <code>menu.json</code> na interface web do GitHub.</p>
+      <div class="grid2">
+        <div><label class="f" for="cOwner">Utilizador/organização</label><input class="inp" id="cOwner" autocapitalize="off"></div>
+        <div><label class="f" for="cRepo">Repositório</label><input class="inp" id="cRepo" autocapitalize="off"></div>
+        <div><label class="f" for="cBranch">Ramo</label><input class="inp" id="cBranch" autocapitalize="off"></div>
+        <div><label class="f" for="cPath">Ficheiro</label><input class="inp" id="cPath" autocapitalize="off"></div>
+      </div>
+      <div><label class="f" for="cToken">Token</label><input class="inp" id="cToken" type="password" autocomplete="off" placeholder="github_pat_…"></div>
+      <div class="row">
+        <button class="btn sm" id="cTest">Testar ligação</button>
+        <button class="btn sm" id="cSave">Guardar neste dispositivo</button>
+        <button class="btn sm danger" id="cForget">Esquecer token</button>
+      </div>
+      <div class="note" id="cMsg"></div>
+    </div>
+  </details>
+</div></div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ============================================================
+   Luna · Gestão — edits menu.json and publishes it through the GitHub
+   Contents API (token stays in this browser) or hands the JSON over.
+   ============================================================ */
+var L="pt";
+var DEF={owner:"costalunaunip-hub",repo:"luna-menu",branch:"main",path:"menu.json"};
+var DAYS=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+var DAYS_PT=[["domingo","m"],["segunda","f"],["terça","f"],["quarta","f"],["quinta","f"],["sexta","f"],["sábado","m"]];
+var ORIG=null, DATA=null, SHA=null, SOURCE="", openCats={}, openItems={}, previewWin=null;
+
+function $(id){ return document.getElementById(id); }
+function tv(v,lang){ if(v==null) return ""; if(typeof v==="string") return v; return v[lang]||v.pt||v.en||""; }
+function esc(s){ return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+function slug(s){ return String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,""); }
+function fmt(p){ return Number(p).toFixed(2).replace(".",","); }
+function parsePrice(s){ var n=Number(String(s).trim().replace(/\s|€/g,"").replace(",",".")); return isFinite(n)&&n>=0?Math.round(n*100)/100:null; }
+function store(k,v){ try{ if(v===undefined) return localStorage.getItem(k); if(v===null) localStorage.removeItem(k); else localStorage.setItem(k,v); return true; }catch(e){ return null; } }
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function setText(obj,key,val){ // keep multilingual objects; write PT
+  if(obj[key]==null||typeof obj[key]==="string") obj[key]={pt:val}; else obj[key].pt=val;
+}
+var toastT=null; function toast(m){ var t=$("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(function(){t.classList.remove("show");},2400); }
+
+/* ---------- theme ---------- */
+(function(){ var t=store("lunaTheme"); if(t==="dark"||t==="light") document.documentElement.setAttribute("data-theme",t); syncTheme(); })();
+function isDark(){ var t=document.documentElement.getAttribute("data-theme"); if(t) return t==="dark"; return window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches; }
+function syncTheme(){ $("metaTheme").setAttribute("content",isDark()?"#16201f":"#f3ebdb"); $("themeBtn").textContent=isDark()?"☀":"☾"; }
+$("themeBtn").addEventListener("click",function(){ var n=isDark()?"light":"dark"; document.documentElement.setAttribute("data-theme",n); store("lunaTheme",n); syncTheme(); });
+
+/* ---------- config ---------- */
+function cfg(){ var c=null; try{ c=JSON.parse(store("lunaGh")||"null"); }catch(e){} c=c||{}; return {owner:c.owner||DEF.owner,repo:c.repo||DEF.repo,branch:c.branch||DEF.branch,path:c.path||DEF.path,token:c.token||""}; }
+function apiUrl(c){ return "https://api.github.com/repos/"+c.owner+"/"+c.repo+"/contents/"+c.path; }
+function pagesUrl(c){ return "https://"+c.owner+".github.io/"+c.repo+"/"+c.path; }
+function ghHeaders(c){ var h={"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"}; if(c.token) h["Authorization"]="Bearer "+c.token; return h; }
+function fillCfg(){ var c=cfg(); $("cOwner").value=c.owner; $("cRepo").value=c.repo; $("cBranch").value=c.branch; $("cPath").value=c.path; $("cToken").value=c.token; $("cfgPill").textContent=c.token?"token guardado":"sem token"; $("cfgPill").className="pill "+(c.token?"ok":"warn"); }
+function readCfg(){ return {owner:$("cOwner").value.trim(),repo:$("cRepo").value.trim(),branch:$("cBranch").value.trim()||"main",path:$("cPath").value.trim()||"menu.json",token:$("cToken").value.trim()}; }
+$("cSave").addEventListener("click",function(){ var c=readCfg(); if(store("lunaGh",JSON.stringify(c))===null) return $("cMsg").textContent="Não foi possível guardar: o armazenamento do navegador está bloqueado neste ambiente."; fillCfg(); $("cMsg").textContent="Guardado neste dispositivo."; });
+$("cForget").addEventListener("click",function(){ var c=readCfg(); c.token=""; store("lunaGh",JSON.stringify(c)); $("cToken").value=""; fillCfg(); $("cMsg").textContent="Token removido deste dispositivo."; });
+$("cTest").addEventListener("click",function(){ var c=readCfg(); $("cMsg").textContent="A testar…";
+  fetch("https://api.github.com/repos/"+c.owner+"/"+c.repo,{headers:ghHeaders(c)}).then(function(r){ return r.json().then(function(j){ return {s:r.status,j:j}; }); }).then(function(x){
+    if(x.s===200) $("cMsg").textContent="Ligação OK · "+x.j.full_name+(x.j.permissions&&x.j.permissions.push?" · permissão de escrita ✓":" · sem permissão de escrita (token em falta ou insuficiente)");
+    else $("cMsg").textContent="Erro "+x.s+": "+(x.j.message||"");
+  }).catch(function(e){ $("cMsg").textContent="Sem acesso à API do GitHub a partir daqui ("+e.message+"). Na pré-visualização do Claude a rede está bloqueada; no site real funciona."; });
+});
+
+/* ---------- load ---------- */
+function b64utf8(str){ var bytes=new TextEncoder().encode(str), bin=""; for(var i=0;i<bytes.length;i+=8192) bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+8192)); return btoa(bin); }
+function utf8b64(b64){ var bin=atob(b64.replace(/\n/g,"")), bytes=new Uint8Array(bin.length); for(var i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i); return new TextDecoder().decode(bytes); }
+function load(){
+  var c=cfg(); setPill("a carregar…","mut");
+  var viaApi=fetch(apiUrl(c)+"?ref="+encodeURIComponent(c.branch)+"&t="+Date.now(),{headers:ghHeaders(c),cache:"no-store"}).then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+    .then(function(j){ SHA=j.sha; SOURCE="GitHub ("+c.branch+")"; return JSON.parse(utf8b64(j.content)); });
+  var viaLocal=function(){ return fetch("menu.json?v="+Date.now(),{cache:"no-store"}).then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); SHA=null; SOURCE="ficheiro local"; return r.json(); }); };
+  viaApi.catch(viaLocal).then(function(d){ ORIG=clone(d); DATA=clone(d); setPill(SOURCE,SHA?"ok":"warn"); render(); checkDraft(); })
+  .catch(function(e){ setPill("erro a carregar","err"); $("cats").innerHTML='<div class="card pad">Não foi possível carregar menu.json ('+esc(e.message)+').</div>'; });
+}
+function setPill(t,k){ $("srcPill").textContent=t; $("srcPill").className="pill "+k; }
+
+/* ---------- draft (autosave) ---------- */
+var saveT=null;
+function markDirty(){ clearTimeout(saveT); saveT=setTimeout(function(){ store("lunaAdminDraft",JSON.stringify({at:Date.now(),data:DATA})); },400); updateCount(); }
+function checkDraft(){
+  var raw=store("lunaAdminDraft"); if(!raw) return;
+  try{ var d=JSON.parse(raw); var n=diff(ORIG,d.data).length; if(!n){ store("lunaAdminDraft",null); return; }
+    var box=$("resume"); box.hidden=false; box.className="resume";
+    box.innerHTML='<span>Existe um rascunho não publicado neste dispositivo com <b>'+n+'</b> '+(n===1?'alteração':'alterações')+' ('+new Date(d.at).toLocaleString("pt-PT")+').</span><button class="btn sm primary" id="resumeYes">Retomar</button><button class="btn sm" id="resumeNo">Descartar</button>';
+    $("resumeYes").addEventListener("click",function(){ DATA=d.data; box.hidden=true; render(); updateCount(); });
+    $("resumeNo").addEventListener("click",function(){ store("lunaAdminDraft",null); box.hidden=true; });
+  }catch(e){}
+}
+
+/* ---------- diff ---------- */
+function indexItems(d){ var m={}; d.categories.forEach(function(c,ci){ c.items.forEach(function(it,ii){ m[it.id]={it:it,cat:c,ci:ci,ii:ii}; }); }); return m; }
+function diff(a,b){
+  var out=[]; if(!a||!b) return out;
+  if(tv(a.info.announcement,L)!==tv(b.info.announcement,L)) out.push({k:"aviso",t:tv(b.info.announcement,L)?'Aviso: «'+tv(b.info.announcement,L)+'»':'Aviso removido'});
+  if(JSON.stringify(a.info.hours)!==JSON.stringify(b.info.hours)) out.push({k:"horário",t:"Horário: "+hoursText(b.info.hours)});
+  var A=indexItems(a), B=indexItems(b);
+  var ca=a.categories.map(function(c){return c.id;}).join(","), cb=b.categories.map(function(c){return c.id;}).join(",");
+  b.categories.forEach(function(c){ var o=a.categories.filter(function(x){return x.id===c.id;})[0]; if(!o) out.push({k:"nova categoria",t:tv(c.title,L),cls:"n"}); else if(tv(o.title,L)!==tv(c.title,L)) out.push({k:"categoria",t:tv(o.title,L)+" → "+tv(c.title,L)}); });
+  a.categories.forEach(function(c){ if(!b.categories.some(function(x){return x.id===c.id;})) out.push({k:"categoria removida",t:tv(c.title,L),cls:"d"}); });
+  if(ca!==cb&&a.categories.length===b.categories.length&&a.categories.every(function(c){return b.categories.some(function(x){return x.id===c.id;})})) out.push({k:"ordem",t:"Ordem das categorias alterada"});
+  Object.keys(B).forEach(function(id){ var y=B[id], x=A[id], name=tv(y.it.sub||y.it.name,L), cat=tv(y.cat.title,L);
+    if(!x){ out.push({k:y.it.sub?"novo subtítulo":"novo",t:name+" ("+cat+")"+(y.it.sub?"":" · "+fmt(y.it.price)+" €"),cls:"n"}); return; }
+    var ch=[];
+    if(!y.it.sub){
+      if(Number(x.it.price)!==Number(y.it.price)) ch.push("preço "+fmt(x.it.price)+" € → "+fmt(y.it.price)+" €");
+      if(!!x.it.soldOut!==!!y.it.soldOut) ch.push(y.it.soldOut?"esgotado":"disponível de novo");
+      if(!!x.it.hidden!==!!y.it.hidden) ch.push(y.it.hidden?"oculto":"visível de novo");
+      if(tv(x.it.desc,L)!==tv(y.it.desc,L)) ch.push("descrição");
+      if((x.it.allergens||[]).join()!==(y.it.allergens||[]).join()) ch.push("alergénios");
+    }
+    if(tv(x.it.name||x.it.sub,L)!==name) ch.push("nome «"+tv(x.it.name||x.it.sub,L)+"» → «"+name+"»");
+    if(x.cat.id!==y.cat.id) ch.push("movido para "+cat);
+    else if(x.ii!==y.ii&&x.cat.items.length===y.cat.items.length) ch.push("reordenado");
+    if(ch.length) out.push({k:"alterado",t:name+": "+ch.join(", ")});
+  });
+  Object.keys(A).forEach(function(id){ if(!B[id]) out.push({k:"removido",t:tv(A[id].it.sub||A[id].it.name,L)+" ("+tv(A[id].cat.title,L)+")",cls:"d"}); });
+  return out;
+}
+function updateCount(){ var n=diff(ORIG,DATA).length; $("cnt").innerHTML=n?"<b>"+n+"</b> "+(n===1?"alteração por publicar":"alterações por publicar"):"Sem alterações"; document.title=(n?"● ":"")+"Luna · Gestão do menu"; }
+
+/* ---------- render ---------- */
+function hoursText(h){
+  var closed=(h.closedDays||[]).slice().sort(), range=h.open+"–"+h.close;
+  var s=closed.length?"Aberto "+range+" · Encerrado "+closed.map(function(d){ var x=DAYS_PT[d]; return (x[1]==="f"?"à ":"ao ")+x[0]; }).reduce(function(acc,cur,i,arr){ return acc+(i===0?"":(i===arr.length-1?" e ":", "))+cur; },""):"Aberto todos os dias · "+range;
+  var note=tv(h.note,L); if(note) s+=" ("+note+")"; return s;
+}
+function render(){
+  $("ann").value=tv(DATA.info.announcement,L);
+  var h=DATA.info.hours; $("hOpen").value=h.open; $("hClose").value=h.close; $("hNote").value=tv(h.note,L);
+  $("days").innerHTML=[1,2,3,4,5,6,0].map(function(d){ var open=(h.closedDays||[]).indexOf(d)<0; return '<button type="button" data-d="'+d+'" aria-pressed="'+open+'" aria-label="'+DAYS[d]+(open?" aberto":" encerrado")+'">'+DAYS[d]+'</button>'; }).join("");
+  $("days").querySelectorAll("button").forEach(function(b){ b.addEventListener("click",function(){ var d=Number(b.dataset.d), cd=h.closedDays=(h.closedDays||[]).slice(); var i=cd.indexOf(d); if(i>=0) cd.splice(i,1); else cd.push(d); cd.sort(); b.setAttribute("aria-pressed",i>=0?"true":"false"); $("hPreview").textContent="🕙 "+hoursText(h); markDirty(); }); });
+  $("hPreview").textContent="🕙 "+hoursText(h);
+  renderCats();
+  updateCount();
+}
+function renderCats(){
+  var O=indexItems(ORIG);
+  $("cats").innerHTML=DATA.categories.map(function(c,ci){
+    var items=c.items.filter(function(i){return !i.sub;}), out=items.filter(function(i){return i.soldOut;}).length, hid=items.filter(function(i){return i.hidden;}).length;
+    var meta=items.length+" itens"+(out?" · "+out+" esgotado"+(out>1?"s":""):"")+(hid?" · "+hid+" oculto"+(hid>1?"s":""):"");
+    var body=openCats[c.id]?'<div class="cat-body">'+
+      '<div class="cat-tools"><input class="inp" data-cat-title="'+c.id+'" value="'+esc(tv(c.title,L))+'" aria-label="Nome da categoria">'+
+      '<button class="mini" data-cat-move="'+c.id+'" data-dir="-1" '+(ci===0?"disabled":"")+' aria-label="Subir categoria">↑</button><button class="mini" data-cat-move="'+c.id+'" data-dir="1" '+(ci===DATA.categories.length-1?"disabled":"")+' aria-label="Descer categoria">↓</button>'+
+      (items.length?"":'<button class="btn sm danger" data-cat-del="'+c.id+'">Eliminar categoria</button>')+'</div>'+
+      c.items.map(function(it,ii){ return itemRow(c,it,ii,O); }).join("")+
+      '<div class="add"><button class="btn sm" data-add="'+c.id+'">+ Item</button><button class="btn sm" data-add-sub="'+c.id+'">+ Subtítulo</button></div>'+
+    '</div>':"";
+    return '<div class="card cat'+(openCats[c.id]?" open":"")+'" data-cat="'+c.id+'"><div class="cat-h" role="button" tabindex="0" aria-expanded="'+!!openCats[c.id]+'" data-cat-toggle="'+c.id+'"><span class="t">'+esc(tv(c.title,L))+'</span><span class="n">'+meta+'</span><span class="chev">›</span></div>'+body+'</div>';
+  }).join("");
+}
+function itemRow(c,it,ii,O){
+  var isNew=!O[it.id], last=c.items.length-1;
+  var move='<button class="mini" data-move="'+it.id+'" data-dir="-1" '+(ii===0?"disabled":"")+' aria-label="Subir">↑</button><button class="mini" data-move="'+it.id+'" data-dir="1" '+(ii===last?"disabled":"")+' aria-label="Descer">↓</button>';
+  if(it.sub) return '<div class="it sub" data-id="'+it.id+'"><div class="l1"><input class="name" data-f="sub" value="'+esc(tv(it.sub,L))+'" aria-label="Subtítulo">'+move+'<button class="btn sm danger" data-del="'+it.id+'" aria-label="Eliminar subtítulo">✕</button></div></div>';
+  var det=openItems[it.id]?'<div class="det">'+
+    '<div><label class="f">Descrição</label><textarea class="inp" data-f="desc" rows="2" placeholder="ingredientes, notas…">'+esc(tv(it.desc,L))+'</textarea></div>'+
+    '<div><label class="f">Alergénios</label><div class="algs">'+Object.keys(DATA.allergens).map(function(k){ var on=(it.allergens||[]).indexOf(k)>=0; return '<label class="'+(on?"on":"")+'"><input type="checkbox" data-alg="'+k+'" '+(on?"checked":"")+'>'+esc(tv(DATA.allergens[k],L))+'</label>'; }).join("")+'</div></div>'+
+    (typeof it.name==="object"&&Object.keys(it.name).length>1?'<div class="lang">Traduções actuais: '+["es","en","fr","de","nl"].map(function(l){ return '<b>'+l.toUpperCase()+'</b> '+esc(it.name[l]||"—"); }).join(" · ")+'<br><span>As traduções mantêm-se como estão; a edição multilingue vem na fase seguinte. Itens novos aparecem em português nas outras línguas até serem traduzidos.</span></div>':'<div class="lang">Sem traduções: nas outras línguas este item aparece em português.</div>')+
+    '<div class="row"><button class="btn sm danger" data-del="'+it.id+'">Eliminar item</button></div>'+
+  '</div>':"";
+  return '<div class="it'+(it.hidden?" hid":"")+'" data-id="'+it.id+'">'+
+    '<div class="l1"><input class="name" data-f="name" value="'+esc(tv(it.name,L))+'" aria-label="Nome do item"><input class="price" data-f="price" inputmode="decimal" value="'+fmt(it.price)+'" aria-label="Preço"><span class="eur">€</span></div>'+
+    '<div class="l2">'+(isNew?'<span class="badge new">novo</span>':"")+
+      '<button type="button" class="tog" data-tog="soldOut" aria-pressed="'+!!it.soldOut+'"><i></i>Esgotado</button>'+
+      '<button type="button" class="tog hide" data-tog="hidden" aria-pressed="'+!!it.hidden+'"><i></i>Oculto</button>'+
+      '<span class="more row" style="gap:4px">'+move+'<button class="mini" data-more="'+it.id+'" aria-expanded="'+!!openItems[it.id]+'" aria-label="Mais opções">'+(openItems[it.id]?"▴":"⋯")+'</button></span>'+
+    '</div>'+det+'</div>';
+}
+
+/* ---------- events (delegated) ---------- */
+function findItem(id){ var r=null; DATA.categories.forEach(function(c){ c.items.forEach(function(it,ii){ if(it.id===id) r={it:it,cat:c,ii:ii}; }); }); return r; }
+$("cats").addEventListener("click",function(ev){
+  var t=ev.target, b;
+  if((b=t.closest("[data-cat-toggle]"))){ var id=b.dataset.catToggle; openCats[id]=!openCats[id]; renderCats(); return; }
+  if((b=t.closest("[data-cat-move]"))){ var i=DATA.categories.findIndex(function(c){return c.id===b.dataset.catMove;}), j=i+Number(b.dataset.dir); if(j<0||j>=DATA.categories.length) return; var tmp=DATA.categories[i]; DATA.categories[i]=DATA.categories[j]; DATA.categories[j]=tmp; renderCats(); markDirty(); return; }
+  if((b=t.closest("[data-cat-del]"))){ arm(b,function(){ DATA.categories=DATA.categories.filter(function(c){return c.id!==b.dataset.catDel;}); renderCats(); markDirty(); }); return; }
+  if((b=t.closest("[data-add]"))){ var c=DATA.categories.filter(function(x){return x.id===b.dataset.add;})[0]; var nid=c.id+"-novo-"+Date.now().toString(36); c.items.push({id:nid,name:{pt:""},price:0,soldOut:false,hidden:false}); openItems[nid]=true; renderCats(); markDirty(); var el=document.querySelector('.it[data-id="'+nid+'"] .name'); if(el){ el.focus(); el.scrollIntoView({block:"center"}); } return; }
+  if((b=t.closest("[data-add-sub]"))){ var c2=DATA.categories.filter(function(x){return x.id===b.dataset.addSub;})[0]; var sid=c2.id+"-sub-"+Date.now().toString(36); c2.items.push({id:sid,sub:{pt:""}}); renderCats(); markDirty(); var el2=document.querySelector('.it[data-id="'+sid+'"] .name'); if(el2) el2.focus(); return; }
+  if((b=t.closest("[data-move]"))){ var f=findItem(b.dataset.move), k=f.ii+Number(b.dataset.dir); if(k<0||k>=f.cat.items.length) return; f.cat.items.splice(f.ii,1); f.cat.items.splice(k,0,f.it); renderCats(); markDirty(); return; }
+  if((b=t.closest("[data-del]"))){ arm(b,function(){ var f=findItem(b.dataset.del); f.cat.items.splice(f.ii,1); renderCats(); markDirty(); }); return; }
+  if((b=t.closest("[data-more]"))){ openItems[b.dataset.more]=!openItems[b.dataset.more]; renderCats(); return; }
+  if((b=t.closest("[data-tog]"))){ var row=b.closest(".it"), f2=findItem(row.dataset.id), key=b.dataset.tog; f2.it[key]=!f2.it[key]; b.setAttribute("aria-pressed",f2.it[key]); if(key==="hidden") row.classList.toggle("hid",f2.it[key]); markDirty(); refreshCatMeta(f2.cat); return; }
+});
+$("cats").addEventListener("keydown",function(ev){ var h=ev.target.closest("[data-cat-toggle]"); if(h&&(ev.key==="Enter"||ev.key===" ")){ ev.preventDefault(); h.click(); } });
+$("cats").addEventListener("input",function(ev){
+  var t=ev.target, row=t.closest(".it");
+  if(t.dataset.catTitle){ var c=DATA.categories.filter(function(x){return x.id===t.dataset.catTitle;})[0]; setText(c,"title",t.value); var tt=t.closest(".cat").querySelector(".cat-h .t"); if(tt) tt.textContent=t.value; markDirty(); return; }
+  if(!row) return; var f=findItem(row.dataset.id); if(!f) return;
+  if(t.dataset.f==="name") setText(f.it,"name",t.value);
+  else if(t.dataset.f==="sub") setText(f.it,"sub",t.value);
+  else if(t.dataset.f==="desc"){ if(t.value.trim()) setText(f.it,"desc",t.value); else delete f.it.desc; }
+  else if(t.dataset.f==="price"){ var p=parsePrice(t.value); t.style.color=p===null?"var(--terra)":""; if(p!==null) f.it.price=p; }
+  markDirty();
+});
+$("cats").addEventListener("change",function(ev){
+  var t=ev.target, row=t.closest(".it"); if(!row) return; var f=findItem(row.dataset.id); if(!f) return;
+  if(t.dataset.alg){ var a=(f.it.allergens||[]).slice(); if(t.checked){ if(a.indexOf(t.dataset.alg)<0) a.push(t.dataset.alg); } else a=a.filter(function(x){return x!==t.dataset.alg;}); a=Object.keys(DATA.allergens).filter(function(k){return a.indexOf(k)>=0;}); if(a.length) f.it.allergens=a; else delete f.it.allergens; t.closest("label").classList.toggle("on",t.checked); markDirty(); }
+  if(t.dataset.f==="price"){ var p=parsePrice(t.value); if(p!==null) t.value=fmt(p); else { t.value=fmt(f.it.price); t.style.color=""; toast("Preço inválido; valor anterior mantido"); } }
+});
+function refreshCatMeta(c){ var el=document.querySelector('.cat[data-cat="'+c.id+'"] .cat-h .n'); if(!el) return; var items=c.items.filter(function(i){return !i.sub;}), out=items.filter(function(i){return i.soldOut;}).length, hid=items.filter(function(i){return i.hidden;}).length; el.textContent=items.length+" itens"+(out?" · "+out+" esgotado"+(out>1?"s":""):"")+(hid?" · "+hid+" oculto"+(hid>1?"s":""):""); }
+function arm(btn,fn){ if(btn.classList.contains("arm")){ fn(); return; } var old=btn.textContent; btn.classList.add("arm"); btn.textContent="Confirmar?"; setTimeout(function(){ if(document.body.contains(btn)){ btn.classList.remove("arm"); btn.textContent=old; } },4000); }
+$("ann").addEventListener("input",function(){ setText(DATA.info,"announcement",this.value); markDirty(); });
+$("hOpen").addEventListener("input",function(){ DATA.info.hours.open=this.value; $("hPreview").textContent="🕙 "+hoursText(DATA.info.hours); markDirty(); });
+$("hClose").addEventListener("input",function(){ DATA.info.hours.close=this.value; $("hPreview").textContent="🕙 "+hoursText(DATA.info.hours); markDirty(); });
+$("hNote").addEventListener("input",function(){ setText(DATA.info.hours,"note",this.value); $("hPreview").textContent="🕙 "+hoursText(DATA.info.hours); markDirty(); });
+$("addCat").addEventListener("click",function(){ var id="cat-"+Date.now().toString(36); DATA.categories.push({id:id,title:{pt:"Nova categoria"},items:[]}); openCats[id]=true; renderCats(); markDirty(); var el=document.querySelector('[data-cat-title="'+id+'"]'); if(el){ el.focus(); el.select(); el.scrollIntoView({block:"center"}); } });
+
+/* ---------- preview ---------- */
+$("previewBtn").addEventListener("click",function(){
+  var ok=store("lunaDraft",JSON.stringify(DATA));
+  var w=window.open("index.html#preview","lunaPreview");
+  if(w){ previewWin=w; if(ok===null) toast("Armazenamento bloqueado: a enviar rascunho directamente"); }
+  else { // popup blocked (or sandboxed): fall back to a plain link the user taps
+    if(ok===null) return toast("Pré-visualização indisponível neste ambiente");
+    var a=document.createElement("a"); a.href="index.html#preview"; a.target="_blank"; a.rel="noopener"; a.click(); toast("Rascunho guardado · abra o menu para o ver");
+  }
+});
+window.addEventListener("message",function(ev){ if(ev.origin===location.origin&&ev.data&&ev.data.type==="luna-preview-ready"&&ev.source){ try{ ev.source.postMessage({type:"luna-draft",data:DATA},location.origin); }catch(e){} } });
+
+/* ---------- publish sheet ---------- */
+function openSheet(){ var d=diff(ORIG,DATA); $("diff").innerHTML=d.length?d.map(function(x){ return '<li class="'+(x.cls||"")+'"><span class="k">'+esc(x.k)+'</span>'+esc(x.t)+'</li>'; }).join(""):'<li>Sem alterações em relação ao ficheiro carregado.</li>'; $("log").hidden=true; $("log").textContent=""; fillCfg(); $("sheet").hidden=false; $("doPublish").disabled=!d.length&&SHA!==null; }
+$("publishBtn").addEventListener("click",openSheet);
+$("sheetClose").addEventListener("click",function(){ $("sheet").hidden=true; });
+$("sheet").addEventListener("click",function(ev){ if(ev.target===$("sheet")) $("sheet").hidden=true; });
+function finalJson(){ var out=clone(DATA); out.updatedAt=new Date().toISOString(); return out; }
+function log(s){ var l=$("log"); l.hidden=false; l.textContent+=(l.textContent?"\n":"")+s; l.scrollTop=l.scrollHeight; }
+$("copyJson").addEventListener("click",function(){ var txt=JSON.stringify(finalJson(),null,1); var done=function(ok){ toast(ok?"JSON copiado · cole-o em menu.json no GitHub":"Não foi possível copiar"); };
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(function(){done(true);},function(){ done(legacyCopy(txt)); }); else done(legacyCopy(txt)); });
+function legacyCopy(txt){ try{ var ta=document.createElement("textarea"); ta.value=txt; ta.setAttribute("readonly",""); ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select(); var ok=document.execCommand("copy"); document.body.removeChild(ta); return ok; }catch(e){ return false; } }
+$("dlJson").addEventListener("click",function(){ var blob=new Blob([JSON.stringify(finalJson(),null,1)],{type:"application/json"}); var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="menu.json"; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },500); toast("A descarregar menu.json"); });
+$("discard").addEventListener("click",function(){ arm(this,function(){ DATA=clone(ORIG); store("lunaAdminDraft",null); openItems={}; render(); $("sheet").hidden=true; toast("Alterações descartadas"); }); });
+
+$("doPublish").addEventListener("click",function(){
+  var c=readCfg(); if(!c.token){ $("cfg").open=true; $("cMsg").textContent="Introduza um token para publicar directamente, ou use «Copiar JSON» / «Descarregar»."; return; }
+  var d=diff(ORIG,DATA), summary=d.slice(0,3).map(function(x){return x.t;}).join("; ")+(d.length>3?" (+"+(d.length-3)+")":"");
+  var body=finalJson(), btn=this; btn.disabled=true; $("log").textContent=""; log("A obter a versão actual do ficheiro…");
+  fetch(apiUrl(c)+"?ref="+encodeURIComponent(c.branch)+"&t="+Date.now(),{headers:ghHeaders(c),cache:"no-store"}).then(function(r){ if(r.status===404) return null; if(!r.ok) throw new Error("GET "+r.status); return r.json(); }).then(function(cur){
+    var sha=cur?cur.sha:null;
+    if(SHA&&sha&&sha!==SHA) log("Atenção: o ficheiro foi alterado no GitHub desde que o carregou (outro dispositivo?). Vai ser substituído pela sua versão.");
+    if(!cur) log("menu.json ainda não existe no repositório: vai ser criado.");
+    var payload={message:"Menu: "+summary,content:b64utf8(JSON.stringify(body,null,1)),branch:c.branch}; if(sha) payload.sha=sha;
+    log("A publicar…");
+    return fetch(apiUrl(c),{method:"PUT",headers:Object.assign({"Content-Type":"application/json"},ghHeaders(c)),body:JSON.stringify(payload)}).then(function(r){ return r.json().then(function(j){ return {s:r.status,j:j}; }); });
+  }).then(function(x){
+    if(x.s!==200&&x.s!==201) throw new Error("PUT "+x.s+": "+(x.j&&x.j.message||""));
+    SHA=x.j.content.sha; ORIG=clone(body); DATA=clone(body); store("lunaAdminDraft",null); render(); $("diff").innerHTML='<li class="n"><span class="k">ok</span>Publicado (commit '+x.j.commit.sha.slice(0,7)+'). O site actualiza em cerca de 1 minuto.</li>';
+    log("Publicado ✓ commit "+x.j.commit.sha.slice(0,7)); setPill("GitHub ("+c.branch+")","ok"); toast("Publicado"); verifyLive(c,body.updatedAt,0);
+  }).catch(function(e){ log("Erro: "+e.message+(String(e.message).indexOf("401")>=0?" — token inválido ou expirado.":String(e.message).indexOf("403")>=0||String(e.message).indexOf("404")>=0?" — o token não tem permissão de escrita neste repositório (Contents: Read and write) ou o repositório/ramo está errado.":"")); btn.disabled=false; });
+});
+function verifyLive(c,stamp,n){
+  if(n===0) log("A verificar o site…");
+  fetch(pagesUrl(c)+"?v="+Date.now(),{cache:"no-store"}).then(function(r){return r.json();}).then(function(j){
+    if(j.updatedAt===stamp){ log("Visível no site ✓ ("+Math.round(n*15)+" s)"); toast("Já está no site"); return; }
+    if(n>=12){ log("Ainda não visível após 3 min. Normalmente demora 1–2 min; confirme mais tarde."); return; }
+    setTimeout(function(){ verifyLive(c,stamp,n+1); },15000);
+  }).catch(function(){ if(n<12) setTimeout(function(){ verifyLive(c,stamp,n+1); },15000); else log("Não foi possível confirmar no site a partir daqui."); });
+}
+window.addEventListener("beforeunload",function(ev){ if(diff(ORIG,DATA).length){ ev.preventDefault(); ev.returnValue=""; } });
+
+fillCfg(); load();
+</script>
+</body>
+</html>
