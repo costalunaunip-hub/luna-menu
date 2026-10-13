@@ -22,7 +22,9 @@
 <meta name="twitter:card" content="summary_large_image">
 <title>Luna Bar · Menu · Praia da Vagueira</title>
 <style>
-/* Layout: photo hero → tools (search, filters, theme) → one sticky category strip → dense one-card-per-category list.
+/* Layout v3: home = photo hero → tools → grid of category cards (one tap opens a category page).
+   Category page = sticky top bar (back · name · all categories) → list → prev/next → legal notes.
+   Item tap = bottom sheet (photo if any, description, allergens, share). Hash routes: #<cat>, #it-<id>, #preview[/…].
    Data comes from menu.json at runtime; nothing about the menu is hardcoded here. */
 @font-face{font-family:"Fraunces";font-style:normal;font-weight:600;font-display:swap;src:url(fraunces-600.woff2) format("woff2")}
 :root{
@@ -35,7 +37,7 @@
   --field:#fffdf8; --focus:#2f6b66;
   --shadow:0 1px 2px rgba(50,36,12,.05),0 10px 28px -14px rgba(50,36,12,.22);
   --skeleton:rgba(88,66,36,.08); --skeleton-hi:rgba(255,255,255,.55);
-  --barH:48px;
+  --scrim:rgba(20,30,30,.32);
   --display:"Fraunces",Georgia,"Iowan Old Style","Palatino Linotype",serif;
   --body:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   color-scheme:light;
@@ -50,6 +52,7 @@
   --field:#1a2423; --focus:#9fd0ca;
   --shadow:0 1px 2px rgba(0,0,0,.25),0 10px 28px -14px rgba(0,0,0,.5);
   --skeleton:rgba(237,230,216,.08); --skeleton-hi:rgba(237,230,216,.10);
+  --scrim:rgba(0,0,0,.5);
   color-scheme:dark;
 }}
 :root[data-theme="dark"]{
@@ -62,29 +65,41 @@
   --field:#1a2423; --focus:#9fd0ca;
   --shadow:0 1px 2px rgba(0,0,0,.25),0 10px 28px -14px rgba(0,0,0,.5);
   --skeleton:rgba(237,230,216,.08); --skeleton-hi:rgba(237,230,216,.10);
+  --scrim:rgba(0,0,0,.5);
   color-scheme:dark;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto} *{animation-duration:.01ms!important;transition-duration:.01ms!important}}
-body{margin:0;font-family:var(--body);font-size:16px;color:var(--ink);background:var(--bg);line-height:1.45}
+html{-webkit-text-size-adjust:100%}
+html.lock{overflow:hidden}
+body{margin:0;font-family:var(--body);font-size:16px;color:var(--ink);background:var(--bg);line-height:1.45;min-height:100vh}
 button{font:inherit;color:inherit}
+a{color:inherit}
 :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 [hidden]{display:none!important}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+img{max-width:100%}
+
+/* ---------- page transitions (View Transitions API; no-op where unsupported) ---------- */
+@keyframes vt-in-r{from{opacity:0;transform:translateX(28px)}}
+@keyframes vt-out-l{to{opacity:0;transform:translateX(-18px)}}
+@keyframes vt-in-l{from{opacity:0;transform:translateX(-28px)}}
+@keyframes vt-out-r{to{opacity:0;transform:translateX(18px)}}
+html[data-dir="fwd"]::view-transition-old(root){animation:vt-out-l .18s ease both}
+html[data-dir="fwd"]::view-transition-new(root){animation:vt-in-r .26s cubic-bezier(.2,.7,.2,1) both}
+html[data-dir="back"]::view-transition-old(root){animation:vt-out-r .18s ease both}
+html[data-dir="back"]::view-transition-new(root){animation:vt-in-l .26s cubic-bezier(.2,.7,.2,1) both}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 
 /* ---------- HERO ---------- */
 .hero{position:relative;height:clamp(250px,66vw,360px);background:#9cc0bc;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;text-align:center;padding:0 16px 16px}
-.hero img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;object-position:center 45%}
+.hero img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;object-position:center 45%;z-index:0}
 .hero::after{content:"";position:absolute;top:0;right:0;bottom:0;left:0;pointer-events:none;
   background:linear-gradient(180deg,rgba(20,30,30,.10) 0%,rgba(20,30,30,0) 30%,rgba(var(--bg-rgb),0) 50%,rgba(var(--bg-rgb),.90) 76%,var(--bg) 100%)}
 .hero>*{position:relative;z-index:1}
-.hero img{z-index:0}
 .hero h1{font-family:var(--display);font-weight:600;font-size:clamp(2.4rem,11vw,3.4rem);line-height:1;margin:0;color:var(--ink);letter-spacing:-.01em;text-wrap:balance}
 .hero .sub{margin-top:8px;font-size:.74rem;letter-spacing:.22em;text-transform:uppercase;color:var(--teal-ink);font-weight:600}
 
-
-/* ---------- LANGUAGE (not sticky) ---------- */
+/* ---------- LANGUAGE ---------- */
 .langbar{display:grid;grid-template-columns:repeat(3,max-content);justify-content:center;gap:6px 8px;padding:12px 12px 0;max-width:760px;margin:0 auto}
 @media(min-width:480px){.langbar{grid-template-columns:repeat(6,max-content)}}
 .langbar button{font-size:.8rem;font-weight:600;color:var(--ink);border:1px solid var(--line);background:var(--card);border-radius:999px;min-height:36px;padding:6px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .15s,color .15s,border-color .15s}
@@ -107,7 +122,12 @@ button{font:inherit;color:inherit}
 .search .ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted)}
 .search .clear{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:none;background:none;border-radius:50%;cursor:pointer;color:var(--muted);font-size:1.1rem}
 .iconbtn{flex:0 0 auto;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:1.05rem;color:var(--teal-ink)}
-.filters{max-width:760px;margin:10px auto 0;padding:0 14px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.fwrap{max-width:760px;margin:10px auto 0;padding:0 14px}
+.fbtn{border:1px solid var(--tag-line);background:var(--tag-bg);color:var(--tag-ink);border-radius:999px;min-height:36px;padding:6px 12px 6px 10px;font-size:.8rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:background .15s,color .15s,border-color .15s}
+.fbtn .n{min-width:20px;height:20px;border-radius:999px;background:var(--terra);color:#fff;font-size:.7rem;display:inline-flex;align-items:center;justify-content:center;padding:0 6px}
+.fbtn .chev{transition:transform .2s;display:inline-flex}
+.fbtn[aria-expanded="true"] .chev{transform:rotate(180deg)}
+.filters{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding-top:10px}
 .filters .lbl{font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-right:2px}
 .filters button{border:1px solid var(--tag-line);background:var(--tag-bg);color:var(--tag-ink);border-radius:999px;min-height:32px;padding:4px 11px;font-size:.78rem;font-weight:600;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
 .filters button[aria-pressed="true"]{background:var(--terra);border-color:var(--terra);color:#fff;text-decoration:line-through;text-decoration-thickness:2px}
@@ -116,35 +136,68 @@ button{font:inherit;color:inherit}
 .status b{color:var(--ink);font-weight:600}
 .status button{border:none;background:none;color:var(--teal-ink);font-weight:600;text-decoration:underline;cursor:pointer;padding:0 0 0 6px}
 
-/* ---------- CATEGORIES: wrapped index at the top + fixed compact bar while reading ---------- */
-.toc{max-width:760px;margin:12px auto 0;padding:0 14px}
+/* ---------- HOME: category grid ---------- */
+.wrap{max-width:760px;margin:0 auto;padding:4px 14px 72px}
+.grp{font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:22px 4px 10px;scroll-margin-top:12px}
+.gjump{margin-top:14px}
+.gjump button{white-space:nowrap;font-size:.8rem;font-weight:600;color:var(--teal-ink);background:var(--card);border:1px solid var(--line);border-radius:999px;min-height:36px;padding:6px 12px;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.gjump+.grp{margin-top:18px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.grp+.grid{margin-top:0}
+@media(min-width:600px){.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}}
+@media(max-width:330px){.grid{grid-template-columns:1fr}}
+.ccard{position:relative;display:flex;flex-direction:column;gap:4px;min-height:124px;padding:13px 14px 12px;background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);text-decoration:none;color:inherit;overflow:hidden;transition:transform .14s,box-shadow .14s;will-change:transform}
+.ccard:active{transform:scale(.97)}
+@media(hover:hover){.ccard:hover{transform:translateY(-2px)}}
+.ccard .cico{width:40px;height:40px;border-radius:12px;background:var(--teal-soft);color:var(--teal-ink);display:inline-flex;align-items:center;justify-content:center;font-size:1.25rem;margin-bottom:6px}
+.ccard .cico svg{width:22px;height:22px}
+.ccard .ctitle{font-family:var(--display);font-weight:600;font-size:1.08rem;line-height:1.15;color:var(--ink);margin-top:auto;text-wrap:balance;letter-spacing:-.005em}
+.ccard .cmeta{font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--teal-ink);font-weight:700}
+.ccard .cprev{font-size:.74rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35}
+.ccard .arrow{position:absolute;top:13px;right:12px;color:var(--muted);opacity:.55}
+.ccard.photo{min-height:156px;justify-content:flex-end;border-color:transparent}
+.ccard.photo img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:0}
+.ccard.photo::after{content:"";position:absolute;top:0;right:0;bottom:0;left:0;background:linear-gradient(180deg,rgba(10,18,18,.05) 20%,rgba(10,18,18,.72) 100%);z-index:1}
+.ccard.photo>*{position:relative;z-index:2}
+.ccard.photo .ctitle,.ccard.photo .cprev{color:#fff}
+.ccard.photo .cmeta{color:#d7efe9}
+.ccard.photo .cico{display:none}
+.ccard.photo .arrow{position:absolute;z-index:2;color:#fff}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}}
+.grid.anim .ccard{animation:rise .42s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i)*28ms)}
+
+/* ---------- results (home, while searching) ---------- */
+.res{margin:22px 0 0}
+.res .rh{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 4px 6px}
+.res .rh a{font-family:var(--display);font-weight:600;font-size:1.2rem;color:var(--terra);text-decoration:none}
+.res .rh span{font-size:.74rem;color:var(--muted);white-space:nowrap}
+
+/* ---------- CATEGORY PAGE ---------- */
+.topbar{position:sticky;top:0;z-index:30;background:rgba(var(--bg-rgb),.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--hair)}
+.preview:not([hidden])~.view .topbar{top:34px}
+.topbar .in{display:flex;align-items:center;gap:4px;max-width:760px;margin:0 auto;min-height:52px;padding:4px 6px}
+.topbar .ib{flex:0 0 auto;width:44px;height:44px;border:none;background:none;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:var(--teal-ink);cursor:pointer;text-decoration:none}
+.topbar .ib:active{background:var(--teal-soft)}
+.topbar .tname{flex:1 1 auto;min-width:0;text-align:center;font-weight:700;font-size:.98rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;transition:opacity .2s}
+.topbar.named .tname{opacity:1}
+.panel{display:none;position:absolute;left:0;right:0;top:100%;background:var(--bg);border-bottom:1px solid var(--line);box-shadow:var(--shadow);max-height:min(62vh,520px);overflow-y:auto}
+.topbar.open .panel{display:block}
+.panel .chips{max-width:760px;margin:0 auto;padding:10px 14px 14px}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chips a{flex:0 1 auto;white-space:nowrap;text-decoration:none;font-size:.8rem;font-weight:600;color:var(--teal-ink);background:var(--card);border:1px solid var(--line);border-radius:999px;min-height:36px;padding:6px 12px;display:inline-flex;align-items:center;transition:background .15s,color .15s,border-color .15s}
 .chips a.active{background:var(--teal);color:var(--on-teal);border-color:var(--teal)}
-.chips-wrap{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:30;transform:translateY(-110%);transition:transform .22s ease;pointer-events:none}
-.chips-wrap.show{transform:none;pointer-events:auto}
-.preview:not([hidden])~.chips-wrap{top:calc(env(safe-area-inset-top,0px) + 34px)}
-.curbar{background:rgba(var(--bg-rgb),.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--hair)}
-.cur{display:flex;align-items:center;gap:10px;width:100%;max-width:760px;margin:0 auto;min-height:48px;padding:6px 14px;border:none;background:none;cursor:pointer;text-align:left}
-.cur .ico{flex:0 0 auto;color:var(--teal-ink);display:inline-flex}
-.cur .lbl{flex:0 0 auto;font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-.cur .name{flex:1 1 auto;min-width:0;font-weight:700;font-size:.98rem;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cur .chev{flex:0 0 auto;width:28px;height:28px;border-radius:50%;background:var(--teal);color:var(--on-teal);display:inline-flex;align-items:center;justify-content:center;transition:transform .2s}
-.chips-wrap.open .cur .chev{transform:rotate(180deg)}
-.panel{display:none;background:var(--bg);border-bottom:1px solid var(--line);box-shadow:var(--shadow);max-height:min(62vh,520px);overflow-y:auto}
-.chips-wrap.open .panel{display:block}
-.panel .chips{max-width:760px;margin:0 auto;padding:10px 14px 14px}
-.scrim{position:fixed;top:0;right:0;bottom:0;left:0;z-index:29;background:rgba(20,30,30,.28);opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim{position:fixed;top:0;right:0;bottom:0;left:0;z-index:29;background:var(--scrim);opacity:0;pointer-events:none;transition:opacity .2s}
 .scrim.show{opacity:1;pointer-events:auto}
-
-/* ---------- MENU ---------- */
-.wrap{max-width:760px;margin:0 auto;padding:4px 14px 72px}
-section.cat{margin:30px 0 0;scroll-margin-top:calc(var(--barH) + 14px)}
-h2.cat-title{font-family:var(--display);font-weight:600;font-size:1.5rem;line-height:1.15;color:var(--terra);margin:0 0 6px 4px;letter-spacing:-.005em}
-.cat-note{font-size:.8rem;color:var(--muted);margin:-2px 0 10px 4px;font-style:italic}
+.cathead{margin:18px 4px 12px}
+.cathead h1{font-family:var(--display);font-weight:600;font-size:1.9rem;line-height:1.1;color:var(--terra);margin:0;letter-spacing:-.01em;text-wrap:balance}
+.cathead .cnt{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-top:6px}
+.cat-note{font-size:.84rem;color:var(--muted);margin:6px 0 0;font-style:italic}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
-.item{padding:11px 14px;cursor:pointer;scroll-margin-top:calc(var(--barH) + 60px);transition:background .2s}
+.item{display:flex;gap:12px;align-items:flex-start;padding:11px 14px;text-decoration:none;color:inherit;cursor:pointer;transition:background .15s}
+.item:active{background:var(--teal-soft)}
 .item+.item{border-top:1px solid var(--hair)}
+.item .thumb{flex:0 0 auto;width:56px;height:56px;border-radius:10px;object-fit:cover;background:var(--skeleton)}
+.item .body{flex:1 1 auto;min-width:0}
 .item .row{display:flex;align-items:baseline;gap:10px}
 .item .name{font-weight:600;font-size:1rem;flex:1 1 auto;min-width:0}
 .item .price{font-weight:600;font-size:.98rem;color:var(--teal-ink);white-space:nowrap;font-variant-numeric:tabular-nums;flex:0 0 auto}
@@ -154,17 +207,42 @@ h2.cat-title{font-family:var(--display);font-weight:600;font-size:1.5rem;line-he
 .alg-inline{display:inline-flex;vertical-align:middle;margin:-2px 0 0 4px;position:relative;top:-1px}
 .sub-h{font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--teal-ink);background:var(--teal-soft);padding:7px 14px}
 .sub-h+.item{border-top:none}
-/* sold out */
-.item.out .name,.item.out .desc,.item.out .alg{opacity:.5}
+.item.out .name,.item.out .desc,.item.out .alg,.item.out .thumb{opacity:.5}
 .item.out .price{opacity:.6;text-decoration:line-through;text-decoration-thickness:1.5px}
 .badge-out{flex:0 0 auto;font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--terra);border:1.5px solid var(--terra);border-radius:6px;padding:2px 6px;line-height:1.3;align-self:center}
-/* open state / actions */
-.item.open{background:var(--teal-soft)}
-.actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-.actions button{border:1px solid var(--line);background:var(--card);border-radius:999px;min-height:36px;padding:6px 12px;font-size:.82rem;font-weight:600;color:var(--teal-ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
-@keyframes flash{0%{box-shadow:inset 0 0 0 2px var(--terra)}100%{box-shadow:inset 0 0 0 2px transparent}}
-.item.flash{animation:flash 1.8s ease-out 1}
-/* skeleton */
+.pager{display:flex;gap:10px;margin:18px 0 0}
+.pager a{flex:1 1 0;min-width:0;display:flex;align-items:center;gap:8px;min-height:56px;padding:8px 12px;border:1px solid var(--line);background:var(--card);border-radius:14px;text-decoration:none;color:inherit;box-shadow:var(--shadow)}
+.pager a.next{justify-content:flex-end;text-align:right}
+.pager a .k{display:block;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.pager a .v{display:block;font-weight:600;font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pager a .t{min-width:0}
+.pager a .ar{flex:0 0 auto;color:var(--teal-ink)}
+.pager a:empty,.pager a.none{visibility:hidden}
+.empty{margin:30px 0;padding:22px 16px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:16px}
+
+/* ---------- ITEM SHEET ---------- */
+.sheet-scrim{position:fixed;top:0;right:0;bottom:0;left:0;z-index:70;background:var(--scrim);opacity:0;pointer-events:none;transition:opacity .22s}
+.sheet-scrim.show{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:71;max-width:760px;margin:0 auto;background:var(--card);color:var(--ink);border-radius:22px 22px 0 0;box-shadow:0 -8px 40px rgba(0,0,0,.28);max-height:86vh;max-height:86dvh;display:flex;flex-direction:column;transform:translateY(105%);transition:transform .3s cubic-bezier(.2,.8,.2,1);padding-bottom:env(safe-area-inset-bottom,0px);outline:none}
+.sheet.show{transform:none}
+.sheet.drag{transition:none}
+.sheet-head{padding:10px 16px 2px;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.handle{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 10px}
+.sheet-head .hrow{display:flex;align-items:flex-start;gap:10px}
+.sheet-head h3{font-family:var(--display);font-weight:600;font-size:1.45rem;line-height:1.15;margin:0;flex:1 1 auto;min-width:0;letter-spacing:-.005em}
+.sheet-head .close{flex:0 0 auto;width:36px;height:36px;border:none;border-radius:50%;background:var(--teal-soft);color:var(--teal-ink);cursor:pointer;font-size:1rem;display:inline-flex;align-items:center;justify-content:center}
+.sheet-body{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:6px 18px 18px}
+.sheet-body .sphoto{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:14px;margin:6px 0 14px;background:var(--skeleton)}
+.sheet-body .prow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0 0}
+.sheet-body .sprice{font-weight:700;font-size:1.25rem;color:var(--teal-ink);font-variant-numeric:tabular-nums}
+.sheet-body .sprice.out{text-decoration:line-through;opacity:.6}
+.sheet-body .sdesc{margin:12px 0 0;font-size:.98rem;line-height:1.5;color:var(--ink)}
+.sheet-body .snota{margin:10px 0 0;font-size:.9rem;color:var(--terra);font-weight:600}
+.sheet-body .slbl{font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:16px 0 0}
+.actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.actions button{border:1px solid var(--line);background:var(--card);border-radius:999px;min-height:40px;padding:6px 14px;font-size:.84rem;font-weight:600;color:var(--teal-ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+
+/* ---------- skeleton / error ---------- */
 .sk{margin:30px 0 0}
 .sk .t{height:26px;width:46%;border-radius:8px;background:var(--skeleton);margin:0 0 10px 4px}
 .sk .card{padding:4px 0}
@@ -177,7 +255,6 @@ h2.cat-title{font-family:var(--display);font-weight:600;font-size:1.5rem;line-he
 .sk .card::after{content:"";position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,transparent,var(--skeleton-hi),transparent);animation:shimmer 1.4s infinite}
 .err{margin:30px 0;padding:18px;border:1px solid var(--terra);background:var(--terra-soft);border-radius:16px;text-align:center}
 .err button{margin-top:10px;border:none;border-radius:999px;background:var(--teal);color:var(--on-teal);min-height:44px;padding:10px 18px;font-weight:600;cursor:pointer}
-.empty{margin:30px 0;padding:22px 16px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:16px}
 
 /* ---------- FOOTER ---------- */
 .iva{text-align:center;font-size:.76rem;color:var(--muted);margin-top:22px}
@@ -192,7 +269,7 @@ h2.cat-title{font-family:var(--display);font-weight:600;font-size:1.5rem;line-he
 /* ---------- FLOATING ---------- */
 .back-top{position:fixed;right:14px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:40;width:44px;height:44px;border-radius:50%;border:none;background:var(--teal);color:var(--on-teal);font-size:1.15rem;box-shadow:var(--shadow);cursor:pointer;opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity .2s,transform .2s}
 .back-top.show{opacity:.94;transform:none;pointer-events:auto}
-.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);z-index:50;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:.88rem;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:calc(100vw - 32px);text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);z-index:80;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:.88rem;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:calc(100vw - 32px);text-align:center}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .preview{position:sticky;top:0;z-index:60;background:var(--terra);color:#fff;text-align:center;font-size:.82rem;font-weight:700;padding:8px 12px;letter-spacing:.04em}
 
@@ -202,97 +279,167 @@ h2.cat-title{font-family:var(--display);font-weight:600;font-size:1.5rem;line-he
 <body>
 <div class="preview" id="previewBar" hidden>PRÉ-VISUALIZAÇÃO DO RASCUNHO · não publicado</div>
 
-<header class="hero">
-  <img src="hero.jpg" alt="" width="1200" height="575" fetchpriority="high" decoding="async">
-  <h1>Luna Bar</h1>
-  <div class="sub">Praia da Vagueira · Aveiro</div>
-</header>
+<!-- ============ HOME ============ -->
+<div class="view" id="vHome">
+  <header class="hero">
+    <img src="hero.jpg" alt="" width="1200" height="575" fetchpriority="high" decoding="async">
+    <h1>Luna Bar</h1>
+    <div class="sub">Praia da Vagueira · Aveiro</div>
+  </header>
 
-<nav class="langbar" id="langbar" aria-label="Idioma / Language"></nav>
+  <nav class="langbar" id="langbar" aria-label="Idioma / Language"></nav>
 
-<div class="announce" id="announce" hidden></div>
+  <div class="announce" id="announce" hidden></div>
 
-<div class="tools">
-  <div class="search">
-    <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-    <label class="sr" for="q" id="qLabel">Procurar no menu</label>
-    <input id="q" type="search" placeholder="Procurar no menu…" autocomplete="off" autocorrect="off" spellcheck="false">
-    <button class="clear" id="qClear" aria-label="Limpar pesquisa" hidden>✕</button>
+  <div class="tools">
+    <div class="search">
+      <svg class="ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <label class="sr" for="q" id="qLabel">Procurar no menu</label>
+      <input id="q" type="search" placeholder="Procurar no menu…" autocomplete="off" autocorrect="off" spellcheck="false">
+      <button class="clear" id="qClear" aria-label="Limpar pesquisa" hidden>✕</button>
+    </div>
+    <button class="iconbtn" id="themeBtn" aria-label="Alternar tema claro/escuro" title="Tema">☾</button>
+    <button class="iconbtn" id="shareBtn" aria-label="Partilhar o menu" title="Partilhar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v13"/><path d="m7 8 5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button>
   </div>
-  <button class="iconbtn" id="themeBtn" aria-label="Alternar tema claro/escuro" title="Tema">☾</button>
-  <button class="iconbtn" id="shareBtn" aria-label="Partilhar o menu" title="Partilhar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v13"/><path d="m7 8 5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button>
-</div>
-<div class="filters" id="filters" aria-label="Ocultar itens com alergénios"></div>
-<div class="status" id="status" aria-live="polite"></div>
+  <div class="fwrap">
+    <button type="button" class="fbtn" id="fbtn" aria-expanded="false" aria-controls="filters"><span id="fbtnLbl">Filtrar alergénios</span><span class="n" id="fbtnN" hidden></span><span class="chev" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span></button>
+    <div class="filters" id="filters" aria-label="Ocultar itens com alergénios" hidden></div>
+  </div>
+  <div class="status" id="status" aria-live="polite"></div>
 
-<nav class="toc" id="toc" aria-label="Categorias"><div class="chips" id="chips"></div></nav>
-<div class="chips-wrap" id="chipsWrap">
-  <div class="curbar"><button type="button" class="cur" id="curBtn" aria-expanded="false" aria-controls="chipsPanel"><span class="ico" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></span><span class="name" id="curName"></span><span class="chev" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span></button></div>
-  <nav class="panel" id="chipsPanel" aria-label="Categorias"><div class="chips" id="chips2"></div></nav>
+  <main class="wrap">
+    <noscript><div style="text-align:center;padding:28px 16px;font-size:1rem;line-height:1.6">Para ver o menu, active o JavaScript no seu navegador.<br>To view the menu, please enable JavaScript in your browser.</div></noscript>
+    <div id="home">
+      <div class="sk"><div class="t"></div><div class="card"><div class="r"></div><div class="r"></div><div class="r"></div><div class="r"></div></div></div>
+      <div class="sk"><div class="t"></div><div class="card"><div class="r"></div><div class="r"></div><div class="r"></div></div></div>
+    </div>
+    <div class="iva" data-iva></div>
+    <div class="legal" data-legal></div>
+    <footer class="footer">
+      <div class="footer-brand">🌙 Luna Bar</div>
+      <div class="footer-info" id="footerInfo"></div>
+      <div class="updated" id="updated"></div>
+    </footer>
+  </main>
+</div>
+
+<!-- ============ CATEGORY PAGE ============ -->
+<div class="view" id="vCat" hidden>
+  <div class="topbar" id="topbar">
+    <div class="in">
+      <button type="button" class="ib" id="backBtn" aria-label="Voltar"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button>
+      <div class="tname" id="tname" aria-hidden="true"></div>
+      <button type="button" class="ib" id="allBtn" aria-expanded="false" aria-controls="catPanel" aria-label="Categorias"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg></button>
+    </div>
+    <nav class="panel" id="catPanel" aria-label="Categorias"><div class="chips" id="chips"></div></nav>
+  </div>
+  <main class="wrap">
+    <div class="cathead"><h1 id="catTitle"></h1><div class="cnt" id="catCnt"></div><div class="cat-note" id="catNote" hidden></div></div>
+    <div class="card" id="catList"></div>
+    <div class="empty" id="catEmpty" hidden></div>
+    <div class="status" id="catStatus" aria-live="polite" style="padding:0;margin-top:10px"></div>
+    <nav class="pager" id="pager" aria-label="Categorias"></nav>
+    <div class="iva" data-iva></div>
+    <div class="legal" data-legal></div>
+  </main>
 </div>
 <div class="scrim" id="scrim"></div>
 
-<main class="wrap">
-  <noscript><div style="text-align:center;padding:28px 16px;font-size:1rem;line-height:1.6">Para ver o menu, active o JavaScript no seu navegador.<br>To view the menu, please enable JavaScript in your browser.</div></noscript>
-  <div id="menu">
-    <div class="sk"><div class="t"></div><div class="card"><div class="r"></div><div class="r"></div><div class="r"></div><div class="r"></div></div></div>
-    <div class="sk"><div class="t"></div><div class="card"><div class="r"></div><div class="r"></div><div class="r"></div></div></div>
-    <div class="sk"><div class="t"></div><div class="card"><div class="r"></div><div class="r"></div><div class="r"></div><div class="r"></div><div class="r"></div></div></div>
-  </div>
-  <div class="iva" id="ivaNote"></div>
-  <div class="legal" id="legalNote"></div>
-  <footer class="footer">
-    <div class="footer-brand">🌙 Luna Bar</div>
-    <div class="footer-info" id="footerInfo"></div>
-    <div class="updated" id="updated"></div>
-  </footer>
-</main>
+<!-- ============ ITEM SHEET ============ -->
+<div class="sheet-scrim" id="sheetScrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="shTitle" tabindex="-1" hidden>
+  <div class="sheet-head" id="sheetHead"><div class="handle" aria-hidden="true"></div><div class="hrow"><h3 id="shTitle"></h3><button type="button" class="close" id="shClose" aria-label="Fechar">✕</button></div></div>
+  <div class="sheet-body" id="shBody"></div>
+</div>
+
 <button class="back-top" id="backTop" aria-label="Voltar ao topo">↑</button>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script type="application/ld+json" id="ld"></script>
 
 <script>
-var ICON={share:"<svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3v13\"/><path d=\"m7 8 5-5 5 5\"/><path d=\"M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6\"/></svg>",copy:"<svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"9\" y=\"9\" width=\"11\" height=\"11\" rx=\"2\"/><path d=\"M5 15V6a2 2 0 0 1 2-2h9\"/></svg>"};
+var ICON={
+ share:"<svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3v13\"/><path d=\"m7 8 5-5 5 5\"/><path d=\"M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6\"/></svg>",
+ copy:"<svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"9\" y=\"9\" width=\"11\" height=\"11\" rx=\"2\"/><path d=\"M5 15V6a2 2 0 0 1 2-2h9\"/></svg>",
+ arrow:"<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m9 5 7 7-7 7\"/></svg>",
+ left:"<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m15 5-7 7 7 7\"/></svg>",
+ right:"<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m9 5 7 7-7 7\"/></svg>"
+};
+/* Category icons: simple line drawings keyed by category id (a category may also set "icon" to an emoji, or "photo" to an image). */
+var CICON={
+ cafes:'<path d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9z"/><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8 3v2M12 3v2"/>',
+ chas:'<path d="M5 9h10v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V9z"/><path d="M15 11h2a2 2 0 0 1 0 4h-2"/><path d="M10 9c0-3 2-5 5-6-1 3-2 5-5 6z"/>',
+ aguas:'<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>',
+ refri:'<path d="M6 8h12l-1.2 11a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 8z"/><path d="M13 8l3-5"/><path d="M7 13h10"/>',
+ cervejas:'<path d="M5 7h10v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7z"/><path d="M15 10h2a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-2"/><path d="M5 7a3 3 0 0 1 3-4c1 0 1.7.4 2.2 1A3 3 0 0 1 15 7"/>',
+ vinhos:'<path d="M8 3h8l.5 6a4.5 4.5 0 0 1-9 0L8 3z"/><path d="M12 13.5V21"/><path d="M8 21h8"/>',
+ brandy:'<path d="M6 7c0-2 2-4 6-4s6 2 6 4c0 4-2.5 7-6 8-3.5-1-6-4-6-8z"/><path d="M12 15v5M8 20h8"/>',
+ whiskey:'<path d="M5 5h14l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 5z"/><path d="M9 11h3v3H9zM13 9h3v3h-3z"/>',
+ rum:'<path d="M10 3h4v3l2 3v10a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V9l2-3V3z"/><path d="M9 13h6"/>',
+ licores:'<path d="M9 3h6v3l1.5 2v11a2 2 0 0 1-2 2h-5a2 2 0 0 1-2-2V8L9 6V3z"/><path d="M9 12h6v4H9z"/>',
+ gin:'<path d="M6 4h12c1 5-1 9-6 10-5-1-7-5-6-10z"/><path d="M12 14v6M8 20h8"/><circle cx="12" cy="9" r="1.6"/>',
+ cocktails:'<path d="M4 4h16l-8 9-8-9z"/><path d="M12 13v7M8 20h8"/><path d="M7 7h10"/>',
+ almocinhos:'<path d="M5 3v5a2 2 0 0 0 4 0V3M7 10v11"/><path d="M17 3c-2 1-3 4-3 7h3v11"/>',
+ petiscos:'<path d="M4 12h16a8 8 0 0 1-16 0z"/><path d="M8 19l-1 2M16 19l1 2"/><circle cx="9" cy="8" r="1.6"/><circle cx="14" cy="6.5" r="1.6"/>',
+ docinhos:'<path d="M6 11h12l-1.5 8a2 2 0 0 1-2 1.5h-5a2 2 0 0 1-2-1.5L6 11z"/><path d="M5 11a7 7 0 0 1 14 0"/><path d="M12 4v2"/>',
+ extras:'<circle cx="12" cy="12" r="8"/><path d="M12 8v8M8 12h8"/>',
+ _:'<circle cx="12" cy="12" r="8"/><path d="M9 12h6"/>'
+};
 /* ============================================================
-   Luna Bar menu — client.
+   Luna Bar menu — client (v3: category pages).
    Content:      menu.json (edited via gestao.html; versioned in Git).
    Availability: Google Sheet "Luna Menu - Disponibilidade" (Estado / Aviso tabs),
                  read on load and every 5 min; union with menu.json flags.
    Languages:    PT ES EN FR DE NL — UI strings in T, data read through tv().
+   Routes:       #            home (category grid, search, filters)
+                 #<catId>     one category page
+                 #it-<id>     that item's category page + item sheet (share links)
+                 #preview[/…] same, reading the editor's draft
    ============================================================ */
 var LANGS=[{code:"pt",flag:"🇵🇹",label:"Português"},{code:"es",flag:"🇪🇸",label:"Español"},{code:"en",flag:"🇬🇧",label:"English"},{code:"fr",flag:"🇫🇷",label:"Français"},{code:"de",flag:"🇩🇪",label:"Deutsch"},{code:"nl",flag:"🇳🇱",label:"Nederlands"}];
 var CODES=LANGS.map(function(l){return l.code;});
 var T={
  pt:{search:"Procurar no menu…",clearSearch:"Limpar pesquisa",results:function(n,q){return n===0?"Nenhum resultado para <b>"+q+"</b>":"<b>"+n+"</b> "+(n===1?"resultado":"resultados")+" para <b>"+q+"</b>";},
    hiding:function(l,n){return "A ocultar itens com <b>"+l.join(", ")+"</b> · "+n+" "+(n===1?"item visível":"itens visíveis");},
+   count:function(n){return n+" "+(n===1?"item":"itens");},
    clear:"limpar",soldOut:"Esgotado",share:"Partilhar",copy:"Copiar ligação",copied:"Ligação copiada",shareFail:"Não foi possível partilhar",without:"Sem",map:"Ver no mapa",updated:"Menu actualizado",alg:"Alergénios",
    open:"Aberto",allDays:"Aberto todos os dias",closed:"Encerrado",noItems:"Nenhum item corresponde à pesquisa.",loadErr:"Não foi possível carregar o menu.",retry:"Tentar novamente",
-   shareTitle:"Luna Bar · Menu",shareText:"Menu do Luna Bar · Praia da Vagueira",theme:"Alternar tema claro/escuro",shareMenu:"Partilhar o menu",closeNotice:"Fechar aviso",top:"Voltar ao topo",cats:"Categorias",preview:"PRÉ-VISUALIZAÇÃO DO RASCUNHO · não publicado",filters:"Ocultar itens com alergénios"},
+   shareTitle:"Luna Bar · Menu",shareText:"Menu do Luna Bar · Praia da Vagueira",theme:"Alternar tema claro/escuro",shareMenu:"Partilhar o menu",closeNotice:"Fechar aviso",top:"Voltar ao topo",cats:"Categorias",preview:"PRÉ-VISUALIZAÇÃO DO RASCUNHO · não publicado",filters:"Ocultar itens com alergénios",
+   filterBtn:"Filtrar alergénios",back:"Voltar",allCats:"Todas as categorias",prev:"Anterior",next:"Seguinte",close:"Fechar",noneCat:"Nenhum item disponível nesta categoria."},
  es:{search:"Buscar en la carta…",clearSearch:"Borrar búsqueda",results:function(n,q){return n===0?"Sin resultados para <b>"+q+"</b>":"<b>"+n+"</b> "+(n===1?"resultado":"resultados")+" para <b>"+q+"</b>";},
    hiding:function(l,n){return "Ocultando artículos con <b>"+l.join(", ")+"</b> · "+n+" visibles";},
+   count:function(n){return n+" "+(n===1?"artículo":"artículos");},
    clear:"quitar",soldOut:"Agotado",share:"Compartir",copy:"Copiar enlace",copied:"Enlace copiado",shareFail:"No se pudo compartir",without:"Sin",map:"Ver en el mapa",updated:"Carta actualizada",alg:"Alérgenos",
    open:"Abierto",allDays:"Abierto todos los días",closed:"Cerrado",noItems:"Ningún artículo coincide con la búsqueda.",loadErr:"No se pudo cargar la carta.",retry:"Reintentar",
-   shareTitle:"Luna Bar · Carta",shareText:"Carta del Luna Bar · Praia da Vagueira",theme:"Cambiar tema claro/oscuro",shareMenu:"Compartir la carta",closeNotice:"Cerrar aviso",top:"Volver arriba",cats:"Categorías",preview:"VISTA PREVIA DEL BORRADOR · no publicado",filters:"Ocultar artículos con alérgenos"},
+   shareTitle:"Luna Bar · Carta",shareText:"Carta del Luna Bar · Praia da Vagueira",theme:"Cambiar tema claro/oscuro",shareMenu:"Compartir la carta",closeNotice:"Cerrar aviso",top:"Volver arriba",cats:"Categorías",preview:"VISTA PREVIA DEL BORRADOR · no publicado",filters:"Ocultar artículos con alérgenos",
+   filterBtn:"Filtrar alérgenos",back:"Volver",allCats:"Todas las categorías",prev:"Anterior",next:"Siguiente",close:"Cerrar",noneCat:"No hay artículos disponibles en esta categoría."},
  en:{search:"Search the menu…",clearSearch:"Clear search",results:function(n,q){return n===0?"No results for <b>"+q+"</b>":"<b>"+n+"</b> "+(n===1?"result":"results")+" for <b>"+q+"</b>";},
    hiding:function(l,n){return "Hiding items with <b>"+l.join(", ")+"</b> · "+n+" shown";},
+   count:function(n){return n+" "+(n===1?"item":"items");},
    clear:"clear",soldOut:"Sold out",share:"Share",copy:"Copy link",copied:"Link copied",shareFail:"Couldn't share",without:"Without",map:"View on map",updated:"Menu updated",alg:"Allergens",
    open:"Open",allDays:"Open daily",closed:"Closed",noItems:"No items match your search.",loadErr:"The menu could not be loaded.",retry:"Try again",
-   shareTitle:"Luna Bar · Menu",shareText:"Luna Bar menu · Praia da Vagueira",theme:"Toggle light/dark theme",shareMenu:"Share the menu",closeNotice:"Dismiss notice",top:"Back to top",cats:"Categories",preview:"DRAFT PREVIEW · not published",filters:"Hide items with allergens"},
+   shareTitle:"Luna Bar · Menu",shareText:"Luna Bar menu · Praia da Vagueira",theme:"Toggle light/dark theme",shareMenu:"Share the menu",closeNotice:"Dismiss notice",top:"Back to top",cats:"Categories",preview:"DRAFT PREVIEW · not published",filters:"Hide items with allergens",
+   filterBtn:"Allergen filter",back:"Back",allCats:"All categories",prev:"Previous",next:"Next",close:"Close",noneCat:"No items available in this category."},
  fr:{search:"Rechercher dans la carte…",clearSearch:"Effacer la recherche",results:function(n,q){return n===0?"Aucun résultat pour <b>"+q+"</b>":"<b>"+n+"</b> "+(n===1?"résultat":"résultats")+" pour <b>"+q+"</b>";},
    hiding:function(l,n){return "Articles masqués avec <b>"+l.join(", ")+"</b> · "+n+" affichés";},
+   count:function(n){return n+" "+(n===1?"article":"articles");},
    clear:"effacer",soldOut:"Épuisé",share:"Partager",copy:"Copier le lien",copied:"Lien copié",shareFail:"Partage impossible",without:"Sans",map:"Voir sur la carte",updated:"Carte mise à jour",alg:"Allergènes",
    open:"Ouvert",allDays:"Ouvert tous les jours",closed:"Fermé",noItems:"Aucun article ne correspond à la recherche.",loadErr:"Impossible de charger la carte.",retry:"Réessayer",
-   shareTitle:"Luna Bar · Carte",shareText:"Carte du Luna Bar · Praia da Vagueira",theme:"Basculer thème clair/sombre",shareMenu:"Partager la carte",closeNotice:"Fermer l'avis",top:"Retour en haut",cats:"Catégories",preview:"APERÇU DU BROUILLON · non publié",filters:"Masquer les articles avec allergènes"},
+   shareTitle:"Luna Bar · Carte",shareText:"Carte du Luna Bar · Praia da Vagueira",theme:"Basculer thème clair/sombre",shareMenu:"Partager la carte",closeNotice:"Fermer l'avis",top:"Retour en haut",cats:"Catégories",preview:"APERÇU DU BROUILLON · non publié",filters:"Masquer les articles avec allergènes",
+   filterBtn:"Filtre allergènes",back:"Retour",allCats:"Toutes les catégories",prev:"Précédent",next:"Suivant",close:"Fermer",noneCat:"Aucun article disponible dans cette catégorie."},
  de:{search:"Speisekarte durchsuchen…",clearSearch:"Suche löschen",results:function(n,q){return n===0?"Keine Treffer für <b>"+q+"</b>":"<b>"+n+"</b> "+(n===1?"Treffer":"Treffer")+" für <b>"+q+"</b>";},
    hiding:function(l,n){return "Ausgeblendet: Artikel mit <b>"+l.join(", ")+"</b> · "+n+" sichtbar";},
+   count:function(n){return n+" Artikel";},
    clear:"aufheben",soldOut:"Ausverkauft",share:"Teilen",copy:"Link kopieren",copied:"Link kopiert",shareFail:"Teilen nicht möglich",without:"Ohne",map:"Auf der Karte ansehen",updated:"Karte aktualisiert",alg:"Allergene",
    open:"Geöffnet",allDays:"Täglich geöffnet",closed:"geschlossen",noItems:"Kein Artikel passt zur Suche.",loadErr:"Die Karte konnte nicht geladen werden.",retry:"Erneut versuchen",
-   shareTitle:"Luna Bar · Karte",shareText:"Karte der Luna Bar · Praia da Vagueira",theme:"Helles/dunkles Design umschalten",shareMenu:"Karte teilen",closeNotice:"Hinweis schließen",top:"Nach oben",cats:"Kategorien",preview:"ENTWURFSVORSCHAU · nicht veröffentlicht",filters:"Artikel mit Allergenen ausblenden"},
+   shareTitle:"Luna Bar · Karte",shareText:"Karte der Luna Bar · Praia da Vagueira",theme:"Helles/dunkles Design umschalten",shareMenu:"Karte teilen",closeNotice:"Hinweis schließen",top:"Nach oben",cats:"Kategorien",preview:"ENTWURFSVORSCHAU · nicht veröffentlicht",filters:"Artikel mit Allergenen ausblenden",
+   filterBtn:"Allergenfilter",back:"Zurück",allCats:"Alle Kategorien",prev:"Vorherige",next:"Nächste",close:"Schließen",noneCat:"In dieser Kategorie ist derzeit nichts verfügbar."},
  nl:{search:"Zoeken in de kaart…",clearSearch:"Zoekopdracht wissen",results:function(n,q){return n===0?"Geen resultaten voor <b>"+q+"</b>":"<b>"+n+"</b> "+(n===1?"resultaat":"resultaten")+" voor <b>"+q+"</b>";},
    hiding:function(l,n){return "Verborgen: items met <b>"+l.join(", ")+"</b> · "+n+" zichtbaar";},
+   count:function(n){return n+" "+(n===1?"item":"items");},
    clear:"wissen",soldOut:"Uitverkocht",share:"Delen",copy:"Link kopiëren",copied:"Link gekopieerd",shareFail:"Delen niet mogelijk",without:"Zonder",map:"Bekijk op de kaart",updated:"Kaart bijgewerkt",alg:"Allergenen",
    open:"Open",allDays:"Dagelijks geopend",closed:"gesloten",noItems:"Geen items gevonden voor deze zoekopdracht.",loadErr:"De kaart kon niet worden geladen.",retry:"Opnieuw proberen",
-   shareTitle:"Luna Bar · Kaart",shareText:"Kaart van Luna Bar · Praia da Vagueira",theme:"Licht/donker thema wisselen",shareMenu:"Kaart delen",closeNotice:"Melding sluiten",top:"Terug naar boven",cats:"Categorieën",preview:"CONCEPTVOORBEELD · niet gepubliceerd",filters:"Items met allergenen verbergen"}
+   shareTitle:"Luna Bar · Kaart",shareText:"Kaart van Luna Bar · Praia da Vagueira",theme:"Licht/donker thema wisselen",shareMenu:"Kaart delen",closeNotice:"Melding sluiten",top:"Terug naar boven",cats:"Categorieën",preview:"CONCEPTVOORBEELD · niet gepubliceerd",filters:"Items met allergenen verbergen",
+   filterBtn:"Allergenenfilter",back:"Terug",allCats:"Alle categorieën",prev:"Vorige",next:"Volgende",close:"Sluiten",noneCat:"Geen items beschikbaar in deze categorie."}
 };
 /* day names, Sunday first; PT entries carry grammatical gender for the article */
 var DAYS={
@@ -308,7 +455,8 @@ var DAY_LD=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturda
 var LIVE_SHEET_ID="1cwCwPJcP_IwmigxbZ2WBn7lReJPGhVPELCgvE5Nlsn4"; // "Luna Menu - Disponibilidade" (read-only by link)
 var LIVE_REFRESH_MS=5*60*1000;
 
-var L="pt", DATA=null, LIVE={items:{},aviso:null,sig:JSON.stringify({items:{},aviso:null})}, pendingHash=null, excluded={}, query="", activeCat=null, lockUntil=0, ticking=false, openItem=null;
+var L="pt", DATA=null, LIVE={items:{},aviso:null,sig:JSON.stringify({items:{},aviso:null})}, excluded={}, query="", PREVIEW=false;
+var cur={view:null,id:null,depth:0}, homeY=0, openId=null, clickNav=false, clickT=null, homeAnimated=false;
 
 function tv(v,lang){ if(v==null) return ""; if(typeof v==="string") return v; return v[lang]||v.pt||v.en||""; }
 function esc(s){ return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
@@ -316,6 +464,9 @@ function norm(s){ return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").t
 function price(p){ return Number(p).toFixed(2).replace(".",",")+" €"; }
 function $(id){ return document.getElementById(id); }
 function store(k,v){ try{ if(v===undefined) return localStorage.getItem(k); localStorage.setItem(k,v); }catch(e){ return null; } }
+function reduced(){ return window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
+function scrollNow(y){ var r=document.documentElement, p=r.style.scrollBehavior; r.style.scrollBehavior="auto"; window.scrollTo(0,y); r.style.scrollBehavior=p; }
+if("scrollRestoration" in history){ try{ history.scrollRestoration="manual"; }catch(e){} }
 
 /* ---------- language ---------- */
 (function initLang(){
@@ -326,12 +477,14 @@ function renderLangbar(){
   $("langbar").innerHTML=LANGS.map(function(l){ return '<button type="button" data-l="'+l.code+'" class="'+(l.code===L?"active":"")+'" title="'+l.label+'" aria-label="'+l.label+'" aria-pressed="'+(l.code===L)+'"><span class="flag">'+l.flag+'</span>'+l.code.toUpperCase()+'</button>'; }).join("");
   $("langbar").querySelectorAll("button").forEach(function(b){ b.addEventListener("click",function(){ setLang(b.dataset.l); }); });
 }
-function setLang(l){ if(CODES.indexOf(l)<0) return; L=l; store("lunaLang",l); applyStatic(); renderLangbar(); if(DATA) renderAll(); }
+function setLang(l){ if(CODES.indexOf(l)<0) return; L=l; store("lunaLang",l); applyStatic(); renderLangbar(); if(DATA){ renderFilters(); render(true); } }
 function applyStatic(){
   var t=T[L]; document.documentElement.lang=L;
   $("q").placeholder=t.search; $("qLabel").textContent=t.search; $("qClear").setAttribute("aria-label",t.clearSearch);
   $("themeBtn").setAttribute("aria-label",t.theme); $("themeBtn").title=t.theme; $("shareBtn").setAttribute("aria-label",t.shareMenu); $("shareBtn").title=t.shareMenu;
-  $("filters").setAttribute("aria-label",t.filters); $("toc").setAttribute("aria-label",t.cats); $("chipsPanel").setAttribute("aria-label",t.cats); $("curBtn").setAttribute("aria-label",t.cats); $("backTop").setAttribute("aria-label",t.top); $("previewBar").textContent=t.preview;
+  $("filters").setAttribute("aria-label",t.filters); $("fbtnLbl").textContent=t.filterBtn;
+  $("catPanel").setAttribute("aria-label",t.cats); $("allBtn").setAttribute("aria-label",t.allCats); $("allBtn").title=t.allCats; $("backBtn").setAttribute("aria-label",t.back); $("backBtn").title=t.back;
+  $("pager").setAttribute("aria-label",t.cats); $("backTop").setAttribute("aria-label",t.top); $("previewBar").textContent=t.preview; $("shClose").setAttribute("aria-label",t.close); $("shClose").title=t.close;
 }
 
 /* ---------- theme ---------- */
@@ -359,23 +512,23 @@ $("shareBtn").addEventListener("click",function(){ share(T[L].shareTitle,T[L].sh
 
 /* ---------- data: menu.json ---------- */
 function loadMenu(){
-  if(location.hash==="#preview"){
+  if((location.hash||"").indexOf("#preview")===0){
     var d=store("lunaDraft");
     if(d){ try{ var j=JSON.parse(d); $("previewBar").hidden=false; return Promise.resolve(j); }catch(e){} }
   }
   return fetch("menu.json?v="+Date.now(),{cache:"no-store"}).then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); });
 }
 function boot(){
-  loadMenu().then(function(data){ DATA=data; renderAll(); handleHash(true); loadLive(); }).catch(function(err){
-    $("menu").innerHTML='<div class="err">'+esc(T[L].loadErr)+'<br><small>'+esc(err.message||err)+'</small><br><button id="retry">'+esc(T[L].retry)+'</button></div>';
+  loadMenu().then(function(data){ DATA=data; renderFilters(); renderFooter(); render(true); loadLive(); }).catch(function(err){
+    $("home").innerHTML='<div class="err">'+esc(T[L].loadErr)+'<br><small>'+esc(err.message||err)+'</small><br><button id="retry">'+esc(T[L].retry)+'</button></div>';
     $("retry").addEventListener("click",boot);
   });
 }
 window.addEventListener("message",function(ev){ // draft handed over by gestao.html when storage is unavailable
   if(ev.origin!==location.origin||!ev.data||ev.data.type!=="luna-draft") return;
-  DATA=ev.data.data; $("previewBar").hidden=false; renderAll();
+  DATA=ev.data.data; $("previewBar").hidden=false; renderFilters(); renderFooter(); render(true);
 });
-if(location.hash==="#preview"&&window.opener){ try{ window.opener.postMessage({type:"luna-preview-ready"},location.origin); }catch(e){} }
+if((location.hash||"").indexOf("#preview")===0&&window.opener){ try{ window.opener.postMessage({type:"luna-preview-ready"},location.origin); }catch(e){} }
 
 /* ---------- data: live availability (Google Sheet) ---------- */
 function liveUrl(sheet){ return "https://docs.google.com/spreadsheets/d/"+LIVE_SHEET_ID+"/gviz/tq?tqx=out:csv&sheet="+encodeURIComponent(sheet)+"&_="+Date.now(); }
@@ -405,7 +558,7 @@ function loadLive(){
   var pAviso=fetchCSV("Aviso").then(function(rows){ var r=null; rows.slice(1).some(function(x){ if(((x[0]||"")+(x[1]||"")).trim()){ r=x; return true; } return false; }); r=r||[]; var pt=(r[0]||"").trim(), en=(r[1]||"").trim(); return (pt||en)?{pt:pt,en:en}:""; }).catch(function(){ return null; });
   Promise.all([pEstado,pAviso]).then(function(res){
     var next={items:res[0]===null?LIVE.items:res[0],aviso:res[1]===null?LIVE.aviso:res[1]}, sig=JSON.stringify(next);
-    if(sig===LIVE.sig) return; LIVE={items:next.items,aviso:next.aviso,sig:sig}; if(DATA) renderMenu();
+    if(sig===LIVE.sig) return; LIVE={items:next.items,aviso:next.aviso,sig:sig}; if(DATA) render(true);
   });
 }
 var liveTimer=null;
@@ -415,52 +568,101 @@ scheduleLive();
 function liveOf(it){ return LIVE.items["i:"+it.id]||LIVE.items["n:"+norm(tv(it.name,"pt"))]||null; }
 function effective(it){ var lv=liveOf(it); return {soldOut:!!it.soldOut||!!(lv&&lv.st==="esgotado"),hidden:!!it.hidden||!!(lv&&lv.st==="oculto"),nota:lv?lv.nota:""}; }
 
-/* ---------- rendering ---------- */
+/* ---------- data helpers ---------- */
+function findCat(id){ var f=null; (DATA?DATA.categories:[]).forEach(function(c){ if(c.id===id) f=c; }); return f; }
+function findItem(id){ var f=null; (DATA?DATA.categories:[]).forEach(function(c){ c.items.forEach(function(it){ if(it.id===id) f=it; }); }); return f; }
+function catOf(itemId){ var f=null; (DATA?DATA.categories:[]).forEach(function(c){ c.items.forEach(function(it){ if(it.id===itemId) f=c; }); }); return f; }
+function passesEx(it){ var ex=Object.keys(excluded); if(!ex.length) return true; var a=it.allergens||[]; return !ex.some(function(k){ return a.indexOf(k)>=0; }); }
+function catItems(cat){ // items shown on the category page (hidden + allergen-excluded removed); sub-headers only when something follows them
+  var out=[], pendingSub=null;
+  cat.items.forEach(function(it){ if(it.sub){ pendingSub=it; return; } if(effective(it).hidden||!passesEx(it)) return; if(pendingSub){ out.push(pendingSub); pendingSub=null; } out.push(it); });
+  return out;
+}
+function visibleCats(){ return DATA.categories.map(function(c){ return {cat:c,items:catItems(c).filter(function(it){return !it.sub;})}; }).filter(function(x){ return x.items.length; }); }
+function href(h){ if(!PREVIEW) return h; return "#preview"+(h&&h.length>1?"/"+h.slice(1):""); }
+
+/* ---------- rendering: shared pieces ---------- */
 function usedAllergens(){
   var set={}; DATA.categories.forEach(function(c){ c.items.forEach(function(it){ (it.allergens||[]).forEach(function(a){ set[a]=1; }); }); });
   return Object.keys(DATA.allergens).filter(function(k){ return set[k]; });
 }
 function renderFilters(){
-  var f=$("filters");
+  var f=$("filters"), n=Object.keys(excluded).length;
   f.innerHTML='<span class="lbl">'+esc(T[L].without)+'</span>'+usedAllergens().map(function(k){ return '<button type="button" data-a="'+k+'" aria-pressed="'+(excluded[k]?"true":"false")+'">'+esc(tv(DATA.allergens[k],L))+'</button>'; }).join("");
-  f.querySelectorAll("button").forEach(function(b){ b.addEventListener("click",function(){ var k=b.dataset.a; if(excluded[k]) delete excluded[k]; else excluded[k]=1; b.setAttribute("aria-pressed",excluded[k]?"true":"false"); applyFilters(); }); });
+  f.querySelectorAll("button").forEach(function(b){ b.addEventListener("click",function(){ var k=b.dataset.a; if(excluded[k]) delete excluded[k]; else excluded[k]=1; b.setAttribute("aria-pressed",excluded[k]?"true":"false"); renderFilters(); render(true); }); });
+  $("fbtnN").hidden=!n; $("fbtnN").textContent=n;
 }
-function chipsHtml(){ return DATA.categories.map(function(cat){ return '<a href="#'+cat.id+'" data-cat="'+cat.id+'">'+esc(tv(cat.title,L))+'</a>'; }).join(""); }
-function renderChips(){
-  var html=chipsHtml(); $("chips").innerHTML=html; $("chips2").innerHTML=html;
-  document.querySelectorAll(".chips a").forEach(function(a){ a.addEventListener("click",function(){ closePanel(); setActiveChip(a.dataset.cat); lockUntil=Date.now()+900; setTimeout(function(){updateActive(true);},950); }); });
-  activeCat=null; syncOffsets();
-}
+$("fbtn").addEventListener("click",function(){ var open=$("filters").hidden; $("filters").hidden=!open; this.setAttribute("aria-expanded",open?"true":"false"); });
+function pills(it){ return (it.allergens||[]).map(function(k){ return "<span>"+esc(tv(DATA.allergens[k],L))+"</span>"; }).join(""); }
 function itemHtml(it){
-  var ef=effective(it), t=T[L];
-  var pills=(it.allergens||[]).map(function(k){ return "<span>"+esc(tv(DATA.allergens[k],L))+"</span>"; }).join("");
+  var ef=effective(it), t=T[L], p=pills(it), name=tv(it.name,L);
   var desc=it.desc?'<div class="desc">'+esc(tv(it.desc,L))+'</div>':"";
-  var algInline=(pills&&!it.desc)?' <span class="alg alg-inline" aria-label="'+t.alg+'">'+pills+'</span>':"";
-  var algBlock=(pills&&it.desc)?'<div class="alg" aria-label="'+t.alg+'">'+pills+'</div>':"";
+  var algInline=(p&&!it.desc)?' <span class="alg alg-inline" aria-label="'+t.alg+'">'+p+'</span>':"";
+  var algBlock=(p&&it.desc)?'<div class="alg" aria-label="'+t.alg+'">'+p+'</div>':"";
   var out=ef.soldOut?'<span class="badge-out">'+t.soldOut+'</span>':"";
   var nota=ef.nota?'<div class="nota">'+esc(ef.nota)+'</div>':"";
-  var name=tv(it.name,L);
-  return '<article class="item'+(ef.soldOut?" out":"")+'" id="it-'+it.id+'" data-id="'+it.id+'" data-s="'+esc(norm(name+" "+tv(it.desc,L)))+'" data-a="'+(it.allergens||[]).join(" ")+'" tabindex="0" aria-label="'+esc(name)+(ef.soldOut?", "+t.soldOut:"")+'">'+
-    '<div class="row"><div class="name">'+esc(name)+algInline+'</div>'+out+'<div class="price">'+price(it.price)+'</div></div>'+desc+nota+algBlock+
-    '<div class="actions" hidden><button type="button" data-act="share">'+ICON.share+' '+t.share+'</button><button type="button" data-act="copy">'+ICON.copy+' '+t.copy+'</button></div>'+
-  '</article>';
+  var thumb=it.photo?'<img class="thumb" src="'+esc(it.photo)+'" alt="" loading="lazy" decoding="async">':"";
+  return '<a class="item'+(ef.soldOut?" out":"")+'" href="'+href("#it-"+it.id)+'" id="row-'+it.id+'" data-id="'+it.id+'" aria-label="'+esc(name)+(ef.soldOut?", "+t.soldOut:"")+'">'+thumb+
+    '<span class="body"><span class="row"><span class="name">'+esc(name)+algInline+'</span>'+out+'<span class="price">'+price(it.price)+'</span></span>'+desc+nota+algBlock+'</span></a>';
 }
-function renderMenu(){
-  var m=$("menu"), t=T[L], wasOpen=openItem?openItem.dataset.id:null;
-  m.innerHTML=DATA.categories.map(function(cat){
-    var visible=cat.items.filter(function(it){ return it.sub||!effective(it).hidden; });
-    if(!visible.some(function(it){return !it.sub;})) return "";
-    var html='<section class="cat" id="'+cat.id+'" data-s="'+esc(norm(tv(cat.title,L)))+'"><h2 class="cat-title">'+esc(tv(cat.title,L))+'</h2>';
-    if(cat.note) html+='<div class="cat-note">'+esc(tv(cat.note,L))+'</div>';
-    html+='<div class="card">'+visible.map(function(it){ return it.sub?'<div class="sub-h">'+esc(tv(it.sub,L))+'</div>':itemHtml(it); }).join("")+'</div></section>';
-    return html;
-  }).join("")+'<div class="empty" id="empty" hidden>'+esc(t.noItems)+'</div>';
-  openItem=null; if(wasOpen){ var el=document.getElementById("it-"+wasOpen); if(el) toggleItem(el,true); }
-  if(pendingHash&&Date.now()-pendingHash.at<4000) focusItem(pendingHash.id,false); // re-apply a fresh deep link after a live re-render
-  $("ivaNote").textContent=tv(DATA.info.iva,L);
-  $("legalNote").textContent=tv(DATA.info.legal,L);
-  renderFooter(); renderAnnouncement(); applyFilters(); updateActive(true);
+function listHtml(items){ return items.map(function(it){ return it.sub?'<div class="sub-h">'+esc(tv(it.sub,L))+'</div>':itemHtml(it); }).join(""); }
+function catIcon(cat){ if(cat.icon) return '<span class="cico" aria-hidden="true">'+esc(cat.icon)+'</span>'; return '<span class="cico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+(CICON[cat.id]||CICON._)+'</svg></span>'; }
+function setLegal(){ var iva=tv(DATA.info.iva,L), lg=tv(DATA.info.legal,L); document.querySelectorAll("[data-iva]").forEach(function(e){ e.textContent=iva; }); document.querySelectorAll("[data-legal]").forEach(function(e){ e.textContent=lg; }); }
+
+/* ---------- rendering: home ---------- */
+function renderHome(){
+  var t=T[L], q=norm(query), vis=visibleCats(), ex=Object.keys(excluded), exNames=ex.map(function(k){return esc(tv(DATA.allergens[k],L));});
+  var html="", shown=0;
+  if(q){
+    vis.forEach(function(x){
+      var catMatch=norm(tv(x.cat.title,L)).indexOf(q)>=0;
+      var hits=x.items.filter(function(it){ return catMatch||norm(tv(it.name,L)+" "+tv(it.desc,L)).indexOf(q)>=0; });
+      if(!hits.length) return; shown+=hits.length;
+      html+='<section class="res"><div class="rh"><a href="'+href("#"+x.cat.id)+'">'+esc(tv(x.cat.title,L))+'</a><span>'+esc(t.count(hits.length))+'</span></div><div class="card">'+listHtml(hits)+'</div></section>';
+    });
+    if(!shown) html='<div class="empty">'+esc(t.noItems)+'</div>';
+    $("home").innerHTML=html;
+    $("status").innerHTML=t.results(shown,esc(query.trim()))+(ex.length?" · "+t.hiding(exNames,shown):"");
+  } else {
+    var lastGroup=null, grid=[], groups=[], flush=function(){ if(grid.length) html+='<div class="grid'+(homeAnimated?"":" anim")+'">'+grid.join("")+'</div>'; grid=[]; };
+    vis.forEach(function(x){ var g=x.cat.group?tv(x.cat.group,L):null; if(g&&groups.indexOf(g)<0) groups.push(g); });
+    if(groups.length>1) html+='<div class="chips gjump">'+groups.map(function(g,i){ return '<button type="button" data-g="'+i+'">'+esc(g)+' <span aria-hidden="true">↓</span></button>'; }).join("")+'</div>';
+    vis.forEach(function(x,i){
+      var g=x.cat.group?tv(x.cat.group,L):null;
+      if(g!==lastGroup){ flush(); if(g) html+='<h2 class="grp" id="grp-'+groups.indexOf(g)+'">'+esc(g)+'</h2>'; lastGroup=g; }
+      var prev=x.items.slice(0,3).map(function(it){ return tv(it.name,L); }).join(" · ");
+      var photo=x.cat.photo?'<img src="'+esc(x.cat.photo)+'" alt="" loading="lazy" decoding="async">':"";
+      grid.push('<a class="ccard'+(photo?" photo":"")+'" href="'+href("#"+x.cat.id)+'" style="--i:'+i+'" aria-label="'+esc(tv(x.cat.title,L))+' · '+esc(t.count(x.items.length))+'">'+photo+catIcon(x.cat)+
+        '<span class="arrow" aria-hidden="true">'+ICON.arrow+'</span><span class="ctitle">'+esc(tv(x.cat.title,L))+'</span><span class="cmeta">'+esc(t.count(x.items.length))+'</span><span class="cprev">'+esc(prev)+'</span></a>');
+      shown+=x.items.length;
+    });
+    flush(); homeAnimated=true;
+    if(!vis.length) html='<div class="empty">'+esc(t.noItems)+'</div>';
+    $("home").innerHTML=html;
+    $("status").innerHTML=ex.length?t.hiding(exNames,shown)+'<button type="button" id="clearEx">'+t.clear+'</button>':"";
+    var ce=$("clearEx"); if(ce) ce.addEventListener("click",function(){ excluded={}; renderFilters(); render(true); });
+  }
+  renderAnnouncement(); setLegal();
 }
+
+/* ---------- rendering: category page ---------- */
+function renderCat(id){
+  var t=T[L], cat=findCat(id), items=catItems(cat), n=items.filter(function(it){return !it.sub;}).length, vis=visibleCats(), idx=-1;
+  vis.forEach(function(x,i){ if(x.cat.id===id) idx=i; });
+  $("catTitle").textContent=tv(cat.title,L); $("tname").textContent=tv(cat.title,L); $("catCnt").textContent=t.count(n);
+  var note=cat.note?tv(cat.note,L):""; $("catNote").textContent=note; $("catNote").hidden=!note;
+  $("catList").innerHTML=listHtml(items); $("catList").hidden=!n; $("catEmpty").textContent=t.noneCat; $("catEmpty").hidden=!!n;
+  var ex=Object.keys(excluded), exNames=ex.map(function(k){return esc(tv(DATA.allergens[k],L));});
+  $("catStatus").innerHTML=ex.length?t.hiding(exNames,n)+'<button type="button" id="clearEx2">'+t.clear+'</button>':"";
+  var ce=$("clearEx2"); if(ce) ce.addEventListener("click",function(){ excluded={}; renderFilters(); render(true); });
+  var prev=idx>0?vis[idx-1].cat:null, next=(idx>=0&&idx<vis.length-1)?vis[idx+1].cat:null;
+  $("pager").innerHTML=(prev?'<a class="prev" href="'+href("#"+prev.id)+'"><span class="ar">'+ICON.left+'</span><span class="t"><span class="k">'+esc(t.prev)+'</span><span class="v">'+esc(tv(prev.title,L))+'</span></span></a>':'<a class="none" aria-hidden="true"></a>')+
+    (next?'<a class="next" href="'+href("#"+next.id)+'"><span class="t"><span class="k">'+esc(t.next)+'</span><span class="v">'+esc(tv(next.title,L))+'</span></span><span class="ar">'+ICON.right+'</span></a>':'<a class="none" aria-hidden="true"></a>');
+  $("chips").innerHTML=vis.map(function(x){ return '<a href="'+href("#"+x.cat.id)+'" data-cat="'+x.cat.id+'" class="'+(x.cat.id===id?"active":"")+'">'+esc(tv(x.cat.title,L))+'</a>'; }).join("");
+  setLegal(); syncTopbar();
+}
+
+/* ---------- footer / announcement (home) ---------- */
 function dayList(days,lang){
   var names=days.map(function(d){ var x=DAYS[lang][d]; return lang==="pt"?((x[1]==="f"?"à ":"ao ")+x[0]):x; });
   return names.reduce(function(acc,cur,i,arr){ return acc+(i===0?"":(i===arr.length-1?AND[lang]:", "))+cur; },"");
@@ -493,95 +695,133 @@ function renderAnnouncement(){
   a.innerHTML='<div><span class="ic" aria-hidden="true">📣</span><p>'+esc(msg)+'</p><button type="button" aria-label="'+T[L].closeNotice+'">✕</button></div>'; a.hidden=false;
   a.querySelector("button").addEventListener("click",function(){ a.hidden=true; try{ sessionStorage.setItem("lunaAnnDismissed",msg); }catch(e){} });
 }
-function renderAll(){ renderFilters(); renderChips(); renderMenu(); }
 
-/* ---------- search + allergen filter ---------- */
-function applyFilters(){
-  var q=norm(query), ex=Object.keys(excluded), shown=0, t=T[L];
-  document.querySelectorAll("section.cat").forEach(function(sec){
-    var catMatch=q&&sec.dataset.s.indexOf(q)>=0, any=false;
-    sec.querySelectorAll(".item").forEach(function(el){
-      var hit=!q||catMatch||el.dataset.s.indexOf(q)>=0;
-      if(hit&&ex.length){ var a=el.dataset.a.split(" "); hit=!ex.some(function(k){ return a.indexOf(k)>=0; }); }
-      el.hidden=!hit; if(hit){ any=true; shown++; }
-    });
-    sec.querySelectorAll(".sub-h").forEach(function(sh){ var n=sh.nextElementSibling, vis=false; while(n&&!n.classList.contains("sub-h")){ if(!n.hidden){vis=true;break;} n=n.nextElementSibling; } sh.hidden=!vis; });
-    sec.hidden=!any;
-    document.querySelectorAll('.chips a[data-cat="'+sec.id+'"]').forEach(function(chip){ chip.hidden=!any; });
-  });
-  $("empty").hidden=shown>0;
-  var st=$("status"), exNames=ex.map(function(k){return esc(tv(DATA.allergens[k],L));});
-  if(q) st.innerHTML=t.results(shown,esc(query.trim()))+(ex.length?" · "+t.hiding(exNames,shown):"");
-  else if(ex.length) st.innerHTML=t.hiding(exNames,shown)+'<button type="button" id="clearEx">'+t.clear+'</button>';
-  else st.innerHTML="";
-  var ce=$("clearEx"); if(ce) ce.addEventListener("click",function(){ excluded={}; renderFilters(); applyFilters(); });
-  activeCat=null; updateActive(true);
+/* ---------- router ---------- */
+function route(){
+  var p=location.hash||"";
+  if(p.indexOf("#preview")===0){ PREVIEW=true; p=p.slice(8).replace(/^\//,""); p=p?"#"+p:""; }
+  if(p.indexOf("#it-")===0) return {view:"item",id:p.slice(4)};
+  if(p.length>1) return {view:"cat",id:decodeURIComponent(p.slice(1))};
+  return {view:"home"};
 }
-var qT=null;
-$("q").addEventListener("input",function(){ query=this.value; $("qClear").hidden=!query; clearTimeout(qT); qT=setTimeout(applyFilters,120); });
-$("qClear").addEventListener("click",function(){ $("q").value=""; query=""; this.hidden=true; applyFilters(); $("q").focus(); });
-
-/* ---------- item interaction (delegated) ---------- */
-$("menu").addEventListener("click",function(ev){
-  var act=ev.target.closest("button[data-act]");
-  if(act){ var el=act.closest(".item"), it=findItem(el.dataset.id), url=baseUrl()+"#it-"+el.dataset.id, txt=tv(it.name,L)+" · "+price(it.price)+" · Luna Bar";
-    if(act.dataset.act==="share") share(tv(it.name,L)+" · Luna Bar",txt,url); else copyText(url).then(function(ok){ toast(ok?T[L].copied:T[L].shareFail); });
-    return; }
-  var item=ev.target.closest(".item"); if(item) toggleItem(item);
+function depthOf(r){ return r.view==="home"?0:r.view==="cat"?1:2; }
+function render(soft){ // soft = same view re-rendered in place (language, filters, live data): no scroll change, no transition
+  if(!DATA) return;
+  var r=route();
+  if(r.view==="item"){ var c=catOf(r.id); if(c) r.cat=c.id; else r={view:"home"}; }
+  else if(r.view==="cat"&&!findCat(r.id)) r={view:"home"};
+  var target=r.view==="home"?"home":"cat", tcat=target==="cat"?(r.cat||r.id):null;
+  var changed=cur.view!==target||(target==="cat"&&cur.id!==tcat), d=depthOf(r), dir=d>cur.depth?"fwd":d<cur.depth?"back":"none";
+  var apply=function(){
+    if(cur.view==="home"&&target!=="home") homeY=window.scrollY;
+    closePanel();
+    if(target==="home"){ $("vCat").hidden=true; $("vHome").hidden=false; renderHome(); if(changed) scrollNow(cur.view===null?0:homeY); }
+    else { $("vHome").hidden=true; $("vCat").hidden=false; renderCat(tcat); if(changed) scrollNow(0); }
+    if(r.view==="item") openSheet(r.id,!changed&&cur.view==="cat"); else closeSheetUI();
+    cur={view:target,id:tcat,depth:d}; updateFloating();
+  };
+  if(changed&&!soft&&cur.view!==null&&document.startViewTransition&&!reduced()){ document.documentElement.setAttribute("data-dir",dir); document.startViewTransition(apply); }
+  else apply();
+}
+window.addEventListener("hashchange",function(){
+  if(clickNav){ clickNav=false; clearTimeout(clickT); try{ history.replaceState({inApp:true},""); }catch(e){} }
+  render(false);
 });
-$("menu").addEventListener("keydown",function(ev){ if((ev.key==="Enter"||ev.key===" ")&&ev.target.classList.contains("item")){ ev.preventDefault(); toggleItem(ev.target); } });
-function toggleItem(el,forceOpen){
-  var open=forceOpen||!el.classList.contains("open");
-  if(openItem&&openItem!==el){ openItem.classList.remove("open"); openItem.querySelector(".actions").hidden=true; }
-  el.classList.toggle("open",open); el.querySelector(".actions").hidden=!open; openItem=open?el:null;
+document.addEventListener("click",function(ev){ // in-app links push a history entry we can safely go back from
+  var a=ev.target.closest("a[href]"); if(!a) return; var h=a.getAttribute("href")||""; if(h.charAt(0)!=="#") return;
+  clickNav=true; clearTimeout(clickT); clickT=setTimeout(function(){ clickNav=false; },400);
+  if(ev.target.closest("#chips")) closePanel();
+});
+function goTo(h){ // navigate without a click (programmatic)
+  var target=href(h), curH=location.hash||"";
+  if(target===curH||(target==="#"&&curH==="")) return;
+  clickNav=true; clearTimeout(clickT); clickT=setTimeout(function(){ clickNav=false; },400);
+  if(target==="#"||target===""){ location.hash=""; } else location.hash=target;
 }
-function findItem(id){ var f=null; DATA.categories.forEach(function(c){ c.items.forEach(function(it){ if(it.id===id) f=it; }); }); return f; }
-function handleHash(initial){
-  var h=location.hash||"";
-  if(h.indexOf("#it-")===0){ pendingHash={id:h.slice(1),at:Date.now()}; focusItem(h.slice(1),initial); }
-  else if(h.length>1&&h!=="#preview"){ var sec=document.getElementById(h.slice(1)); if(sec&&initial) setTimeout(function(){ sec.scrollIntoView(); setActiveChip(sec.id); },150); }
+function goParent(){ // in-app back: real history.back() when this entry was pushed in-app, else replace with the parent route
+  var r=route(), parent=r.view==="item"?("#"+(catOf(r.id)||{id:""}).id):"#";
+  if(history.state&&history.state.inApp){ history.back(); return; }
+  try{ history.replaceState(null,"",href(parent)===""?location.pathname+location.search:href(parent)); }catch(e){ location.hash=href(parent); return; }
+  render(false);
 }
-function focusItem(id,initial){
-  var el=document.getElementById(id); if(!el) return;
-  el.hidden=false; el.closest("section").hidden=false;
-  el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); toggleItem(el,true); el.focus({preventScroll:true});
-  setTimeout(function(){ jumpTo(id); },initial?150:0);
-}
-function jumpTo(id){ // instant jump for deep links (smooth scrolling is for in-page navigation only); resolves the element at call time
-  var el=document.getElementById(id); if(!el) return;
-  var root=document.documentElement, prev=root.style.scrollBehavior; root.style.scrollBehavior="auto";
-  el.scrollIntoView({block:"center"}); root.style.scrollBehavior=prev; updateActive(true);
-}
-window.addEventListener("hashchange",function(){ handleHash(false); });
+$("backBtn").addEventListener("click",function(){ goParent(); });
 
-/* ---------- fixed category bar (appears once the index scrolls away) + active category ---------- */
-function syncOffsets(){ var w=$("chipsWrap"); if(w){ var h=w.querySelector(".curbar").offsetHeight||48; document.documentElement.style.setProperty("--barH",h+"px"); } }
-window.addEventListener("resize",syncOffsets); window.addEventListener("load",syncOffsets);
-function barVisible(){ var t=$("toc").getBoundingClientRect(); return t.bottom<0; } // index scrolled out above the viewport
-function syncBar(){ var show=barVisible(); $("chipsWrap").classList.toggle("show",show); if(!show) closePanel(); }
-function openPanel(){ var w=$("chipsWrap"); w.classList.add("open"); $("curBtn").setAttribute("aria-expanded","true"); $("scrim").classList.add("show"); var a=$("chips2").querySelector("a.active"); if(a&&a.scrollIntoView) a.scrollIntoView({block:"nearest"}); }
-function closePanel(){ var w=$("chipsWrap"); if(!w.classList.contains("open")) return; w.classList.remove("open"); $("curBtn").setAttribute("aria-expanded","false"); $("scrim").classList.remove("show"); }
-$("curBtn").addEventListener("click",function(){ if($("chipsWrap").classList.contains("open")) closePanel(); else openPanel(); });
+/* ---------- category panel (all categories) ---------- */
+function openPanel(){ $("topbar").classList.add("open"); $("allBtn").setAttribute("aria-expanded","true"); $("scrim").classList.add("show"); }
+function closePanel(){ var tb=$("topbar"); if(!tb.classList.contains("open")) return; tb.classList.remove("open"); $("allBtn").setAttribute("aria-expanded","false"); $("scrim").classList.remove("show"); }
+$("allBtn").addEventListener("click",function(){ if($("topbar").classList.contains("open")) closePanel(); else openPanel(); });
 $("scrim").addEventListener("click",closePanel);
-document.addEventListener("keydown",function(ev){ if(ev.key==="Escape") closePanel(); });
-function setActiveChip(id){
-  if(id===activeCat) return; activeCat=id;
-  document.querySelectorAll(".chips a").forEach(function(a){ a.classList.toggle("active",a.dataset.cat===id); });
-  var cat=null; if(DATA) DATA.categories.forEach(function(c){ if(c.id===id) cat=c; }); $("curName").textContent=cat?tv(cat.title,L):"";
+function syncTopbar(){ var tb=$("topbar"); tb.classList.toggle("named",window.scrollY>60); }
+
+/* ---------- item sheet ---------- */
+function sheetHtml(it){
+  var ef=effective(it), t=T[L], p=pills(it);
+  var h="";
+  if(it.photo) h+='<img class="sphoto" src="'+esc(it.photo)+'" alt="" decoding="async">';
+  h+='<div class="prow"><span class="sprice'+(ef.soldOut?" out":"")+'">'+price(it.price)+'</span>'+(ef.soldOut?'<span class="badge-out">'+t.soldOut+'</span>':"")+'</div>';
+  if(it.desc) h+='<p class="sdesc">'+esc(tv(it.desc,L))+'</p>';
+  if(ef.nota) h+='<div class="snota">'+esc(ef.nota)+'</div>';
+  if(p) h+='<div class="slbl">'+esc(t.alg)+'</div><div class="alg">'+p+'</div>';
+  h+='<div class="actions"><button type="button" data-act="share">'+ICON.share+' '+t.share+'</button><button type="button" data-act="copy">'+ICON.copy+' '+t.copy+'</button></div>';
+  return h;
 }
-function updateActive(force){
-  syncBar();
-  if(!force&&Date.now()<lockUntil) return;
-  var barH=parseInt(getComputedStyle(document.documentElement).getPropertyValue("--barH"))||48, y=window.scrollY+barH+24;
-  var secs=Array.prototype.filter.call(document.querySelectorAll("section.cat"),function(s){ return !s.hidden; });
-  if(!secs.length) return;
-  var cur=secs[0].id; secs.forEach(function(s){ if(s.offsetTop<=y) cur=s.id; });
-  if(window.innerHeight+window.scrollY>=document.documentElement.scrollHeight-2) cur=secs[secs.length-1].id;
-  setActiveChip(cur);
-  var bt=$("backTop"); if(bt) bt.classList.toggle("show",window.scrollY>700);
+function openSheet(id,pushed){
+  var it=findItem(id); if(!it) return;
+  var s=$("sheet"), same=openId===id&&!s.hidden;
+  $("shTitle").textContent=tv(it.name,L); $("shBody").innerHTML=sheetHtml(it);
+  if(same) return;
+  openId=id; s.hidden=false; $("shBody").scrollTop=0; document.documentElement.classList.add("lock");
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ s.classList.add("show"); $("sheetScrim").classList.add("show"); try{ s.focus({preventScroll:true}); }catch(e){} }); });
+  var row=$("row-"+id); if(row&&!pushed){ row.scrollIntoView({block:"center"}); }
 }
-window.addEventListener("scroll",function(){ if(ticking) return; ticking=true; requestAnimationFrame(function(){ ticking=false; updateActive(false); }); },{passive:true});
-$("backTop").addEventListener("click",function(){ closePanel(); window.scrollTo({top:0,behavior:"smooth"}); });
+var sheetHideT=null;
+function closeSheetUI(){ // visual close only (route already changed)
+  var s=$("sheet"); if(s.hidden) return; openId=null;
+  s.classList.remove("show","drag"); s.style.transform=""; $("sheetScrim").classList.remove("show"); document.documentElement.classList.remove("lock");
+  clearTimeout(sheetHideT); sheetHideT=setTimeout(function(){ if(!s.classList.contains("show")) s.hidden=true; },320);
+}
+function closeSheet(){ if(route().view==="item") goParent(); else closeSheetUI(); }
+$("shClose").addEventListener("click",closeSheet);
+$("sheetScrim").addEventListener("click",closeSheet);
+document.addEventListener("keydown",function(ev){ if(ev.key==="Escape"){ if(!$("sheet").hidden) closeSheet(); else closePanel(); } });
+$("shBody").addEventListener("click",function(ev){
+  var act=ev.target.closest("button[data-act]"); if(!act||!openId) return;
+  var it=findItem(openId), url=baseUrl()+"#it-"+openId, txt=tv(it.name,L)+" · "+price(it.price)+" · Luna Bar";
+  if(act.dataset.act==="share") share(tv(it.name,L)+" · Luna Bar",txt,url); else copyText(url).then(function(ok){ toast(ok?T[L].copied:T[L].shareFail); });
+});
+(function sheetDrag(){ // drag the handle/title area down to dismiss
+  var s=$("sheet"), head=$("sheetHead"), y0=null, dy=0;
+  function move(e){ if(y0===null) return; dy=Math.max(0,(e.touches?e.touches[0].clientY:e.clientY)-y0); s.style.transform="translateY("+dy+"px)"; }
+  function end(){ if(y0===null) return; y0=null; s.classList.remove("drag"); if(dy>90) closeSheet(); else s.style.transform=""; dy=0; }
+  function start(e){ y0=e.touches?e.touches[0].clientY:e.clientY; dy=0; s.classList.add("drag"); }
+  if("ontouchstart" in window){ head.addEventListener("touchstart",start,{passive:true}); head.addEventListener("touchmove",move,{passive:true}); head.addEventListener("touchend",end); head.addEventListener("touchcancel",end); }
+  head.addEventListener("mousedown",function(e){ start(e); var mv=function(e){move(e);}, up=function(){ end(); window.removeEventListener("mousemove",mv); window.removeEventListener("mouseup",up); }; window.addEventListener("mousemove",mv); window.addEventListener("mouseup",up); });
+})();
+document.addEventListener("error",function(ev){ var el=ev.target; if(el&&el.tagName==="IMG"&&(el.classList.contains("thumb")||el.classList.contains("sphoto"))) el.remove(); else if(el&&el.tagName==="IMG"&&el.closest(".ccard")){ el.closest(".ccard").classList.remove("photo"); el.remove(); } },true);
+
+/* ---------- swipe between categories (category page) ---------- */
+(function swipe(){
+  var x0=null,y0=null,t0=0;
+  var v=$("vCat");
+  v.addEventListener("touchstart",function(e){ if(e.touches.length!==1||!$("sheet").hidden){ x0=null; return; } x0=e.touches[0].clientX; y0=e.touches[0].clientY; t0=Date.now(); },{passive:true});
+  v.addEventListener("touchend",function(e){ if(x0===null) return; var t=e.changedTouches[0], dx=t.clientX-x0, dy=t.clientY-y0; x0=null;
+    if(x0!==null||Date.now()-t0>600||Math.abs(dy)>50||Math.abs(dx)<70||t.clientX<0) return;
+    if(e.changedTouches[0].clientX-dx<28) return; // started at the left edge = browser back gesture
+    var a=dx<0?$("pager").querySelector("a.next"):$("pager").querySelector("a.prev"); if(a&&a.getAttribute("href")) goTo(a.getAttribute("href").replace(/^#preview\/?/,"#")); },{passive:true});
+})();
+
+$("home").addEventListener("click",function(ev){ var b=ev.target.closest(".gjump button"); if(!b) return; var h=$("grp-"+b.dataset.g); if(h) h.scrollIntoView({behavior:reduced()?"auto":"smooth",block:"start"}); });
+
+/* ---------- search ---------- */
+var qT=null;
+$("q").addEventListener("input",function(){ query=this.value; $("qClear").hidden=!query; clearTimeout(qT); qT=setTimeout(function(){ render(true); },120); });
+$("qClear").addEventListener("click",function(){ $("q").value=""; query=""; this.hidden=true; render(true); $("q").focus(); });
+
+/* ---------- floating ---------- */
+var ticking=false;
+function updateFloating(){ var bt=$("backTop"); if(bt) bt.classList.toggle("show",window.scrollY>700); if(cur.view==="cat") syncTopbar(); }
+window.addEventListener("scroll",function(){ if(ticking) return; ticking=true; requestAnimationFrame(function(){ ticking=false; updateFloating(); }); },{passive:true});
+$("backTop").addEventListener("click",function(){ closePanel(); window.scrollTo({top:0,behavior:reduced()?"auto":"smooth"}); });
 
 applyStatic(); renderLangbar(); boot();
 </script>

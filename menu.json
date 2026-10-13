@@ -158,6 +158,14 @@
     "de": "Kaffee",
     "nl": "Koffie"
    },
+   "group": {
+    "pt": "Bebidas",
+    "es": "Bebidas",
+    "en": "Drinks",
+    "fr": "Boissons",
+    "de": "Getränke",
+    "nl": "Dranken"
+   },
    "items": [
     {
      "id": "cafes-cafe-expresso",
@@ -405,6 +413,14 @@
     "de": "Tees",
     "nl": "Thee"
    },
+   "group": {
+    "pt": "Bebidas",
+    "es": "Bebidas",
+    "en": "Drinks",
+    "fr": "Boissons",
+    "de": "Getränke",
+    "nl": "Dranken"
+   },
    "items": [
     {
      "id": "chas-camomila",
@@ -544,6 +560,14 @@
     "de": "Wasser",
     "nl": "Water"
    },
+   "group": {
+    "pt": "Bebidas",
+    "es": "Bebidas",
+    "en": "Drinks",
+    "fr": "Boissons",
+    "de": "Getränke",
+    "nl": "Dranken"
+   },
    "items": [
     {
      "id": "aguas-agua-0-5l",
@@ -654,6 +678,14 @@
     "fr": "Sodas & Jus",
     "de": "Erfrischungsgetränke & Säfte",
     "nl": "Frisdranken & Sappen"
+   },
+   "group": {
+    "pt": "Bebidas",
+    "es": "Bebidas",
+    "en": "Drinks",
+    "fr": "Boissons",
+    "de": "Getränke",
+    "nl": "Dranken"
    },
    "items": [
     {
@@ -789,6 +821,14 @@
     "fr": "Bières & Cidre",
     "de": "Biere & Cider",
     "nl": "Bieren & Cider"
+   },
+   "group": {
+    "pt": "Bebidas",
+    "es": "Bebidas",
+    "en": "Drinks",
+    "fr": "Boissons",
+    "de": "Getränke",
+    "nl": "Dranken"
    },
    "items": [
     {
@@ -941,6 +981,14 @@
     "fr": "Vins & Mousseux",
     "de": "Weine & Schaumwein",
     "nl": "Wijnen & Mousserend"
+   },
+   "group": {
+    "pt": "Bebidas",
+    "es": "Bebidas",
+    "en": "Drinks",
+    "fr": "Boissons",
+    "de": "Getränke",
+    "nl": "Dranken"
    },
    "items": [
     {
@@ -1119,6 +1167,14 @@
     "de": "Brände & Brandy",
     "nl": "Sterke drank & Brandy"
    },
+   "group": {
+    "pt": "Bebidas",
+    "es": "Bebidas",
+    "en": "Drinks",
+    "fr": "Boissons",
+    "de": "Getränke",
+    "nl": "Dranken"
+   },
    "items": [
     {
      "id": "brandy-macieira",
@@ -1173,6 +1229,14 @@
     "fr": "Whiskey",
     "de": "Whiskey",
     "nl": "Whiskey"
+   },
+   "group": {
+    "pt": "Bebidas",
+    "es": "Bebidas",
+    "en": "Drinks",
+    "fr": "Boissons",
+    "de": "Getränke",
+    "nl": "Dranken"
    },
    "items": [
     {
@@ -1243,6 +1307,14 @@
     "de": "Rum, Tequila & Wodka",
     "nl": "Rum, Tequila & Wodka"
    },
+   "group": {
+    "pt": "Bebidas",
+    "es": "Bebidas",
+    "en": "Drinks",
+    "fr": "Boissons",
+    "de": "Getränke",
+    "nl": "Dranken"
+   },
    "items": [
     {
      "id": "rum-plantation-rum",
@@ -1304,6 +1376,14 @@
     "fr": "Liqueurs",
     "de": "Liköre",
     "nl": "Likeuren"
+   },
+   "group": {
+    "pt": "Bebidas",
+    "es": "Bebidas",
+    "en": "Drinks",
+    "fr": "Boissons",
+    "de": "Getränke",
+    "nl": "Dranken"
    },
    "items": [
     {
@@ -1411,6 +1491,14 @@
     "fr": "Gin Tonic",
     "de": "Gin Tonic",
     "nl": "Gin-Tonic"
+   },
+   "group": {
+    "pt": "Bebidas",
+    "es": "Bebidas",
+    "en": "Drinks",
+    "fr": "Boissons",
+    "de": "Getränke",
+    "nl": "Dranken"
    },
    "items": [
     {
@@ -1544,6 +1632,14 @@
     "fr": "Cocktails",
     "de": "Cocktails",
     "nl": "Cocktails"
+   },
+   "group": {
+    "pt": "Bebidas",
+    "es": "Bebidas",
+    "en": "Drinks",
+    "fr": "Boissons",
+    "de": "Getränke",
+    "nl": "Dranken"
    },
    "items": [
     {
@@ -1698,6 +1794,14 @@
     "fr": "Petits Plats",
     "de": "Kleine Gerichte",
     "nl": "Kleine Gerechten"
+   },
+   "group": {
+    "pt": "Comida",
+    "es": "Comida",
+    "en": "Food",
+    "fr": "Plats",
+    "de": "Essen",
+    "nl": "Eten"
    },
    "items": [
     {
@@ -2091,6 +2195,14 @@
     "de": "Snacks",
     "nl": "Hapjes"
    },
+   "group": {
+    "pt": "Comida",
+    "es": "Comida",
+    "en": "Food",
+    "fr": "Plats",
+    "de": "Essen",
+    "nl": "Eten"
+   },
    "items": [
     {
      "id": "petiscos-batata-frita",
@@ -2203,6 +2315,14 @@
     "de": "Süßspeisen",
     "nl": "Zoetigheden"
    },
+   "group": {
+    "pt": "Comida",
+    "es": "Comida",
+    "en": "Food",
+    "fr": "Plats",
+    "de": "Essen",
+    "nl": "Eten"
+   },
    "items": [
     {
      "id": "docinhos-bolo-de-chocolate-vegan",
@@ -2281,6 +2401,14 @@
     "fr": "Extras",
     "de": "Extras",
     "nl": "Extra's"
+   },
+   "group": {
+    "pt": "Comida",
+    "es": "Comida",
+    "en": "Food",
+    "fr": "Plats",
+    "de": "Essen",
+    "nl": "Eten"
    },
    "note": {
     "pt": "Para qualquer prato ou tosta",
