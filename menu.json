@@ -1,11 +1,36 @@
 {
  "version": 1,
- "updatedAt": "2026-09-30T09:44:58.444Z",
+ "updatedAt": "2026-10-19T22:06:32.000Z",
  "info": {
   "name": "Luna Bar",
   "place": "Praia da Vagueira · Aveiro",
   "mapUrl": "https://www.google.com/maps/search/?api=1&query=Luna+Bar+Praia+da+Vagueira",
   "hours": {
+   "week": [
+    {
+     "open": "10:00",
+     "close": "22:00"
+    },
+    {
+     "open": "10:00",
+     "close": "21:00"
+    },
+    null,
+    null,
+    {
+     "open": "10:00",
+     "close": "21:00"
+    },
+    {
+     "open": "10:00",
+     "close": "21:00"
+    },
+    {
+     "open": "10:00",
+     "close": "22:00"
+    }
+   ],
+   "kitchenBefore": 60,
    "open": "10:00",
    "close": "22:00",
    "closedDays": [
@@ -1803,6 +1828,7 @@
     "de": "Essen",
     "nl": "Eten"
    },
+   "kitchen": true,
    "items": [
     {
      "id": "almocinhos-hamburguer-beyond",
@@ -2203,6 +2229,7 @@
     "de": "Essen",
     "nl": "Eten"
    },
+   "kitchen": true,
    "items": [
     {
      "id": "petiscos-batata-frita",
@@ -2323,6 +2350,7 @@
     "de": "Essen",
     "nl": "Eten"
    },
+   "kitchen": true,
    "items": [
     {
      "id": "docinhos-bolo-de-chocolate-vegan",
@@ -2410,6 +2438,7 @@
     "de": "Essen",
     "nl": "Eten"
    },
+   "kitchen": true,
    "note": {
     "pt": "Para qualquer prato ou tosta",
     "es": "Para cualquier plato o tostada",

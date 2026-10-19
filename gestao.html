@@ -63,6 +63,15 @@ textarea.inp{min-height:70px;resize:vertical;line-height:1.4}
 .days button{min-height:40px;min-width:44px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--field);font-weight:600;font-size:.86rem;cursor:pointer}
 .days button[aria-pressed="true"]{background:var(--teal);border-color:var(--teal);color:var(--on-teal)}
 .days button[aria-pressed="false"]{text-decoration:line-through;color:var(--muted)}
+.week{display:grid;gap:6px}
+.wrow{display:grid;grid-template-columns:58px minmax(0,1fr) 10px minmax(0,1fr);gap:6px;align-items:center}
+.wrow .dbtn{min-height:44px;border-radius:12px;border:1px solid var(--teal);background:var(--teal);color:var(--on-teal);font-weight:700;font-size:.86rem;cursor:pointer;padding:0 6px}
+.wrow .dbtn[aria-pressed="false"]{background:var(--field);border-color:var(--line);color:var(--muted);text-decoration:line-through}
+.wrow .inp{min-height:44px;padding:8px 6px;font-size:.95rem;font-variant-numeric:tabular-nums}
+.wrow .inp::-webkit-calendar-picker-indicator{margin-left:2px;padding:0}
+.wrow .dash{text-align:center;color:var(--muted)}
+.wrow .off{grid-column:2 / 5;font-size:.86rem;color:var(--muted);padding-left:6px}
+.wrow.bad .inp{border-color:var(--terra)}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .btn{min-height:44px;padding:10px 16px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;justify-content:center}
 .btn.primary{background:var(--teal);border-color:var(--teal);color:var(--on-teal)}
@@ -100,6 +109,7 @@ textarea.inp{min-height:70px;resize:vertical;line-height:1.4}
 .tog[aria-pressed="true"]{color:var(--ink)}
 .tog[aria-pressed="true"] i{background:var(--terra)} .tog[aria-pressed="true"] i::after{transform:translateX(12px)}
 .tog.hide[aria-pressed="true"] i{background:var(--muted)}
+.tog.kit[aria-pressed="true"] i{background:var(--teal)}
 .it .more{margin-left:auto}
 .it.sub .name{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--teal-ink)}
 .it .det{margin-top:10px;padding:12px;border-radius:12px;background:var(--teal-soft);display:grid;gap:10px}
@@ -171,13 +181,11 @@ details.cfg .pad{border-top:1px solid var(--hair);display:grid;gap:10px}
 
   <section class="sec">
     <h2>Horário</h2>
-    <p class="hint">Toque num dia para o marcar como encerrado. O rodapé e os dados para o Google são gerados a partir daqui.</p>
-    <div class="card pad" style="display:grid;gap:12px">
-      <div class="grid2">
-        <div><label class="f" for="hOpen">Abre</label><input class="inp" id="hOpen" type="time" step="300"></div>
-        <div><label class="f" for="hClose">Fecha</label><input class="inp" id="hClose" type="time" step="300"></div>
-      </div>
-      <div><label class="f">Dias</label><div class="days" id="days"></div></div>
+    <p class="hint">Uma linha por dia: toque no dia para o abrir ou encerrar e acerte as horas. O «Aberto agora» do menu, a tabela do rodapé, os avisos da cozinha e os dados para o Google saem daqui.</p>
+    <div class="card pad" style="display:grid;gap:14px">
+      <div class="week" id="week"></div>
+      <div><label class="f" for="hKitchen">A cozinha fecha</label><select class="inp" id="hKitchen"></select>
+        <div class="note" style="margin-top:6px">As categorias servidas pela cozinha têm o interruptor <b>Cozinha</b> ligado (dentro de cada categoria, abaixo).</div></div>
       <div><label class="f" for="hNote">Nota (opcional)</label><input class="inp" id="hNote" placeholder="pode variar com a época"></div>
       <div class="note" id="hPreview"></div>
     </div>
@@ -285,7 +293,7 @@ function load(){
   var viaApi=fetch(apiUrl(c)+"?ref="+encodeURIComponent(c.branch)+"&t="+Date.now(),{headers:ghHeaders(c),cache:"no-store"}).then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
     .then(function(j){ SHA=j.sha; SOURCE="GitHub ("+c.branch+")"; return JSON.parse(utf8b64(j.content)); });
   var viaLocal=function(){ return fetch("menu.json?v="+Date.now(),{cache:"no-store"}).then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); SHA=null; SOURCE="ficheiro local"; return r.json(); }); };
-  viaApi.catch(viaLocal).then(function(d){ ORIG=clone(d); DATA=clone(d); setPill(SOURCE,SHA?"ok":"warn"); render(); checkDraft(); })
+  viaApi.catch(viaLocal).then(function(d){ ensureWeek(d.info.hours); ORIG=clone(d); DATA=clone(d); setPill(SOURCE,SHA?"ok":"warn"); render(); checkDraft(); })
   .catch(function(e){ setPill("erro a carregar","err"); $("cats").innerHTML='<div class="card pad">Não foi possível carregar menu.json ('+esc(e.message)+').</div>'; });
 }
 function setPill(t,k){ $("srcPill").textContent=t; $("srcPill").className="pill "+k; }
@@ -312,6 +320,7 @@ function diff(a,b){
   var A=indexItems(a), B=indexItems(b);
   var ca=a.categories.map(function(c){return c.id;}).join(","), cb=b.categories.map(function(c){return c.id;}).join(",");
   b.categories.forEach(function(c){ var o=a.categories.filter(function(x){return x.id===c.id;})[0]; if(!o) out.push({k:"nova categoria",t:tv(c.title,L),cls:"n"}); else if(tv(o.title,L)!==tv(c.title,L)) out.push({k:"categoria",t:tv(o.title,L)+" → "+tv(c.title,L)}); });
+  b.categories.forEach(function(c){ var o=a.categories.filter(function(x){return x.id===c.id;})[0]; if(o&&!!o.kitchen!==!!c.kitchen) out.push({k:"categoria",t:tv(c.title,L)+": "+(c.kitchen?"servida pela cozinha":"já não depende da cozinha")}); });
   a.categories.forEach(function(c){ if(!b.categories.some(function(x){return x.id===c.id;})) out.push({k:"categoria removida",t:tv(c.title,L),cls:"d"}); });
   if(ca!==cb&&a.categories.length===b.categories.length&&a.categories.every(function(c){return b.categories.some(function(x){return x.id===c.id;})})) out.push({k:"ordem",t:"Ordem das categorias alterada"});
   Object.keys(B).forEach(function(id){ var y=B[id], x=A[id], name=tv(y.it.sub||y.it.name,L), cat=tv(y.cat.title,L);
@@ -335,17 +344,46 @@ function diff(a,b){
 function updateCount(){ var n=diff(ORIG,DATA).length; $("cnt").innerHTML=n?"<b>"+n+"</b> "+(n===1?"alteração por publicar":"alterações por publicar"):"Sem alterações"; document.title=(n?"● ":"")+"Luna · Gestão do menu"; }
 
 /* ---------- render ---------- */
+var KITCHEN_OPTS=[[0,"ao mesmo tempo que o bar"],[30,"30 min antes do bar"],[45,"45 min antes do bar"],[60,"1 hora antes do bar"],[90,"1h30 antes do bar"],[120,"2 horas antes do bar"]];
+var lastTimes={}; // a day's hours, remembered while it is toggled to closed
+function ensureWeek(h){ // hours.week = 7 entries, Sunday first: null (closed) or {open,close}; migrates the old open/close/closedDays
+  if(!Array.isArray(h.week)||h.week.length!==7) h.week=[0,1,2,3,4,5,6].map(function(d){ return (h.closedDays||[]).indexOf(d)>=0?null:{open:h.open||"10:00",close:h.close||"22:00"}; });
+  if(h.kitchenBefore==null) h.kitchenBefore=0;
+  return h;
+}
+function syncLegacy(h){ // keep open/close/closedDays meaningful for anything that still reads them
+  var open=h.week.filter(function(e){ return e; });
+  h.closedDays=[0,1,2,3,4,5,6].filter(function(d){ return !h.week[d]; });
+  if(open.length){ h.open=open.map(function(e){ return e.open; }).sort()[0]; h.close=open.map(function(e){ return e.close; }).sort().slice(-1)[0]; }
+}
+function kitchenLabel(m){ var f=KITCHEN_OPTS.filter(function(o){ return o[0]===m; })[0]; return f?f[1]:m+" min antes do bar"; }
 function hoursText(h){
-  var closed=(h.closedDays||[]).slice().sort(), range=h.open+"–"+h.close;
-  var s=closed.length?"Aberto "+range+" · Encerrado "+closed.map(function(d){ var x=DAYS_PT[d]; return (x[1]==="f"?"à ":"ao ")+x[0]; }).reduce(function(acc,cur,i,arr){ return acc+(i===0?"":(i===arr.length-1?" e ":", "))+cur; },""):"Aberto todos os dias · "+range;
-  var note=tv(h.note,L); if(note) s+=" ("+note+")"; return s;
+  ensureWeek(h);
+  var groups=[], kb=Number(h.kitchenBefore)||0;
+  [1,2,3,4,5,6,0].forEach(function(d){ var e=h.week[d], key=e?e.open+"–"+e.close:"encerrado", g=null;
+    groups.forEach(function(x){ if(x.key===key) g=x; }); if(g) g.days.push(DAYS[d]); else groups.push({key:key,days:[DAYS[d]]}); });
+  var s=groups.map(function(g){ return g.days.join(", ")+" "+g.key; }).join(" · ");
+  if(kb) s+=" · cozinha fecha "+kitchenLabel(kb).replace(" do bar","");
+  var note=tv(h.note,L); if(note) s+=" ("+note+")";
+  return s;
+}
+function updHoursPreview(){
+  var h=DATA.info.hours, bad=[1,2,3,4,5,6,0].filter(function(d){ var e=h.week[d]; return e&&e.close<=e.open; });
+  $("hPreview").textContent="🕙 "+hoursText(h)+(bad.length?" · ⚠ "+bad.map(function(d){ return DAYS[d]; }).join(", ")+": fecha antes de abrir (só está certo se fechar depois da meia-noite)":"");
+}
+function renderHours(){
+  var h=ensureWeek(DATA.info.hours);
+  $("week").innerHTML=[1,2,3,4,5,6,0].map(function(d){ var e=h.week[d], full=DAYS_PT[d][0];
+    return '<div class="wrow'+(e&&e.close<=e.open?" bad":"")+'" data-d="'+d+'"><button type="button" class="dbtn" data-day="'+d+'" aria-pressed="'+!!e+'" aria-label="'+full+(e?" aberto":" encerrado")+'">'+DAYS[d]+'</button>'+
+      (e?'<input class="inp" type="time" step="300" data-t="open" value="'+esc(e.open)+'" aria-label="'+full+' abre"><span class="dash" aria-hidden="true">–</span><input class="inp" type="time" step="300" data-t="close" value="'+esc(e.close)+'" aria-label="'+full+' fecha">':'<span class="off">Encerrado</span>')+'</div>'; }).join("");
+  var kb=Number(h.kitchenBefore)||0, opts=KITCHEN_OPTS.slice(); if(!opts.some(function(o){ return o[0]===kb; })) opts.push([kb,kitchenLabel(kb)]);
+  $("hKitchen").innerHTML=opts.map(function(o){ return '<option value="'+o[0]+'"'+(o[0]===kb?" selected":"")+'>'+o[1]+'</option>'; }).join("");
+  $("hNote").value=tv(h.note,L);
+  updHoursPreview();
 }
 function render(){
   $("ann").value=tv(DATA.info.announcement,L);
-  var h=DATA.info.hours; $("hOpen").value=h.open; $("hClose").value=h.close; $("hNote").value=tv(h.note,L);
-  $("days").innerHTML=[1,2,3,4,5,6,0].map(function(d){ var open=(h.closedDays||[]).indexOf(d)<0; return '<button type="button" data-d="'+d+'" aria-pressed="'+open+'" aria-label="'+DAYS[d]+(open?" aberto":" encerrado")+'">'+DAYS[d]+'</button>'; }).join("");
-  $("days").querySelectorAll("button").forEach(function(b){ b.addEventListener("click",function(){ var d=Number(b.dataset.d), cd=h.closedDays=(h.closedDays||[]).slice(); var i=cd.indexOf(d); if(i>=0) cd.splice(i,1); else cd.push(d); cd.sort(); b.setAttribute("aria-pressed",i>=0?"true":"false"); $("hPreview").textContent="🕙 "+hoursText(h); markDirty(); }); });
-  $("hPreview").textContent="🕙 "+hoursText(h);
+  renderHours();
   renderCats();
   updateCount();
 }
@@ -353,10 +391,11 @@ function renderCats(){
   var O=indexItems(ORIG);
   $("cats").innerHTML=DATA.categories.map(function(c,ci){
     var items=c.items.filter(function(i){return !i.sub;}), out=items.filter(function(i){return i.soldOut;}).length, hid=items.filter(function(i){return i.hidden;}).length;
-    var meta=items.length+" itens"+(out?" · "+out+" esgotado"+(out>1?"s":""):"")+(hid?" · "+hid+" oculto"+(hid>1?"s":""):"");
+    var meta=items.length+" itens"+(out?" · "+out+" esgotado"+(out>1?"s":""):"")+(hid?" · "+hid+" oculto"+(hid>1?"s":""):"")+(c.kitchen?" · cozinha":"");
     var body=openCats[c.id]?'<div class="cat-body">'+
       '<div class="cat-tools"><input class="inp" data-cat-title="'+c.id+'" value="'+esc(tv(c.title,L))+'" aria-label="Nome da categoria">'+
       '<button class="mini" data-cat-move="'+c.id+'" data-dir="-1" '+(ci===0?"disabled":"")+' aria-label="Subir categoria">↑</button><button class="mini" data-cat-move="'+c.id+'" data-dir="1" '+(ci===DATA.categories.length-1?"disabled":"")+' aria-label="Descer categoria">↓</button>'+
+      '<button type="button" class="tog kit" data-cat-kitchen="'+c.id+'" aria-pressed="'+!!c.kitchen+'" title="Os itens desta categoria deixam de ser servidos quando a cozinha fecha"><i></i>Cozinha</button>'+
       (items.length?"":'<button class="btn sm danger" data-cat-del="'+c.id+'">Eliminar categoria</button>')+'</div>'+
       c.items.map(function(it,ii){ return itemRow(c,it,ii,O); }).join("")+
       '<div class="add"><button class="btn sm" data-add="'+c.id+'">+ Item</button><button class="btn sm" data-add-sub="'+c.id+'">+ Subtítulo</button></div>'+
@@ -387,6 +426,7 @@ function itemRow(c,it,ii,O){
 function findItem(id){ var r=null; DATA.categories.forEach(function(c){ c.items.forEach(function(it,ii){ if(it.id===id) r={it:it,cat:c,ii:ii}; }); }); return r; }
 $("cats").addEventListener("click",function(ev){
   var t=ev.target, b;
+  if((b=t.closest("[data-cat-kitchen]"))){ var ck=DATA.categories.filter(function(x){return x.id===b.dataset.catKitchen;})[0]; if(ck.kitchen) delete ck.kitchen; else ck.kitchen=true; renderCats(); markDirty(); return; }
   if((b=t.closest("[data-cat-toggle]"))){ var id=b.dataset.catToggle; openCats[id]=!openCats[id]; renderCats(); return; }
   if((b=t.closest("[data-cat-move]"))){ var i=DATA.categories.findIndex(function(c){return c.id===b.dataset.catMove;}), j=i+Number(b.dataset.dir); if(j<0||j>=DATA.categories.length) return; var tmp=DATA.categories[i]; DATA.categories[i]=DATA.categories[j]; DATA.categories[j]=tmp; renderCats(); markDirty(); return; }
   if((b=t.closest("[data-cat-del]"))){ arm(b,function(){ DATA.categories=DATA.categories.filter(function(c){return c.id!==b.dataset.catDel;}); renderCats(); markDirty(); }); return; }
@@ -416,9 +456,14 @@ $("cats").addEventListener("change",function(ev){
 function refreshCatMeta(c){ var el=document.querySelector('.cat[data-cat="'+c.id+'"] .cat-h .n'); if(!el) return; var items=c.items.filter(function(i){return !i.sub;}), out=items.filter(function(i){return i.soldOut;}).length, hid=items.filter(function(i){return i.hidden;}).length; el.textContent=items.length+" itens"+(out?" · "+out+" esgotado"+(out>1?"s":""):"")+(hid?" · "+hid+" oculto"+(hid>1?"s":""):""); }
 function arm(btn,fn){ if(btn.classList.contains("arm")){ fn(); return; } var old=btn.textContent; btn.classList.add("arm"); btn.textContent="Confirmar?"; setTimeout(function(){ if(document.body.contains(btn)){ btn.classList.remove("arm"); btn.textContent=old; } },4000); }
 $("ann").addEventListener("input",function(){ setText(DATA.info,"announcement",this.value); markDirty(); });
-$("hOpen").addEventListener("input",function(){ DATA.info.hours.open=this.value; $("hPreview").textContent="🕙 "+hoursText(DATA.info.hours); markDirty(); });
-$("hClose").addEventListener("input",function(){ DATA.info.hours.close=this.value; $("hPreview").textContent="🕙 "+hoursText(DATA.info.hours); markDirty(); });
-$("hNote").addEventListener("input",function(){ setText(DATA.info.hours,"note",this.value); $("hPreview").textContent="🕙 "+hoursText(DATA.info.hours); markDirty(); });
+$("week").addEventListener("click",function(ev){ var b=ev.target.closest("[data-day]"); if(!b) return; var d=Number(b.dataset.day), h=DATA.info.hours;
+  if(h.week[d]){ lastTimes[d]=h.week[d]; h.week[d]=null; }
+  else { var prev=lastTimes[d]; if(!prev){ [1,2,3,4,5,6,0].forEach(function(x){ if(!prev&&h.week[x]) prev=h.week[x]; }); } prev=prev||{open:"10:00",close:"22:00"}; h.week[d]={open:prev.open,close:prev.close}; }
+  syncLegacy(h); renderHours(); markDirty(); var nb=document.querySelector('#week [data-day="'+d+'"]'); if(nb) nb.focus(); });
+$("week").addEventListener("input",function(ev){ var t=ev.target; if(!t.dataset.t||!t.value) return; var row=t.closest(".wrow"), d=Number(row.dataset.d), e=DATA.info.hours.week[d]; if(!e) return;
+  e[t.dataset.t]=t.value; syncLegacy(DATA.info.hours); row.classList.toggle("bad",e.close<=e.open); updHoursPreview(); markDirty(); });
+$("hKitchen").addEventListener("change",function(){ DATA.info.hours.kitchenBefore=Number(this.value)||0; updHoursPreview(); markDirty(); });
+$("hNote").addEventListener("input",function(){ setText(DATA.info.hours,"note",this.value); updHoursPreview(); markDirty(); });
 $("addCat").addEventListener("click",function(){ var id="cat-"+Date.now().toString(36); DATA.categories.push({id:id,title:{pt:"Nova categoria"},items:[]}); openCats[id]=true; renderCats(); markDirty(); var el=document.querySelector('[data-cat-title="'+id+'"]'); if(el){ el.focus(); el.select(); el.scrollIntoView({block:"center"}); } });
 
 /* ---------- preview ---------- */
