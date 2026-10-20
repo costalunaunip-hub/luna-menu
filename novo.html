@@ -591,7 +591,7 @@ function loadLive(){
       if(st==="esgotado"||st==="oculto"||nota){ var o={st:st,nota:nota}; items["n:"+k]=o; if(cid>=0&&r[cid]) items["i:"+r[cid].trim()]=o; } });
     return items;
   }).catch(function(){ return null; });
-  var pAviso=fetchCSV("Aviso").then(function(rows){ var r=null; rows.slice(1).some(function(x){ if(((x[0]||"")+(x[1]||"")).trim()){ r=x; return true; } return false; }); if(!r&&rows[0]){ var isHdr=function(x){ return /^aviso do dia \((pt|en)\)/.test(norm(x)); }, h0=rows[0]; // notice typed over the header row: show it anyway
+  var pAviso=fetchCSV("Aviso").then(function(rows){ var r=null; rows.slice(1).some(function(x){ if(((x[0]||"")+(x[1]||"")).trim()){ r=x; return true; } return false; }); if(!r&&rows[0]){ var isHdr=function(x){ return /^aviso do dia( (pt|en))?( opcional)?$/.test(norm(x).replace(/[()\[\]:\-–—]/g," ").replace(/\s+/g," ").trim()); }, h0=rows[0]; // notice typed over the header row: show it anyway
     if(((h0[0]||"")+(h0[1]||"")).trim()) r=[isHdr(h0[0])?"":h0[0],isHdr(h0[1])?"":h0[1]]; }
     r=r||[]; var pt=(r[0]||"").trim(), en=(r[1]||"").trim(); return (pt||en)?{pt:pt,en:en}:""; }).catch(function(){ return null; });
   Promise.all([pEstado,pAviso]).then(function(res){
