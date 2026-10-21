@@ -1,6 +1,6 @@
 {
  "version": 1,
- "updatedAt": "2026-10-19T22:06:32.000Z",
+ "updatedAt": "2026-10-21T22:02:53.000Z",
  "info": {
   "name": "Luna Bar",
   "place": "Praia da Vagueira · Aveiro",
@@ -138,6 +138,46 @@
    "fr": "Sulfites",
    "de": "Sulfite",
    "nl": "Sulfieten"
+  },
+  "mustard": {
+   "pt": "Mostarda",
+   "es": "Mostaza",
+   "en": "Mustard",
+   "fr": "Moutarde",
+   "de": "Senf",
+   "nl": "Mosterd"
+  },
+  "sesame": {
+   "pt": "Sésamo",
+   "es": "Sésamo",
+   "en": "Sesame",
+   "fr": "Sésame",
+   "de": "Sesam",
+   "nl": "Sesam"
+  },
+  "celery": {
+   "pt": "Aipo",
+   "es": "Apio",
+   "en": "Celery",
+   "fr": "Céleri",
+   "de": "Sellerie",
+   "nl": "Selderij"
+  },
+  "crustaceans": {
+   "pt": "Crustáceos",
+   "es": "Crustáceos",
+   "en": "Crustaceans",
+   "fr": "Crustacés",
+   "de": "Krebstiere",
+   "nl": "Schaaldieren"
+  },
+  "molluscs": {
+   "pt": "Moluscos",
+   "es": "Moluscos",
+   "en": "Molluscs",
+   "fr": "Mollusques",
+   "de": "Weichtiere",
+   "nl": "Weekdieren"
   }
  },
  "languages": [
@@ -1842,12 +1882,12 @@
      },
      "price": 10,
      "desc": {
-      "pt": "hambúrguer vegan, alface, tomate, cebola caramelizada, maionese, com batata frita tipo pála-pála",
-      "es": "hamburguesa vegana, lechuga, tomate, cebolla caramelizada, mayonesa, con patatas fritas",
-      "en": "vegan burger, lettuce, tomato, caramelised onion, mayo, with crinkle-cut fries",
-      "fr": "burger végan, laitue, tomate, oignon caramélisé, mayonnaise, avec frites",
-      "de": "veganer Burger, Salat, Tomate, karamellisierte Zwiebel, Mayo, mit Pommes",
-      "nl": "veganistische burger, sla, tomaat, gekarameliseerde ui, mayo, met friet"
+      "pt": "hambúrguer vegan, alface, tomate, cebola caramelizada, maionese, com batata frita tipo pála-pála. Pode pedir com maionese vegan (sem ovo).",
+      "es": "hamburguesa vegana, lechuga, tomate, cebolla caramelizada, mayonesa, con patatas fritas. Puede pedirse con mayonesa vegana (sin huevo).",
+      "en": "vegan burger, lettuce, tomato, caramelised onion, mayo, with crinkle-cut fries. Ask for vegan mayo (egg-free).",
+      "fr": "burger végan, laitue, tomate, oignon caramélisé, mayonnaise, avec frites. Possible avec mayonnaise végane (sans œuf).",
+      "de": "veganer Burger, Salat, Tomate, karamellisierte Zwiebel, Mayo, mit Pommes. Auf Wunsch mit veganer Mayonnaise (ohne Ei).",
+      "nl": "veganistische burger, sla, tomaat, gekarameliseerde ui, mayo, met friet. Op verzoek met vegan mayonaise (zonder ei)."
      },
      "allergens": [
       "egg",
@@ -1868,12 +1908,12 @@
      },
      "price": 6.5,
      "desc": {
-      "pt": "atum, cebola, maionese, tomate, queijo, pimenta preta",
-      "es": "atún, cebolla, mayonesa, tomate, queso, pimienta negra",
-      "en": "tuna, onion, mayo, tomato, cheese, black pepper",
-      "fr": "thon, oignon, mayonnaise, tomate, fromage, poivre noir",
-      "de": "Thunfisch, Zwiebel, Mayo, Tomate, Käse, schwarzer Pfeffer",
-      "nl": "tonijn, ui, mayo, tomaat, kaas, zwarte peper"
+      "pt": "atum, cebola, maionese, tomate, queijo, pimenta preta. Pode pedir com maionese vegan (sem ovo).",
+      "es": "atún, cebolla, mayonesa, tomate, queso, pimienta negra. Puede pedirse con mayonesa vegana (sin huevo).",
+      "en": "tuna, onion, mayo, tomato, cheese, black pepper. Ask for vegan mayo (egg-free).",
+      "fr": "thon, oignon, mayonnaise, tomate, fromage, poivre noir. Possible avec mayonnaise végane (sans œuf).",
+      "de": "Thunfisch, Zwiebel, Mayo, Tomate, Käse, schwarzer Pfeffer. Auf Wunsch mit veganer Mayonnaise (ohne Ei).",
+      "nl": "tonijn, ui, mayo, tomaat, kaas, zwarte peper. Op verzoek met vegan mayonaise (zonder ei)."
      },
      "allergens": [
       "egg",
@@ -1896,12 +1936,12 @@
      },
      "price": 6.5,
      "desc": {
-      "pt": "salsicha de soja/tofu, tomate, queijo, maionese, alho",
-      "es": "salchicha de soja/tofu, tomate, queso, mayonesa, ajo",
-      "en": "soy/tofu sausage, tomato, cheese, mayo, garlic",
-      "fr": "saucisse soja/tofu, tomate, fromage, mayonnaise, ail",
-      "de": "Soja-/Tofu-Wurst, Tomate, Käse, Mayo, Knoblauch",
-      "nl": "soja-/tofuworst, tomaat, kaas, mayo, knoflook"
+      "pt": "salsicha de soja/tofu, tomate, queijo, maionese, alho. Pode pedir com maionese vegan (sem ovo).",
+      "es": "salchicha de soja/tofu, tomate, queso, mayonesa, ajo. Puede pedirse con mayonesa vegana (sin huevo).",
+      "en": "soy/tofu sausage, tomato, cheese, mayo, garlic. Ask for vegan mayo (egg-free).",
+      "fr": "saucisse soja/tofu, tomate, fromage, mayonnaise, ail. Possible avec mayonnaise végane (sans œuf).",
+      "de": "Soja-/Tofu-Wurst, Tomate, Käse, Mayo, Knoblauch. Auf Wunsch mit veganer Mayonnaise (ohne Ei).",
+      "nl": "soja-/tofuworst, tomaat, kaas, mayo, knoflook. Op verzoek met vegan mayonaise (zonder ei)."
      },
      "allergens": [
       "egg",
@@ -1933,7 +1973,8 @@
      },
      "allergens": [
       "soy",
-      "gluten"
+      "gluten",
+      "mustard"
      ],
      "soldOut": false,
      "hidden": false
@@ -1943,14 +1984,15 @@
      "name": "Green Wrap",
      "price": 10,
      "desc": {
-      "pt": "cenoura, couve roxa, alface, preparado vegan, cebola caramelizada e molho tártaro ou vegan",
-      "es": "zanahoria, col lombarda, lechuga, preparado vegano, cebolla caramelizada y salsa tártara o vegana",
-      "en": "carrot, red cabbage, lettuce, vegan filling, caramelised onion & tartar or vegan sauce",
-      "fr": "carotte, chou rouge, laitue, préparation végane, oignon caramélisé & sauce tartare ou végane",
-      "de": "Karotte, Rotkohl, Salat, vegane Füllung, karamellisierte Zwiebel & Sauce Tartar oder vegan",
-      "nl": "wortel, rode kool, sla, veganvulling, gekarameliseerde ui & tartaar- of vegansaus"
+      "pt": "cenoura, couve roxa, alface, preparado vegan, cebola caramelizada e molho tártaro ou vegan. Sem ovo: peça com molho vegan.",
+      "es": "zanahoria, col lombarda, lechuga, preparado vegano, cebolla caramelizada y salsa tártara o vegana. Sin huevo: pídelo con salsa vegana.",
+      "en": "carrot, red cabbage, lettuce, vegan filling, caramelised onion & tartar or vegan sauce. Egg-free: ask for the vegan sauce.",
+      "fr": "carotte, chou rouge, laitue, préparation végane, oignon caramélisé & sauce tartare ou végane. Sans œuf : demandez la sauce végane.",
+      "de": "Karotte, Rotkohl, Salat, vegane Füllung, karamellisierte Zwiebel & Sauce Tartar oder vegan. Ohne Ei: mit veganer Sauce bestellen.",
+      "nl": "wortel, rode kool, sla, veganvulling, gekarameliseerde ui & tartaar- of vegansaus. Zonder ei: vraag de vegan saus."
      },
      "allergens": [
+      "egg",
       "gluten"
      ],
      "soldOut": false,
