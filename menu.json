@@ -1,6 +1,6 @@
 {
  "version": 1,
- "updatedAt": "2026-10-21T22:02:53.000Z",
+ "updatedAt": "2026-10-21T22:26:38.000Z",
  "info": {
   "name": "Luna Bar",
   "place": "Praia da Vagueira · Aveiro",
@@ -2333,16 +2333,14 @@
      },
      "price": 6,
      "desc": {
-      "pt": "servido com palitos de pepino e cenoura, ou com pãozinho",
-      "es": "servido con bastones de pepino y zanahoria, o con pan",
-      "en": "served with cucumber & carrot sticks, or with bread",
-      "fr": "servi avec bâtonnets de concombre et carotte, ou avec du pain",
-      "de": "serviert mit Gurken- und Karottensticks oder mit Brot",
-      "nl": "geserveerd met komkommer- en wortelreepjes, of met broodje"
+      "pt": "servido com palitos de pepino e cenoura, ou com pãozinho (o pão contém glúten)",
+      "es": "servido con bastones de pepino y zanahoria, o con pan (el pan contiene gluten)",
+      "en": "served with cucumber & carrot sticks, or with bread (the bread contains gluten)",
+      "fr": "servi avec bâtonnets de concombre et carotte, ou avec du pain (le pain contient du gluten)",
+      "de": "serviert mit Gurken- und Karottensticks oder mit Brot (das Brot enthält Gluten)",
+      "nl": "geserveerd met komkommer- en wortelreepjes, of met broodje (het brood bevat gluten)"
      },
-     "allergens": [
-      "gluten"
-     ],
+     "allergens": [],
      "soldOut": false,
      "hidden": false
     },
