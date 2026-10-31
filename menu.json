@@ -1,6 +1,6 @@
 {
  "version": 1,
- "updatedAt": "2026-10-21T22:26:38.000Z",
+ "updatedAt": "2026-10-31T10:00:57.000Z",
  "info": {
   "name": "Luna Bar",
   "place": "Praia da Vagueira · Aveiro",
@@ -679,12 +679,12 @@
     {
      "id": "aguas-agua-das-pedras-limao-tangerina",
      "name": {
-      "pt": "Água das Pedras (limão / tangerina)",
-      "es": "Agua con gas (limón / mandarina)",
-      "en": "Sparkling water (lemon / tangerine)",
-      "fr": "Eau gazeuse (citron / mandarine)",
-      "de": "Sprudelwasser (Zitrone / Mandarine)",
-      "nl": "Bruiswater (citroen / mandarijn)"
+      "pt": "Água das Pedras (limão / tangerina / açaí / maracujá)",
+      "es": "Agua con gas (limón / mandarina / asaí / maracuyá)",
+      "en": "Sparkling water (lemon / tangerine / açaí / passion fruit)",
+      "fr": "Eau gazeuse (citron / mandarine / açaï / fruit de la passion)",
+      "de": "Sprudelwasser (Zitrone / Mandarine / Açaí / Maracuja)",
+      "nl": "Bruiswater (citroen / mandarijn / açaí / passievrucht)"
      },
      "price": 1.7,
      "soldOut": false,
