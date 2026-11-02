@@ -1,6 +1,6 @@
 {
  "version": 1,
- "updatedAt": "2026-10-31T10:00:57.000Z",
+ "updatedAt": "2026-11-02T13:41:07.000Z",
  "info": {
   "name": "Luna Bar",
   "place": "Praia da Vagueira · Aveiro",
@@ -987,8 +987,34 @@
     },
     {
      "id": "cervejas-heineken-0-25l",
-     "name": "Heineken 0.25L",
+     "name": "Heineken 0.0 0.25L",
      "price": 2,
+     "desc": {
+      "pt": "sem álcool",
+      "es": "sin alcohol",
+      "en": "alcohol-free",
+      "fr": "sans alcool",
+      "de": "alkoholfrei",
+      "nl": "alcoholvrij"
+     },
+     "allergens": [
+      "gluten"
+     ],
+     "soldOut": false,
+     "hidden": false
+    },
+    {
+     "id": "cervejas-estrella-galicia-0-0-tostada-0-25l",
+     "name": "Estrella Galicia 0.0 Tostada 0.25L",
+     "price": 2,
+     "desc": {
+      "pt": "sem álcool",
+      "es": "sin alcohol",
+      "en": "alcohol-free",
+      "fr": "sans alcool",
+      "de": "alkoholfrei",
+      "nl": "alcoholvrij"
+     },
      "allergens": [
       "gluten"
      ],
@@ -1017,7 +1043,17 @@
     },
     {
      "id": "cervejas-1906-0-33l",
-     "name": "1906 0.33L",
+     "name": "1906 Reserva Especial 0.33L",
+     "price": 2.5,
+     "allergens": [
+      "gluten"
+     ],
+     "soldOut": false,
+     "hidden": false
+    },
+    {
+     "id": "cervejas-1906-black-coupage-0-33l",
+     "name": "1906 Black Coupage 0.33L",
      "price": 2.5,
      "allergens": [
       "gluten"
