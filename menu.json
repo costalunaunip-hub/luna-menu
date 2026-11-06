@@ -1,6 +1,6 @@
 {
  "version": 1,
- "updatedAt": "2026-11-02T13:41:07.000Z",
+ "updatedAt": "2026-11-06T09:33:20.000Z",
  "info": {
   "name": "Luna Bar",
   "place": "Praia da Vagueira · Aveiro",
@@ -9,30 +9,30 @@
    "week": [
     {
      "open": "10:00",
-     "close": "22:00"
+     "close": "20:00"
     },
     {
      "open": "10:00",
-     "close": "21:00"
+     "close": "20:00"
     },
     null,
     null,
     {
      "open": "10:00",
-     "close": "21:00"
+     "close": "20:00"
     },
     {
      "open": "10:00",
-     "close": "21:00"
+     "close": "20:00"
     },
     {
      "open": "10:00",
-     "close": "22:00"
+     "close": "20:00"
     }
    ],
    "kitchenBefore": 60,
    "open": "10:00",
-   "close": "22:00",
+   "close": "20:00",
    "closedDays": [
     2,
     3
